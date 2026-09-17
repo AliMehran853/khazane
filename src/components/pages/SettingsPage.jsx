@@ -26,6 +26,7 @@ import PinPad from '../lock/PinPad';
 import { useAppStore } from '../store/appStore';
 import { useSecurityStore } from '../store/securityStore';
 import { useDailyReminder } from '../hooks/useDailyReminder';
+import { useBiometricCheck } from '../hooks/useBiometricCheck';
 import { SESSION_UNLOCK_KEY } from '../hooks/useAppLock';
 
 import {
@@ -323,12 +324,17 @@ function SettingsPage() {
   const dataVersion = useAppStore((s) => s.dataVersion);
   const refreshData = useAppStore((s) => s.refreshData);
 
-  const biometricAvailable = useSecurityStore((s) => s.biometricAvailable);
   const setLocked = useSecurityStore((s) => s.setLocked);
   const resetSecurity = useSecurityStore((s) => s.reset);
   const setMethod = useSecurityStore((s) => s.setMethod);
 
   const { forceShow: forceShowReminder } = useDailyReminder();
+
+  // ⭐ چک خودکار اثر انگشت در زمان mount
+  const {
+    available: bioAvailable,
+    checking: bioChecking,
+  } = useBiometricCheck();
 
   const [userName, setLocalName] = useState('');
   const [currency, setLocalCurrency] = useState('افغانی');
@@ -382,7 +388,7 @@ function SettingsPage() {
 
   function showToast(msg) {
     setToast(msg);
-    setTimeout(() => setToast(''), 2200);
+    setTimeout(() => setToast(''), 3000);
   }
 
   async function saveName() {
@@ -461,13 +467,38 @@ function SettingsPage() {
   async function handleRegisterBiometric() {
     setBusy(true);
     try {
+      if (!window.PublicKeyCredential) {
+        throw new Error('مرورگر شما از اثر انگشت پشتیبانی نمی‌کند.');
+      }
+
+      const available = await window.PublicKeyCredential
+        .isUserVerifyingPlatformAuthenticatorAvailable()
+        .catch(() => false);
+
+      if (!available) {
+        throw new Error(
+          'اثر انگشت روی این دستگاه فعال نیست. در تنظیمات گوشی، قفل صفحه و اثر انگشت را فعال کن.'
+        );
+      }
+
       await registerBiometric();
       setLocalBio(true);
       setLocalLock(true);
       await setLockEnabled(true);
       showToast('اثر انگشت فعال شد.');
     } catch (err) {
-      showToast(err?.message || 'ثبت اثر انگشت ناموفق بود.');
+      console.error('Biometric error:', err);
+
+      let message = err?.message || 'ثبت اثر انگشت ناموفق بود.';
+      if (err?.name === 'NotAllowedError') {
+        message = 'لغو شد یا اجازه داده نشد.';
+      } else if (err?.name === 'NotSupportedError') {
+        message = 'این دستگاه از اثر انگشت پشتیبانی نمی‌کند.';
+      } else if (err?.name === 'InvalidStateError') {
+        message = 'اثر انگشت قبلاً روی این دستگاه ثبت شده است.';
+      }
+
+      showToast(message);
     } finally {
       setBusy(false);
     }
@@ -543,7 +574,7 @@ function SettingsPage() {
 
     resetSecurity();
 
-    const useBio = bioOn && biometricAvailable;
+    const useBio = bioOn && bioAvailable;
     setMethod(useBio ? 'biometric' : 'pin');
 
     setLocked(true);
@@ -561,7 +592,6 @@ function SettingsPage() {
         <h1 className="mt-1 text-[21px] font-bold text-[#F2EFE9]">تنظیمات</h1>
       </header>
 
-      {/* ⭐ کارت نصب PWA */}
       <InstallCard />
 
       <SettingsProfileCard name={userName} onClick={() => setSheet('profile')} />
@@ -591,7 +621,6 @@ function SettingsPage() {
         />
       </SettingsGroup>
 
-      {/* یادآوری */}
       <SettingsGroup>
         <SettingsToggleRow
           icon={Bell}
@@ -659,8 +688,8 @@ function SettingsPage() {
       </p>
 
       {toast && (
-        <div className="pointer-events-none fixed bottom-[100px] left-1/2 z-[200] -translate-x-1/2">
-          <div className="rounded-2xl border border-white/[0.08] bg-[#153029] px-4 py-2.5 text-[12px] font-medium text-[#F2EFE9] shadow-lg">
+        <div className="pointer-events-none fixed bottom-[100px] left-1/2 z-[200] -translate-x-1/2 max-w-[90vw]">
+          <div className="rounded-2xl border border-white/[0.08] bg-[#153029] px-4 py-2.5 text-center text-[12px] font-medium text-[#F2EFE9] shadow-lg">
             {toast}
           </div>
         </div>
@@ -732,6 +761,7 @@ function SettingsPage() {
           <PinSetupFlow onDone={afterPinSet} onCancel={cancelPinSetup} />
         ) : (
           <div className="space-y-4">
+            {/* PIN Row */}
             <div className="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-[#0A1614] p-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#153029] text-[#8FA39D]">
                 <ShieldCheck size={19} />
@@ -768,6 +798,7 @@ function SettingsPage() {
               )}
             </div>
 
+            {/* Biometric Row — اصلاح‌شده */}
             <div className="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-[#0A1614] p-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#153029] text-[#8FA39D]">
                 <Fingerprint size={19} />
@@ -778,10 +809,20 @@ function SettingsPage() {
                   اثر انگشت / Face ID
                 </p>
                 <div className="mt-1">
-                  <StatusBadge
-                    active={bioOn}
-                    inactiveLabel={biometricAvailable ? 'غیرفعال' : 'پشتیبانی نمی‌شود'}
-                  />
+                  {bioChecking ? (
+                    <span className="text-[10px] text-[#5C736C]">
+                      در حال بررسی...
+                    </span>
+                  ) : (
+                    <StatusBadge
+                      active={bioOn}
+                      inactiveLabel={
+                        bioAvailable === false
+                          ? 'پشتیبانی نمی‌شود'
+                          : 'غیرفعال'
+                      }
+                    />
+                  )}
                 </div>
               </div>
 
@@ -796,11 +837,11 @@ function SettingsPage() {
               ) : (
                 <button
                   type="button"
-                  disabled={busy || !biometricAvailable}
+                  disabled={busy || bioChecking}
                   onClick={handleRegisterBiometric}
                   className="shrink-0 rounded-xl bg-[#E3B341]/[0.14] px-3 py-2 text-[11px] font-semibold text-[#E3B341] disabled:opacity-40"
                 >
-                  {busy ? '...' : 'فعال‌سازی'}
+                  {busy ? '...' : bioChecking ? '...' : 'فعال‌سازی'}
                 </button>
               )}
             </div>
