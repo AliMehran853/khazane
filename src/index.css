@@ -1,0 +1,177 @@
+@import "tailwindcss";
+
+/* =========================================================
+   Vazirmatn
+   ========================================================= */
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("./components/assets/fonts/Vazirmatn-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("./components/assets/fonts/Vazirmatn-Medium.ttf")
+    format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("./components/assets/fonts/Vazirmatn-SemiBold.ttf")
+    format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("./components/assets/fonts/Vazirmatn-ExtraLight.ttf")
+    format("truetype");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* =========================================================
+   Theme
+   ========================================================= */
+
+@theme {
+  --font-family-sans: "Vazirmatn", sans-serif;
+
+  --color-kh-base: #0a1614;
+  --color-kh-surface: #0f211e;
+  --color-kh-surface-2: #153029;
+  --color-kh-surface-3: #1b3a32;
+
+  --color-kh-text: #f2efe9;
+  --color-kh-text-secondary: #8fa39d;
+  --color-kh-text-muted: #5c736c;
+
+  --color-kh-gold: #e3b341;
+  --color-kh-income: #4fd1be;
+  --color-kh-expense: #e2574c;
+}
+
+/* =========================================================
+   Root variables
+   ========================================================= */
+
+:root {
+  font-family: "Vazirmatn", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color: #f2efe9;
+  background: #0a1614;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --kh-bg: #0a1614;
+  --kh-surface: #0f211e;
+  --kh-surface-2: #153029;
+  --kh-surface-3: #1b3a32;
+
+  --kh-text: #f2efe9;
+  --kh-text-secondary: #8fa39d;
+  --kh-text-muted: #5c736c;
+
+  --kh-gold: #e3b341;
+  --kh-income: #4fd1be;
+  --kh-expense: #e2574c;
+
+  --kh-border: rgba(242, 239, 233, 0.08);
+}
+
+/* =========================================================
+   Base
+   ========================================================= */
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--kh-bg);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100dvh;
+  margin: 0;
+  background: var(--kh-bg);
+  color: var(--kh-text);
+  font-family: "Vazirmatn", sans-serif;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a {
+  touch-action: manipulation;
+}
+
+img,
+svg {
+  display: block;
+}
+
+/* =========================================================
+   Scrollbar
+   ========================================================= */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(242, 239, 233, 0.12) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(242, 239, 233, 0.12);
+  border-radius: 999px;
+}
+
+/* =========================================================
+   Selection
+   ========================================================= */
+
+::selection {
+  background: rgba(227, 179, 65, 0.24);
+  color: #f2efe9;
+}
