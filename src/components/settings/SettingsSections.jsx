@@ -1,19 +1,19 @@
 import { ChevronLeft } from 'lucide-react';
 
 // ============================================================
-// گروه (کارت سفید که چند ردیف را در خودش دارد)
+// گروه
 // ============================================================
 
 export function SettingsGroup({ children }) {
   return (
-    <div className="mt-3 overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E]">
+    <div className="mt-3 overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E] lg:mt-4 lg:rounded-[22px]">
       {children}
     </div>
   );
 }
 
 // ============================================================
-// ردیف دکمه‌ای (کلیک می‌شود و چیزی باز می‌کند)
+// ردیف دکمه‌ای
 // ============================================================
 
 export function SettingsButtonRow({
@@ -34,7 +34,7 @@ export function SettingsButtonRow({
       type="button"
       onClick={onClick}
       className={[
-        'flex min-h-[70px] w-full items-center gap-3 px-4 text-right transition-colors',
+        'flex min-h-[70px] w-full items-center gap-3 px-4 text-right transition-colors lg:min-h-[64px] lg:px-5',
         'active:bg-white/[0.025]',
         !isLast ? 'border-b border-white/[0.06]' : '',
       ].join(' ')}
@@ -42,7 +42,7 @@ export function SettingsButtonRow({
       {Icon && (
         <div
           className={[
-            'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl',
+            'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl lg:h-9 lg:w-9',
             iconBg,
           ].join(' ')}
         >
@@ -51,9 +51,13 @@ export function SettingsButtonRow({
       )}
 
       <div className="min-w-0 flex-1">
-        <p className="text-[13.5px] font-semibold text-[#F2EFE9]">{title}</p>
+        <p className="text-[13.5px] font-semibold text-[#F2EFE9] lg:text-[14px]">
+          {title}
+        </p>
         {subtitle && (
-          <p className="mt-1 truncate text-[11px] text-[#5C736C]">{subtitle}</p>
+          <p className="mt-1 truncate text-[11px] text-[#5C736C] lg:text-[11.5px]">
+            {subtitle}
+          </p>
         )}
       </div>
 
@@ -82,21 +86,25 @@ export function SettingsToggleRow({
   return (
     <div
       className={[
-        'flex min-h-[70px] items-center gap-3 px-4',
+        'flex min-h-[70px] items-center gap-3 px-4 lg:min-h-[64px] lg:px-5',
         !isLast ? 'border-b border-white/[0.06]' : '',
         disabled ? 'opacity-50' : '',
       ].join(' ')}
     >
       {Icon && (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#153029] text-[#8FA39D]">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#153029] text-[#8FA39D] lg:h-9 lg:w-9">
           <Icon size={19} strokeWidth={1.8} />
         </div>
       )}
 
       <div className="min-w-0 flex-1">
-        <p className="text-[13.5px] font-semibold text-[#F2EFE9]">{title}</p>
+        <p className="text-[13.5px] font-semibold text-[#F2EFE9] lg:text-[14px]">
+          {title}
+        </p>
         {subtitle && (
-          <p className="mt-1 truncate text-[11px] text-[#5C736C]">{subtitle}</p>
+          <p className="mt-1 truncate text-[11px] text-[#5C736C] lg:text-[11.5px]">
+            {subtitle}
+          </p>
         )}
       </div>
 
@@ -131,19 +139,19 @@ export function SettingsProfileCard({ name, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="mt-6 flex w-full items-center gap-3 rounded-[26px] border border-white/[0.06] bg-[linear-gradient(160deg,#1B3A32_0%,#0F211E_75%)] p-5 text-right active:scale-[0.99]"
+      className="mt-6 flex w-full items-center gap-3 rounded-[26px] border border-white/[0.06] bg-[linear-gradient(160deg,#1B3A32_0%,#0F211E_75%)] p-5 text-right active:scale-[0.99] lg:mt-4 lg:p-6"
     >
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E3B341]/10 text-[#E3B341]">
-        <span className="text-[20px] font-extrabold">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E3B341]/10 text-[#E3B341] lg:h-14 lg:w-14">
+        <span className="text-[20px] font-extrabold lg:text-[22px]">
           {name?.[0] ? name[0] : '؟'}
         </span>
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[14px] font-bold text-[#F2EFE9]">
+        <p className="truncate text-[14px] font-bold text-[#F2EFE9] lg:text-[16px]">
           {name || 'کاربر خزانه'}
         </p>
-        <p className="mt-1 text-[11px] text-[#8FA39D]">
+        <p className="mt-1 text-[11px] text-[#8FA39D] lg:text-[12px]">
           حساب محلی روی همین دستگاه
         </p>
       </div>
@@ -154,10 +162,14 @@ export function SettingsProfileCard({ name, onClick }) {
 }
 
 // ============================================================
-// بج وضعیت (فعال / غیرفعال)
+// بج وضعیت
 // ============================================================
 
-export function StatusBadge({ active, activeLabel = 'فعال', inactiveLabel = 'غیرفعال' }) {
+export function StatusBadge({
+  active,
+  activeLabel = 'فعال',
+  inactiveLabel = 'غیرفعال',
+}) {
   return (
     <span
       className={[

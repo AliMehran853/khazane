@@ -6,15 +6,15 @@ import BiometricButton from './BiometricButton';
 import PinPad from './PinPad';
 
 import { useSecurityStore } from '../store/securityStore';
+import { useIsDesktop } from '../hooks/useIsDesktop';
 import { SESSION_UNLOCK_KEY } from '../hooks/useAppLock';
-import {
-  verifyPin,
-  verifyBiometric,
-} from '../services/securityService';
+import { verifyPin, verifyBiometric } from '../services/securityService';
 
 const PIN_LENGTH = 4;
 
 function LockScreen() {
+  const isDesktop = useIsDesktop();
+
   const method = useSecurityStore((s) => s.method);
   const setMethod = useSecurityStore((s) => s.setMethod);
 
@@ -34,14 +34,14 @@ function LockScreen() {
   const verifyingRef = useRef(false);
   const autoTriedRef = useRef(false);
 
-  // ⭐ هر بار موفق به باز کردن قفل شدی، این تابع را صدا بزن
   function handleUnlocked() {
     sessionStorage.setItem(SESSION_UNLOCK_KEY, '1');
     setLocked(false);
   }
 
-  // تلاش خودکار اثر انگشت هنگام ورود
+  // فقط موبایل: تلاش خودکار اثر انگشت
   useEffect(() => {
+    if (isDesktop) return;
     if (method !== 'biometric') return;
     if (!biometricEnabled || !biometricAvailable) return;
     if (autoTriedRef.current) return;
@@ -63,11 +63,11 @@ function LockScreen() {
       cancelled = true;
       clearTimeout(t);
     };
-  }, [method, biometricEnabled, biometricAvailable]);
+  }, [method, biometricEnabled, biometricAvailable, isDesktop]);
 
-  // بررسی خودکار PIN وقتی ۴ رقم شد
+  // بررسی خودکار PIN
   useEffect(() => {
-    if (method !== 'pin') return;
+    if (method !== 'pin' && !isDesktop) return;
     if (pinBuffer.length !== PIN_LENGTH) return;
     if (verifyingRef.current) return;
 
@@ -99,7 +99,7 @@ function LockScreen() {
       cancelled = true;
       verifyingRef.current = false;
     };
-  }, [pinBuffer, method, setPinError, clearPinBuffer, reset]);
+  }, [pinBuffer, method, setPinError, clearPinBuffer, reset, isDesktop]);
 
   async function handleBiometric() {
     try {
@@ -119,11 +119,12 @@ function LockScreen() {
   }
 
   const showBiometric =
-    method === 'biometric' && biometricEnabled && biometricAvailable;
+    !isDesktop && method === 'biometric' && biometricEnabled && biometricAvailable;
   const showPin = !showBiometric && pinEnabled;
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0A1614] px-6">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0A1614] px-6 lg:px-8">
+      {/* هاله طلایی */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -133,112 +134,109 @@ function LockScreen() {
       />
 
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
+        initial={{ scale: 0.94, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.35 }}
+        className="
+          relative z-10 flex w-full max-w-[340px] flex-col items-center
+          lg:max-w-[400px]
+          lg:rounded-[28px] lg:border lg:border-white/[0.08]
+          lg:bg-[#0F211E]/80 lg:px-7 lg:py-8 lg:shadow-2xl lg:backdrop-blur-xl
+        "
       >
-        <AppLogo size={84} />
-      </motion.div>
+        {/* ⭐ فقط یک لوگو با اندازه‌ی متغیر */}
+        <AppLogo size={isDesktop ? 64 : 84} />
 
-      <motion.h1
-        initial={{ y: 10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.1, duration: 0.35 }}
-        className="mt-5 text-[26px] font-extrabold text-[#F2EFE9]"
-      >
-        خزانه
-      </motion.h1>
+        <h1 className="mt-5 text-[26px] font-extrabold text-[#F2EFE9] lg:mt-4 lg:text-[24px]">
+          خزانه
+        </h1>
 
-      <motion.p
-        initial={{ y: 10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.15, duration: 0.35 }}
-        className="mt-2 max-w-[260px] text-center text-[12px] leading-relaxed text-[#8FA39D]"
-      >
-        مدیریت درآمد و مصارف روزانه‌ات
-        <br />
-        ساده، دقیق و کاملاً آفلاین
-      </motion.p>
+        <p className="mt-2 max-w-[260px] text-center text-[12px] leading-relaxed text-[#8FA39D] lg:mt-2 lg:max-w-[300px] lg:text-[12.5px]">
+          مدیریت درآمد و مصارف روزانه‌ات
+          <br />
+          ساده، دقیق و کاملاً آفلاین
+        </p>
 
-      <div className="mt-12 w-full max-w-[320px]">
-        {showBiometric && (
-          <div className="flex flex-col items-center">
-            <BiometricButton onPress={handleBiometric} />
+        <div className="mt-10 w-full max-w-[320px] lg:mt-7">
+          {showBiometric && (
+            <div className="flex flex-col items-center">
+              <BiometricButton onPress={handleBiometric} />
 
-            <p className="mt-5 text-[13px] font-semibold text-[#F2EFE9]">
-              ورود با اثر انگشت
-            </p>
-            <p className="mt-1.5 text-center text-[11px] leading-relaxed text-[#5C736C]">
-              برای باز کردن، دستت را روی سنسور نگهدار
-            </p>
+              <p className="mt-5 text-[13px] font-semibold text-[#F2EFE9]">
+                ورود با اثر انگشت
+              </p>
+              <p className="mt-1.5 text-center text-[11px] leading-relaxed text-[#5C736C]">
+                برای باز کردن، دستت را روی سنسور نگهدار
+              </p>
 
-            {pinEnabled && (
-              <button
-                type="button"
-                onClick={() => {
-                  setMethod('pin');
-                  setPinError('');
-                  clearPinBuffer();
-                }}
-                className="mt-10 text-[12px] font-semibold text-[#E3B341]"
-              >
-                ورود با رمز عبور
-              </button>
-            )}
-          </div>
-        )}
-
-        {showPin && (
-          <div className="flex flex-col items-center">
-            <p className="text-[13px] font-semibold text-[#F2EFE9]">
-              رمز عبور را وارد کنید
-            </p>
-
-            <div className="mt-4 flex items-center gap-3" dir="ltr">
-              {Array.from({ length: PIN_LENGTH }).map((_, i) => (
-                <div
-                  key={i}
-                  className={[
-                    'h-3.5 w-3.5 rounded-full transition-all duration-200',
-                    i < pinBuffer.length
-                      ? 'scale-100 bg-[#E3B341]'
-                      : 'scale-90 bg-white/[0.12]',
-                  ].join(' ')}
-                />
-              ))}
-            </div>
-
-            <div className="h-5">
-              {pinError && (
-                <p className="mt-2 text-[11px] text-[#E2574C]">{pinError}</p>
+              {pinEnabled && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMethod('pin');
+                    setPinError('');
+                    clearPinBuffer();
+                  }}
+                  className="mt-10 text-[12px] font-semibold text-[#E3B341]"
+                >
+                  ورود با رمز عبور
+                </button>
               )}
             </div>
+          )}
 
-            <div className="mt-5 w-full">
-              <PinPad
-                onKey={handleKey}
-                onBackspace={backspacePin}
-                onClear={clearPinBuffer}
-              />
+          {showPin && (
+            <div className="flex flex-col items-center">
+              <p className="text-[13px] font-semibold text-[#F2EFE9] lg:text-[13.5px]">
+                رمز عبور را وارد کنید
+              </p>
+
+              <div className="mt-4 flex items-center gap-3" dir="ltr">
+                {Array.from({ length: PIN_LENGTH }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={[
+                      'h-3.5 w-3.5 rounded-full transition-all duration-200 lg:h-3.5 lg:w-3.5',
+                      i < pinBuffer.length
+                        ? 'scale-100 bg-[#E3B341]'
+                        : 'scale-90 bg-white/[0.12]',
+                    ].join(' ')}
+                  />
+                ))}
+              </div>
+
+              <div className="h-5">
+                {pinError && (
+                  <p className="mt-2 text-[11px] text-[#E2574C]">{pinError}</p>
+                )}
+              </div>
+
+              <div className="mt-4 w-full lg:mt-3">
+                <PinPad
+                  onKey={handleKey}
+                  onBackspace={backspacePin}
+                  onClear={clearPinBuffer}
+                />
+              </div>
+
+              {!isDesktop && biometricEnabled && biometricAvailable && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMethod('biometric');
+                    setPinError('');
+                    clearPinBuffer();
+                    autoTriedRef.current = false;
+                  }}
+                  className="mt-6 text-[12px] font-semibold text-[#E3B341]"
+                >
+                  ورود با اثر انگشت
+                </button>
+              )}
             </div>
-
-            {biometricEnabled && biometricAvailable && (
-              <button
-                type="button"
-                onClick={() => {
-                  setMethod('biometric');
-                  setPinError('');
-                  clearPinBuffer();
-                  autoTriedRef.current = false;
-                }}
-                className="mt-6 text-[12px] font-semibold text-[#E3B341]"
-              >
-                ورود با اثر انگشت
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </motion.div>
     </div>
   );
 }

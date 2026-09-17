@@ -1,5 +1,6 @@
 import Chart from 'react-apexcharts';
 import { useChartAutoScroll } from '../hooks/useChartAutoScroll';
+import { useIsDesktop } from '../hooks/useIsDesktop';
 
 function formatNumber(value) {
   return new Intl.NumberFormat('fa-AF').format(Math.round(value || 0));
@@ -20,7 +21,13 @@ function getChartLayout(period, dataLength) {
   };
 }
 
-export default function IncomeTrendChart({ data = [], period = 'weekly' }) {
+export default function IncomeTrendChart({
+  data = [],
+  period = 'weekly',
+  fixedHeight,
+}) {
+  const isDesktop = useIsDesktop();
+
   const categories = data.map((item) => item.label);
   const income = data.map((item) => item.income || 0);
 
@@ -31,7 +38,6 @@ export default function IncomeTrendChart({ data = [], period = 'weekly' }) {
 
   const options = {
     chart: {
-      // فقط ماهانه bar، بقیه area
       type: isMonthly ? 'bar' : 'area',
       toolbar: { show: false },
       zoom: { enabled: false },
@@ -43,7 +49,6 @@ export default function IncomeTrendChart({ data = [], period = 'weekly' }) {
     },
     colors: ['#4FD1BE'],
 
-    // استایل area (هفتگی و سالانه)
     ...(!isMonthly && {
       stroke: { curve: 'smooth', width: 2.2 },
       fill: {
@@ -57,7 +62,6 @@ export default function IncomeTrendChart({ data = [], period = 'weekly' }) {
       },
     }),
 
-    // استایل bar (فقط ماهانه)
     ...(isMonthly && {
       plotOptions: {
         bar: {
@@ -79,7 +83,13 @@ export default function IncomeTrendChart({ data = [], period = 'weekly' }) {
         trim: false,
         style: {
           colors: '#5C736C',
-          fontSize: isMonthly ? '7px' : '10px',
+          fontSize: isMonthly
+            ? isDesktop
+              ? '10px'
+              : '7px'
+            : isDesktop
+              ? '12px'
+              : '10px',
           fontFamily: 'Vazirmatn, sans-serif',
         },
       },
@@ -90,7 +100,7 @@ export default function IncomeTrendChart({ data = [], period = 'weekly' }) {
       labels: {
         style: {
           colors: '#5C736C',
-          fontSize: '9px',
+          fontSize: isDesktop ? '11px' : '9px',
           fontFamily: 'Vazirmatn, sans-serif',
         },
         formatter: (value) => formatNumber(value),
@@ -111,7 +121,15 @@ export default function IncomeTrendChart({ data = [], period = 'weekly' }) {
 
   const series = [{ name: 'درآمد', data: income }];
 
-  const height = isMonthly ? 300 : 230;
+  const height =
+    fixedHeight ||
+    (isDesktop
+      ? isMonthly
+        ? 400
+        : 320
+      : isMonthly
+        ? 300
+        : 230);
 
   return (
     <div className="w-full px-1 pt-1" dir="rtl">
@@ -128,7 +146,7 @@ export default function IncomeTrendChart({ data = [], period = 'weekly' }) {
           }
         >
           <Chart
-            key={`${period}-${data.length}-${shouldScroll}`}
+            key={`${period}-${data.length}-${shouldScroll}-${isDesktop}-${fixedHeight || 'auto'}`}
             options={options}
             series={series}
             type={isMonthly ? 'bar' : 'area'}

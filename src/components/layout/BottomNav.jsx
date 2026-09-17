@@ -38,7 +38,7 @@ function NavItem({ label, to, icon: Icon, end = false }) {
 
 function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-1/2 z-40 w-full max-w-[420px] -translate-x-1/2 px-3 pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 left-1/2 z-40 w-full max-w-[420px] -translate-x-1/2 px-3 pb-[env(safe-area-inset-bottom)] lg:hidden">
       <div className="relative mb-2 flex h-[64px] items-center justify-between rounded-[23px] border border-white/[0.07] bg-[#0F211E]/95 px-2 shadow-[0_-8px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl">
         <div className="flex h-full flex-1 items-center justify-between pl-3">
           {leftItems.map((item) => <NavItem key={item.to} {...item} />)}

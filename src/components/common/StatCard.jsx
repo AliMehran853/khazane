@@ -1,4 +1,3 @@
-
 function StatCard({
   title,
   value,
@@ -26,19 +25,19 @@ function StatCard({
         'rounded-[22px] border bg-[#0F211E]',
         'transition-all duration-200',
         accent.border,
-        featured ? 'p-5' : 'p-4',
+        featured ? 'p-5 lg:p-6' : 'p-4 lg:p-5',
       ].join(' ')}
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[11px] font-medium text-[#5C736C]">
+          <p className="text-[11px] font-medium text-[#5C736C] lg:text-[12px]">
             {title}
           </p>
 
           <p
             className={[
               'mt-2 font-extrabold tracking-tight text-[#F2EFE9]',
-              featured ? 'text-[28px]' : 'text-[19px]',
+              featured ? 'text-[28px] lg:text-[32px]' : 'text-[19px] lg:text-[22px]',
             ].join(' ')}
           >
             {value}
@@ -50,7 +49,7 @@ function StatCard({
             className={[
               'flex items-center justify-center rounded-2xl',
               accent.iconBg,
-              featured ? 'h-11 w-11' : 'h-10 w-10',
+              featured ? 'h-11 w-11 lg:h-12 lg:w-12' : 'h-10 w-10 lg:h-11 lg:w-11',
             ].join(' ')}
           >
             <Icon

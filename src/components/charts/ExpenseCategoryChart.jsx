@@ -1,11 +1,14 @@
 import Chart from 'react-apexcharts';
 import { prepareCategoryChartData } from '../utils/categoryPalette';
+import { useIsDesktop } from '../hooks/useIsDesktop';
 
 function formatNumber(value) {
   return new Intl.NumberFormat('fa-AF').format(Math.round(value || 0));
 }
 
-export default function ExpenseCategoryChart({ categories = [] }) {
+export default function ExpenseCategoryChart({ categories = [], fixedHeight }) {
+  const isDesktop = useIsDesktop();
+
   const prepared = prepareCategoryChartData(categories);
 
   const labels = prepared.map((c) => c.name);
@@ -26,10 +29,10 @@ export default function ExpenseCategoryChart({ categories = [] }) {
       position: 'bottom',
       horizontalAlign: 'center',
       fontFamily: 'Vazirmatn, sans-serif',
-      fontSize: '11px',
+      fontSize: isDesktop ? '13px' : '11px',
       labels: { colors: '#8FA39D' },
       markers: { width: 8, height: 8, radius: 10 },
-      itemMargin: { horizontal: 6, vertical: 2 },
+      itemMargin: { horizontal: isDesktop ? 12 : 6, vertical: 2 },
     },
     dataLabels: { enabled: false },
     stroke: {
@@ -44,13 +47,13 @@ export default function ExpenseCategoryChart({ categories = [] }) {
             show: true,
             name: {
               show: true,
-              fontSize: '12px',
+              fontSize: isDesktop ? '14px' : '12px',
               color: '#8FA39D',
               fontFamily: 'Vazirmatn, sans-serif',
             },
             value: {
               show: true,
-              fontSize: '18px',
+              fontSize: isDesktop ? '24px' : '18px',
               fontWeight: 800,
               color: '#F2EFE9',
               fontFamily: 'Vazirmatn, sans-serif',
@@ -59,7 +62,7 @@ export default function ExpenseCategoryChart({ categories = [] }) {
             total: {
               show: true,
               label: 'مجموع',
-              fontSize: '12px',
+              fontSize: isDesktop ? '14px' : '12px',
               color: '#8FA39D',
               fontFamily: 'Vazirmatn, sans-serif',
               formatter: (w) => {
@@ -78,9 +81,17 @@ export default function ExpenseCategoryChart({ categories = [] }) {
     },
   };
 
+  const height = fixedHeight || (isDesktop ? 360 : 260);
+
   return (
     <div className="w-full px-1 pt-1" dir="rtl">
-      <Chart options={options} series={values} type="donut" height={260} />
+      <Chart
+        key={`donut-${isDesktop}-${fixedHeight || 'auto'}`}
+        options={options}
+        series={values}
+        type="donut"
+        height={height}
+      />
     </div>
   );
 }

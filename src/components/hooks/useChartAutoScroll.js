@@ -113,7 +113,7 @@ export function useChartAutoScroll(data, period, shouldScroll) {
       }
     };
 
-    timeoutId = setTimeout(tryScroll, 300);
+    timeoutId = setTimeout(tryScroll, 20);
 
     return () => clearTimeout(timeoutId);
   }, [data, period, shouldScroll]);

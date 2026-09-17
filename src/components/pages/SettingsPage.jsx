@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Drawer } from 'vaul';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bell,
   Clock,
+  Coins,
   Database,
   Fingerprint,
   LogOut,
-  Palette,
   ShieldCheck,
   Trash2,
   X,
@@ -264,55 +264,115 @@ function PinSetupFlow({ onDone, onCancel }) {
 }
 
 // ============================================================
-// Sheet wrapper
+// Sheet — با Framer Motion
 // ============================================================
 
 function Sheet({ open, onClose, title, subtitle, children }) {
+  useEffect(() => {
+    if (!open) return;
+
+    const scrollY = window.scrollY;
+    const body = document.body;
+
+    const prevPosition = body.style.position;
+    const prevTop = body.style.top;
+    const prevLeft = body.style.left;
+    const prevRight = body.style.right;
+    const prevWidth = body.style.width;
+
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.width = '100%';
+
+    return () => {
+      body.style.position = prevPosition;
+      body.style.top = prevTop;
+      body.style.left = prevLeft;
+      body.style.right = prevRight;
+      body.style.width = prevWidth;
+      window.scrollTo(0, scrollY);
+    };
+  }, [open]);
+
   return (
-    <Drawer.Root
-      open={open}
-      onOpenChange={(v) => {
-        if (!v) onClose?.();
-      }}
-    >
-      <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-[2px]" />
-        <Drawer.Content
-          className="
-            fixed inset-x-0 bottom-0 z-[70] mx-auto
-            flex max-h-[90dvh] w-full max-w-[420px] flex-col
-            rounded-t-[30px] border border-white/[0.07] bg-[#0F211E]
-            outline-none
-          "
-        >
-          <div className="shrink-0 px-4 pt-3">
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/[0.12]" />
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onClose}
+            className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-[2px]"
+          />
 
-            <div className="mb-5 flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                {subtitle && (
-                  <p className="text-[11px] text-[#5C736C]">{subtitle}</p>
-                )}
-                <Drawer.Title className="mt-0.5 text-[18px] font-bold text-[#F2EFE9]">
-                  {title}
-                </Drawer.Title>
+          <motion.div
+            initial={{ y: '100%', opacity: 0.6 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0.6 }}
+            transition={{ type: 'spring', damping: 30, stiffness: 320 }}
+            className="
+              fixed inset-x-3 bottom-3 z-[70] mx-auto
+              flex max-h-[88svh] w-auto max-w-[420px] flex-col
+              overflow-hidden rounded-[24px] border border-white/[0.07] bg-[#0F211E]
+              outline-none
+
+              lg:inset-x-auto lg:bottom-auto lg:left-1/2 lg:top-1/2
+              lg:max-h-[85vh] lg:w-full lg:max-w-[520px]
+              lg:-translate-x-1/2 lg:-translate-y-1/2
+            "
+            style={{
+              paddingBottom: 'env(safe-area-inset-bottom)',
+            }}
+          >
+            <div className="shrink-0 px-4 pt-3 pb-3 lg:px-6 lg:pt-4 lg:pb-4">
+              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/[0.12] lg:hidden" />
+
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  {subtitle && (
+                    <p className="text-[11px] text-[#5C736C] lg:text-[12px]">
+                      {subtitle}
+                    </p>
+                  )}
+                  <h2 className="mt-0.5 text-[18px] font-bold text-[#F2EFE9] lg:text-[20px]">
+                    {title}
+                  </h2>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#153029] text-[#8FA39D] active:scale-95 lg:h-10 lg:w-10"
+                  aria-label="بستن"
+                >
+                  <X size={18} />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#153029] text-[#8FA39D] active:scale-95"
-              >
-                <X size={19} />
-              </button>
             </div>
-          </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(env(safe-area-inset-bottom)+20px)]">
-            {children}
-          </div>
-        </Drawer.Content>
-      </Drawer.Portal>
-    </Drawer.Root>
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-5 lg:px-6 lg:pb-6">
+              {children}
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ============================================================
+// Section Title (فقط دسکتاپ)
+// ============================================================
+
+function SectionTitle({ children }) {
+  return (
+    <h2 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[#5C736C]">
+      {children}
+    </h2>
   );
 }
 
@@ -330,11 +390,7 @@ function SettingsPage() {
 
   const { forceShow: forceShowReminder } = useDailyReminder();
 
-  // ⭐ چک خودکار اثر انگشت در زمان mount
-  const {
-    available: bioAvailable,
-    checking: bioChecking,
-  } = useBiometricCheck();
+  const { available: bioAvailable, checking: bioChecking } = useBiometricCheck();
 
   const [userName, setLocalName] = useState('');
   const [currency, setLocalCurrency] = useState('افغانی');
@@ -355,23 +411,16 @@ function SettingsPage() {
   const [confirmLogout, setConfirmLogout] = useState(false);
 
   async function loadAll() {
-    const [
-      name,
-      cur,
-      remOn,
-      remTime,
-      lockState,
-      pinState,
-      bioState,
-    ] = await Promise.all([
-      getUserName(),
-      getCurrencyLabel(),
-      isReminderEnabled(),
-      getReminderTime(),
-      isLockEnabled(),
-      isPinEnabled(),
-      isBiometricEnabled(),
-    ]);
+    const [name, cur, remOn, remTime, lockState, pinState, bioState] =
+      await Promise.all([
+        getUserName(),
+        getCurrencyLabel(),
+        isReminderEnabled(),
+        getReminderTime(),
+        isLockEnabled(),
+        isPinEnabled(),
+        isBiometricEnabled(),
+      ]);
     setLocalName(name);
     setLocalCurrency(cur);
     setLocalReminder(remOn);
@@ -585,115 +634,258 @@ function SettingsPage() {
     await forceShowReminder();
   }
 
+  // ==========================================================
+  // Currency Row (مشترک بین موبایل و دسکتاپ)
+  // ==========================================================
+  const currencyRow = (
+    <SettingsButtonRow
+      icon={Coins}
+      title="واحد پول"
+      subtitle={currency}
+      onClick={() => setSheet('currency')}
+      isLast
+    />
+  );
+
   return (
-    <div className="px-4 pb-6 pt-6">
-      <header>
-        <p className="text-[11px] text-[#5C736C]">شخصی‌سازی برنامه</p>
-        <h1 className="mt-1 text-[21px] font-bold text-[#F2EFE9]">تنظیمات</h1>
-      </header>
+    <>
+      <div className="px-4 pb-6 pt-6 lg:mx-auto lg:max-w-[1100px] lg:px-8 lg:pb-12 lg:pt-8">
+        <header>
+          <p className="text-[11px] text-[#5C736C] lg:text-[12px]">
+            شخصی‌سازی برنامه
+          </p>
+          <h1 className="mt-1 text-[21px] font-bold text-[#F2EFE9] lg:text-[26px]">
+            تنظیمات
+          </h1>
+        </header>
 
-      <InstallCard />
-
-      <SettingsProfileCard name={userName} onClick={() => setSheet('profile')} />
-
-      <SettingsGroup>
-        <SettingsToggleRow
-          icon={ShieldCheck}
-          title="قفل برنامه"
-          subtitle={
-            lockOn
-              ? 'برای باز کردن، رمز یا اثر انگشت لازم است'
-              : 'غیرفعال'
-          }
-          checked={lockOn}
-          onChange={toggleLock}
-        />
-
-        <SettingsButtonRow
-          icon={Fingerprint}
-          title="روش‌های ورود"
-          subtitle={
-            pinOn || bioOn
-              ? `${pinOn ? 'رمز' : ''}${pinOn && bioOn ? ' + ' : ''}${bioOn ? 'اثر انگشت' : ''}`
-              : 'هیچ روشی تنظیم نشده'
-          }
-          onClick={() => setSheet('lock')}
-        />
-      </SettingsGroup>
-
-      <SettingsGroup>
-        <SettingsToggleRow
-          icon={Bell}
-          title="یادآوری ثبت روزانه"
-          subtitle={
-            reminderOn
-              ? `هر شب ساعت ${formatTime12(reminderTime)}`
-              : 'غیرفعال'
-          }
-          checked={reminderOn}
-          onChange={toggleReminder}
-          isLast={!reminderOn}
-        />
-
-        {reminderOn && (
-          <SettingsButtonRow
-            icon={Clock}
-            title="زمان یادآوری"
-            subtitle={formatTime12(reminderTime)}
-            onClick={() => setSheet('reminderTime')}
+        {/* ============================================ */}
+        {/* موبایل — تک‌ستونی، دست‌نخورده               */}
+        {/* ============================================ */}
+        <div className="lg:hidden">
+          <InstallCard />
+          <SettingsProfileCard
+            name={userName}
+            onClick={() => setSheet('profile')}
           />
-        )}
-      </SettingsGroup>
 
-      <SettingsGroup>
-        <SettingsButtonRow
-          icon={Palette}
-          title="واحد پول"
-          subtitle={currency}
-          onClick={() => setSheet('currency')}
-        />
-      </SettingsGroup>
+          <SettingsGroup>
+            <SettingsToggleRow
+              icon={ShieldCheck}
+              title="قفل برنامه"
+              subtitle={
+                lockOn
+                  ? 'برای باز کردن، رمز یا اثر انگشت لازم است'
+                  : 'غیرفعال'
+              }
+              checked={lockOn}
+              onChange={toggleLock}
+            />
 
-      <SettingsGroup>
-        <SettingsButtonRow
-          icon={Database}
-          title="پشتیبان‌گیری"
-          subtitle="خروجی و بازیابی اطلاعات"
-          onClick={() => setSheet('backup')}
-        />
+            <SettingsButtonRow
+              icon={Fingerprint}
+              title="روش‌های ورود"
+              subtitle={
+                pinOn || bioOn
+                  ? `${pinOn ? 'رمز' : ''}${pinOn && bioOn ? ' + ' : ''}${bioOn ? 'اثر انگشت' : ''}`
+                  : 'هیچ روشی تنظیم نشده'
+              }
+              onClick={() => setSheet('lock')}
+            />
+          </SettingsGroup>
 
-        <SettingsButtonRow
-          icon={Trash2}
-          title="پاک‌سازی همه داده‌ها"
-          subtitle="حذف کامل تراکنش‌ها و تنظیمات"
-          tone="danger"
-          isLast
-          onClick={() => setConfirmClear(true)}
-        />
-      </SettingsGroup>
+          <SettingsGroup>
+            <SettingsToggleRow
+              icon={Bell}
+              title="یادآوری ثبت روزانه"
+              subtitle={
+                reminderOn
+                  ? `هر شب ساعت ${formatTime12(reminderTime)}`
+                  : 'غیرفعال'
+              }
+              checked={reminderOn}
+              onChange={toggleReminder}
+              isLast={!reminderOn}
+            />
 
-      {lockOn && (
-        <button
-          type="button"
-          onClick={() => setConfirmLogout(true)}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-[#E2574C]/20 bg-[#E2574C]/[0.08] py-3.5 text-[13px] font-semibold text-[#E2574C] active:scale-[0.98]"
-        >
-          <LogOut size={17} strokeWidth={2} />
-          خروج از حساب
-        </button>
-      )}
+            {reminderOn && (
+              <SettingsButtonRow
+                icon={Clock}
+                title="زمان یادآوری"
+                subtitle={formatTime12(reminderTime)}
+                onClick={() => setSheet('reminderTime')}
+              />
+            )}
+          </SettingsGroup>
 
-      <p className="mt-6 text-center text-[10.5px] text-[#5C736C]">
-        خزانه • نسخه ۱.۰ • {getTodayShort()}
-      </p>
+          <SettingsGroup>{currencyRow}</SettingsGroup>
 
-      {toast && (
-        <div className="pointer-events-none fixed bottom-[100px] left-1/2 z-[200] -translate-x-1/2 max-w-[90vw]">
-          <div className="rounded-2xl border border-white/[0.08] bg-[#153029] px-4 py-2.5 text-center text-[12px] font-medium text-[#F2EFE9] shadow-lg">
-            {toast}
+          <SettingsGroup>
+            <SettingsButtonRow
+              icon={Database}
+              title="پشتیبان‌گیری"
+              subtitle="خروجی و بازیابی اطلاعات"
+              onClick={() => setSheet('backup')}
+            />
+
+            <SettingsButtonRow
+              icon={Trash2}
+              title="پاک‌سازی همه داده‌ها"
+              subtitle="حذف کامل تراکنش‌ها و تنظیمات"
+              tone="danger"
+              isLast
+              onClick={() => setConfirmClear(true)}
+            />
+          </SettingsGroup>
+
+          {lockOn && (
+            <button
+              type="button"
+              onClick={() => setConfirmLogout(true)}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-[#E2574C]/20 bg-[#E2574C]/[0.08] py-3.5 text-[13px] font-semibold text-[#E2574C] active:scale-[0.98]"
+            >
+              <LogOut size={17} strokeWidth={2} />
+              خروج از حساب
+            </button>
+          )}
+
+          <p className="mt-6 text-center text-[10.5px] text-[#5C736C]">
+            خزانه • نسخه ۱.۰ • {getTodayShort()}
+          </p>
+        </div>
+
+        {/* ============================================ */}
+        {/* دسکتاپ — گرید ۳ ردیفی با ارتفاع یکسان        */}
+        {/* ============================================ */}
+        <div className="mt-8 hidden lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-x-5 lg:gap-y-6">
+          {/* ---------- ردیف ۱: حساب کاربری | ترجیحات ---------- */}
+          <div className="flex flex-col">
+            <SectionTitle>حساب کاربری</SectionTitle>
+            <div className="flex-1 [&>*]:!mt-0 [&>*]:h-full">
+              <SettingsProfileCard
+                name={userName}
+                onClick={() => setSheet('profile')}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col">
+            <SectionTitle>ترجیحات</SectionTitle>
+            <div className="flex-1 [&>*]:!mt-0 [&>*]:h-full">
+              <SettingsGroup>{currencyRow}</SettingsGroup>
+            </div>
+          </div>
+
+          {/* ---------- ردیف ۲: امنیت | داده‌ها ---------- */}
+          <div className="flex flex-col">
+            <SectionTitle>امنیت</SectionTitle>
+            <div className="flex-1 [&>*]:!mt-0 [&>*]:h-full">
+              <SettingsGroup>
+                <SettingsToggleRow
+                  icon={ShieldCheck}
+                  title="قفل برنامه"
+                  subtitle={
+                    lockOn
+                      ? 'برای باز کردن، رمز یا اثر انگشت لازم است'
+                      : 'غیرفعال'
+                  }
+                  checked={lockOn}
+                  onChange={toggleLock}
+                />
+                <SettingsButtonRow
+                  icon={Fingerprint}
+                  title="روش‌های ورود"
+                  subtitle={
+                    pinOn || bioOn
+                      ? `${pinOn ? 'رمز' : ''}${pinOn && bioOn ? ' + ' : ''}${bioOn ? 'اثر انگشت' : ''}`
+                      : 'هیچ روشی تنظیم نشده'
+                  }
+                  onClick={() => setSheet('lock')}
+                  isLast
+                />
+              </SettingsGroup>
+            </div>
+          </div>
+
+          <div className="flex flex-col">
+            <SectionTitle>داده‌ها</SectionTitle>
+            <div className="flex-1 [&>*]:!mt-0 [&>*]:h-full">
+              <SettingsGroup>
+                <SettingsButtonRow
+                  icon={Database}
+                  title="پشتیبان‌گیری"
+                  subtitle="خروجی و بازیابی اطلاعات"
+                  onClick={() => setSheet('backup')}
+                />
+                <SettingsButtonRow
+                  icon={Trash2}
+                  title="پاک‌سازی همه داده‌ها"
+                  subtitle="حذف کامل تراکنش‌ها و تنظیمات"
+                  tone="danger"
+                  isLast
+                  onClick={() => setConfirmClear(true)}
+                />
+              </SettingsGroup>
+            </div>
+          </div>
+
+          {/* ---------- ردیف ۳: یادآوری | نصب و خروج ---------- */}
+          <div className="flex flex-col">
+            <SectionTitle>یادآوری</SectionTitle>
+            <div className="flex-1 [&>*]:!mt-0 [&>*]:h-full">
+              <SettingsGroup>
+                <SettingsToggleRow
+                  icon={Bell}
+                  title="یادآوری ثبت روزانه"
+                  subtitle={
+                    reminderOn
+                      ? `هر شب ساعت ${formatTime12(reminderTime)}`
+                      : 'غیرفعال'
+                  }
+                  checked={reminderOn}
+                  onChange={toggleReminder}
+                  isLast={!reminderOn}
+                />
+                {reminderOn && (
+                  <SettingsButtonRow
+                    icon={Clock}
+                    title="زمان یادآوری"
+                    subtitle={formatTime12(reminderTime)}
+                    onClick={() => setSheet('reminderTime')}
+                    isLast
+                  />
+                )}
+              </SettingsGroup>
+            </div>
+          </div>
+
+          <div className="flex flex-col">
+            <SectionTitle>نصب و خروج</SectionTitle>
+            <div className="flex flex-1 flex-col gap-3 [&>*]:!mt-0">
+              <InstallCard />
+              {lockOn && (
+                <button
+                  type="button"
+                  onClick={() => setConfirmLogout(true)}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#E2574C]/20 bg-[#E2574C]/[0.08] py-3.5 text-[13px] font-semibold text-[#E2574C] transition-all hover:bg-[#E2574C]/[0.12] active:scale-[0.98]"
+                >
+                  <LogOut size={17} strokeWidth={2} />
+                  خروج از حساب
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      )}
+
+        {/* ---------- فوتر دسکتاپ ---------- */}
+        <p className="mt-10 hidden text-center text-[10.5px] text-[#5C736C] lg:block">
+          خزانه • نسخه ۱.۰ • {getTodayShort()}
+        </p>
+      </div>
+
+      {/* ============================================ */}
+      {/* Sheets — مشترک                               */}
+      {/* ============================================ */}
 
       <Sheet
         open={sheet === 'profile'}
@@ -761,7 +953,6 @@ function SettingsPage() {
           <PinSetupFlow onDone={afterPinSet} onCancel={cancelPinSetup} />
         ) : (
           <div className="space-y-4">
-            {/* PIN Row */}
             <div className="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-[#0A1614] p-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#153029] text-[#8FA39D]">
                 <ShieldCheck size={19} />
@@ -798,7 +989,6 @@ function SettingsPage() {
               )}
             </div>
 
-            {/* Biometric Row — اصلاح‌شده */}
             <div className="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-[#0A1614] p-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#153029] text-[#8FA39D]">
                 <Fingerprint size={19} />
@@ -817,9 +1007,7 @@ function SettingsPage() {
                     <StatusBadge
                       active={bioOn}
                       inactiveLabel={
-                        bioAvailable === false
-                          ? 'پشتیبانی نمی‌شود'
-                          : 'غیرفعال'
+                        bioAvailable === false ? 'پشتیبانی نمی‌شود' : 'غیرفعال'
                       }
                     />
                   )}
@@ -847,7 +1035,8 @@ function SettingsPage() {
             </div>
 
             <p className="pt-1 text-center text-[10.5px] leading-relaxed text-[#5C736C]">
-              همه‌ی اطلاعات فقط روی همین دستگاه ذخیره می‌شود و هیچ‌گاه به سرور فرستاده نمی‌شود.
+              همه‌ی اطلاعات فقط روی همین دستگاه ذخیره می‌شود و هیچ‌گاه به سرور
+              فرستاده نمی‌شود.
             </p>
           </div>
         )}
@@ -951,7 +1140,8 @@ function SettingsPage() {
         subtitle="این عملیات قابل بازگشت نیست"
       >
         <p className="rounded-2xl border border-[#E2574C]/20 bg-[#E2574C]/[0.08] p-4 text-[12px] leading-relaxed text-[#E2574C]">
-          تمام تراکنش‌ها، دسته‌بندی‌ها و تنظیمات شما برای همیشه حذف می‌شود. توصیه می‌کنیم قبل از این کار پشتیبان تهیه کنید.
+          تمام تراکنش‌ها، دسته‌بندی‌ها و تنظیمات شما برای همیشه حذف می‌شود.
+          توصیه می‌کنیم قبل از این کار پشتیبان تهیه کنید.
         </p>
 
         <div className="mt-4 grid grid-cols-2 gap-3">
@@ -979,7 +1169,10 @@ function SettingsPage() {
         subtitle="بعد از خروج باید دوباره وارد شوید"
       >
         <p className="rounded-2xl border border-white/[0.06] bg-[#153029] p-4 text-[12px] leading-relaxed text-[#8FA39D]">
-          با خروج از حساب، برنامه بلافاصله قفل می‌شود و برای ورود دوباره به {pinOn ? 'رمز عبور' : ''}{pinOn && bioOn ? ' یا ' : ''}{bioOn ? 'اثر انگشت' : ''} نیاز خواهید داشت.
+          با خروج از حساب، برنامه بلافاصله قفل می‌شود و برای ورود دوباره به{' '}
+          {pinOn ? 'رمز عبور' : ''}
+          {pinOn && bioOn ? ' یا ' : ''}
+          {bioOn ? 'اثر انگشت' : ''} نیاز خواهید داشت.
         </p>
 
         <div className="mt-4 grid grid-cols-2 gap-3">
@@ -1000,7 +1193,15 @@ function SettingsPage() {
           </button>
         </div>
       </Sheet>
-    </div>
+
+      {toast && (
+        <div className="pointer-events-none fixed bottom-[100px] left-1/2 z-[200] max-w-[90vw] -translate-x-1/2">
+          <div className="rounded-2xl border border-white/[0.08] bg-[#153029] px-4 py-2.5 text-center text-[12px] font-medium text-[#F2EFE9] shadow-lg">
+            {toast}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

@@ -81,3 +81,31 @@ export async function createCategory({
 
   return category;
 }
+
+// ⭐ تابع جدید: حذف دسته‌بندی
+export async function deleteCategory(id) {
+  const category = await db.categories.get(id);
+
+  if (!category) {
+    throw new Error('دسته پیدا نشد.');
+  }
+
+  if (category.isDefault) {
+    throw new Error('دسته‌های پیش‌فرض قابل حذف نیستند.');
+  }
+
+  // چک کن که تراکنشی از این دسته استفاده نمی‌کند
+  const count = await db.transactions
+    .where('categoryId')
+    .equals(id)
+    .count();
+
+  if (count > 0) {
+    throw new Error(
+      `این دسته در ${count} تراکنش استفاده شده و قابل حذف نیست.`
+    );
+  }
+
+  await db.categories.delete(id);
+  return true;
+}

@@ -10,7 +10,29 @@ const periodLabels = {
   yearly: 'امسال',
 };
 
-export default function BalanceHero({ summary, period = 'weekly' }) {
+export default function BalanceHero({
+  summary,
+  period = 'weekly',
+  variant = 'mobile',
+}) {
+  const isDesktop = variant === 'desktop';
+
+  if (isDesktop) {
+    return (
+      <section className="flex h-full flex-col justify-center rounded-[26px] border border-white/[0.06] bg-[linear-gradient(160deg,#1B3A32_0%,#0F211E_75%)] p-8">
+        <p className="text-[14px] font-medium text-[#8FA39D]">
+          موجودی {periodLabels[period] || ''}
+        </p>
+
+        <p className="mt-4 text-[56px] font-extrabold leading-tight tracking-tight text-[#F2EFE9]">
+          {formatNumber(summary.balance)}
+        </p>
+
+        <p className="mt-2 text-[13px] text-[#5C736C]">افغانی</p>
+      </section>
+    );
+  }
+
   return (
     <section className="mt-7 rounded-[26px] border border-white/[0.06] bg-[linear-gradient(160deg,#1B3A32_0%,#0F211E_75%)] p-5">
       <p className="text-[12px] text-[#8FA39D]">

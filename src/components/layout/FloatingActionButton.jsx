@@ -9,7 +9,6 @@ function FloatingActionButton() {
 
   const openTransactionSheet = useAppStore((s) => s.openTransactionSheet);
 
-  // در صفحه تنظیمات پنهان می‌شود
   if (location.pathname === '/settings') {
     return null;
   }
@@ -25,12 +24,13 @@ function FloatingActionButton() {
       whileHover={{ scale: 1.04 }}
       transition={{ duration: 0.16 }}
       className="
-        fixed bottom-[34px] left-1/2 z-50
+        fixed bottom-[36px] left-1/2 z-50
         flex h-[58px] w-[58px] -translate-x-1/2 items-center justify-center rounded-full
         border border-[#E3B341]/20
         bg-[linear-gradient(155deg,#E3B341,#B9862A)]
         text-[#0A1614]
         shadow-[0_8px_30px_rgba(227,179,65,0.22)]
+        lg:hidden
       "
     >
       <Plus size={27} strokeWidth={2.4} />

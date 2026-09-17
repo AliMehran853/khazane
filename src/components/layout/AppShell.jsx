@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import BottomNav from './BottomNav';
+import Sidebar from './Sidebar';
 import FloatingActionButton from './FloatingActionButton';
 import TransactionSheet from '../transactions/TransactionSheet';
 import LockScreen from '../lock/LockScreen';
@@ -33,19 +34,28 @@ function AppShell() {
   }
 
   return (
-    <div className="relative min-h-dvh bg-[#0A1614] text-[#F2EFE9]">
-      <main className="mx-auto w-full max-w-[420px] pb-32">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-          >
-            <Outlet />
-          </motion.div>
-        </AnimatePresence>
+    <div
+      className="relative min-h-dvh bg-[#0A1614] text-[#F2EFE9]"
+      data-vaul-drawer-wrapper
+    >
+      {/* Sidebar — فقط دسکتاپ */}
+      <Sidebar />
+
+      {/* محتوای اصلی — موبایل: باریک وسط، دسکتاپ: پهن با فاصله از سایدبار */}
+      <main className="mx-auto w-full max-w-[420px] pb-24 lg:max-w-none lg:pb-12 lg:pr-[260px]">
+        <div className="lg:mx-auto lg:max-w-[1200px] lg:px-8 lg:pt-2">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </main>
 
       <FloatingActionButton />
@@ -57,7 +67,6 @@ function AppShell() {
         onClose={closeTransactionSheet}
       />
 
-      {/* ⭐ یادآوری روزانه */}
       <DailyReminderModal
         open={reminderVisible}
         onClose={dismissReminder}

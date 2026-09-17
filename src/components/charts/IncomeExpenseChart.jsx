@@ -1,5 +1,6 @@
 import Chart from 'react-apexcharts';
 import { useChartAutoScroll } from '../hooks/useChartAutoScroll';
+import { useIsDesktop } from '../hooks/useIsDesktop';
 
 function formatNumber(value) {
   return new Intl.NumberFormat('fa-AF').format(Math.round(value || 0));
@@ -20,7 +21,13 @@ function getChartLayout(period, dataLength) {
   };
 }
 
-export default function IncomeExpenseChart({ data = [], period = 'weekly' }) {
+export default function IncomeExpenseChart({
+  data = [],
+  period = 'weekly',
+  fixedHeight,
+}) {
+  const isDesktop = useIsDesktop();
+
   const categories = data.map((item) => item.label);
   const income = data.map((item) => item.income || 0);
   const expense = data.map((item) => item.expense || 0);
@@ -32,7 +39,6 @@ export default function IncomeExpenseChart({ data = [], period = 'weekly' }) {
 
   const options = {
     chart: {
-      // فقط ماهانه bar، بقیه area
       type: isMonthly ? 'bar' : 'area',
       toolbar: { show: false },
       zoom: { enabled: false },
@@ -44,7 +50,6 @@ export default function IncomeExpenseChart({ data = [], period = 'weekly' }) {
     },
     colors: ['#4FD1BE', '#E2574C'],
 
-    // استایل مخصوص area (هفتگی و سالانه)
     ...(!isMonthly && {
       stroke: { curve: 'smooth', width: 2.2 },
       fill: {
@@ -58,7 +63,6 @@ export default function IncomeExpenseChart({ data = [], period = 'weekly' }) {
       },
     }),
 
-    // استایل مخصوص bar (فقط ماهانه)
     ...(isMonthly && {
       plotOptions: {
         bar: {
@@ -80,7 +84,13 @@ export default function IncomeExpenseChart({ data = [], period = 'weekly' }) {
         trim: false,
         style: {
           colors: '#5C736C',
-          fontSize: isMonthly ? '7px' : '10px',
+          fontSize: isMonthly
+            ? isDesktop
+              ? '10px'
+              : '7px'
+            : isDesktop
+              ? '12px'
+              : '10px',
           fontFamily: 'Vazirmatn, sans-serif',
         },
       },
@@ -91,7 +101,7 @@ export default function IncomeExpenseChart({ data = [], period = 'weekly' }) {
       labels: {
         style: {
           colors: '#5C736C',
-          fontSize: '9px',
+          fontSize: isDesktop ? '11px' : '9px',
           fontFamily: 'Vazirmatn, sans-serif',
         },
         formatter: (value) => formatNumber(value),
@@ -113,7 +123,7 @@ export default function IncomeExpenseChart({ data = [], period = 'weekly' }) {
       position: 'top',
       horizontalAlign: 'right',
       fontFamily: 'Vazirmatn, sans-serif',
-      fontSize: '11px',
+      fontSize: isDesktop ? '13px' : '11px',
       labels: { colors: '#8FA39D' },
       markers: { width: 7, height: 7, radius: 10 },
       itemMargin: { horizontal: 8 },
@@ -125,7 +135,16 @@ export default function IncomeExpenseChart({ data = [], period = 'weekly' }) {
     { name: 'مصرف', data: expense },
   ];
 
-  const height = isMonthly ? 300 : 250;
+  // اگر fixedHeight داده شده، همان را استفاده کن
+  const height =
+    fixedHeight ||
+    (isDesktop
+      ? isMonthly
+        ? 400
+        : 340
+      : isMonthly
+        ? 300
+        : 250);
 
   return (
     <div className="w-full px-1 pt-1" dir="rtl">
@@ -142,7 +161,7 @@ export default function IncomeExpenseChart({ data = [], period = 'weekly' }) {
           }
         >
           <Chart
-            key={`${period}-${data.length}-${shouldScroll}`}
+            key={`${period}-${data.length}-${shouldScroll}-${isDesktop}-${fixedHeight || 'auto'}`}
             options={options}
             series={series}
             type={isMonthly ? 'bar' : 'area'}

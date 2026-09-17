@@ -9,7 +9,7 @@ const KEYS = [
 
 export default function PinPad({ onKey, onBackspace, onClear }) {
   return (
-    <div className="grid grid-cols-3 gap-3" dir="ltr">
+    <div className="grid grid-cols-3 gap-3 lg:gap-4" dir="ltr">
       {KEYS.flat().map((key) => {
         if (key === 'clear') {
           return (
@@ -17,7 +17,7 @@ export default function PinPad({ onKey, onBackspace, onClear }) {
               key="clear"
               type="button"
               onClick={onClear}
-              className="flex h-[56px] items-center justify-center rounded-2xl text-[12px] font-semibold text-[#8FA39D] active:scale-95 active:bg-white/[0.03]"
+              className="flex h-[56px] items-center justify-center rounded-2xl text-[12px] font-semibold text-[#8FA39D] active:scale-95 active:bg-white/[0.03] lg:h-[64px] lg:text-[13px]"
             >
               پاک
             </button>
@@ -30,7 +30,7 @@ export default function PinPad({ onKey, onBackspace, onClear }) {
               key="backspace"
               type="button"
               onClick={onBackspace}
-              className="flex h-[56px] items-center justify-center rounded-2xl text-[#8FA39D] active:scale-95 active:bg-white/[0.03]"
+              className="flex h-[56px] items-center justify-center rounded-2xl text-[#8FA39D] active:scale-95 active:bg-white/[0.03] lg:h-[64px]"
             >
               <Delete size={22} strokeWidth={1.8} />
             </button>
@@ -42,7 +42,7 @@ export default function PinPad({ onKey, onBackspace, onClear }) {
             key={key}
             type="button"
             onClick={() => onKey(key)}
-            className="flex h-[56px] items-center justify-center rounded-2xl border border-white/[0.05] bg-[#0F211E] text-[22px] font-bold text-[#F2EFE9] transition-all active:scale-95 active:bg-[#153029]"
+            className="flex h-[56px] items-center justify-center rounded-2xl border border-white/[0.05] bg-[#0F211E] text-[22px] font-bold text-[#F2EFE9] transition-all active:scale-95 active:bg-[#153029] lg:h-[64px] lg:text-[26px]"
           >
             {key}
           </button>

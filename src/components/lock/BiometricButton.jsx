@@ -15,7 +15,6 @@ export default function BiometricButton({ onPress, disabled = false }) {
       "
       aria-label="ورود با اثر انگشت"
     >
-      {/* حلقه‌های نبض */}
       <motion.div
         className="absolute inset-0 rounded-full border border-[#E3B341]/30"
         animate={{ scale: [1, 1.35], opacity: [0.55, 0] }}

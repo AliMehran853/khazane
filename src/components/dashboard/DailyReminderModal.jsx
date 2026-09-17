@@ -11,7 +11,6 @@ function DailyReminderModal({ open, onClose, onConfirmNavigate }) {
 
   async function handleNo() {
     await onClose?.();
-    // باز کردن شیت ثبت مصرف به صورت پیش‌فرض
     if (onConfirmNavigate) {
       onConfirmNavigate();
     } else {
@@ -23,7 +22,6 @@ function DailyReminderModal({ open, onClose, onConfirmNavigate }) {
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-5">
-          {/* Overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -33,21 +31,19 @@ function DailyReminderModal({ open, onClose, onConfirmNavigate }) {
             className="absolute inset-0 bg-black/70 backdrop-blur-[3px]"
           />
 
-          {/* Modal */}
           <motion.div
             initial={{ opacity: 0, scale: 0.92, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             className="
-              relative z-10 w-full max-w-[340px]
+              relative z-10 w-full max-w-[340px] lg:max-w-[400px]
               rounded-[28px] border border-white/[0.08]
               bg-[linear-gradient(160deg,#1B3A32_0%,#0F211E_75%)]
-              p-6 shadow-2xl
+              p-6 shadow-2xl lg:p-7
             "
             dir="rtl"
           >
-            {/* Icon */}
             <div className="flex justify-center">
               <motion.div
                 initial={{ scale: 0.6, rotate: -10 }}
@@ -59,19 +55,16 @@ function DailyReminderModal({ open, onClose, onConfirmNavigate }) {
               </motion.div>
             </div>
 
-            {/* Title */}
-            <h2 className="mt-5 text-center text-[17px] font-extrabold text-[#F2EFE9]">
+            <h2 className="mt-5 text-center text-[17px] font-extrabold text-[#F2EFE9] lg:text-[18px]">
               ثبت روزانه فراموش نشود
             </h2>
 
-            {/* Message */}
-            <p className="mt-2 text-center text-[12.5px] leading-relaxed text-[#8FA39D]">
+            <p className="mt-2 text-center text-[12.5px] leading-relaxed text-[#8FA39D] lg:text-[13px]">
               از آخرین ثبت شما بیش از ۲۴ ساعت گذشته.
               <br />
               آیا درآمد یا مصرف جدیدی ثبت کرده‌اید؟
             </p>
 
-            {/* Buttons */}
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button
                 type="button"
