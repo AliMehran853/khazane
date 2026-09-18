@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import {
   Home,
   ArrowDownLeft,
@@ -54,7 +54,17 @@ function SidebarItem({ label, to, icon: Icon, end = false }) {
 }
 
 function Sidebar() {
+  const location = useLocation();
   const openTransactionSheet = useAppStore((s) => s.openTransactionSheet);
+
+  // ⭐ تعیین نوع تراکنش بر اساس صفحه‌ی فعلی
+  const type = location.pathname === '/income' ? 'income' : 'expense';
+
+  // ⭐ متن دکمه هم بر اساس صفحه تغییر می‌کند
+  const buttonLabel = type === 'income' ? 'ثبت درآمد' : 'ثبت مصرف';
+
+  // اگر در صفحه‌ی تنظیمات هستیم، دکمه رو مخفی نکنیم؟ — کاربر خواسته بماند
+  // اما اگر ترجیح می‌دهی مخفی بشه، بگو
 
   return (
     <aside
@@ -91,7 +101,7 @@ function Sidebar() {
       <div className="border-t border-white/[0.06] px-4 py-4">
         <button
           type="button"
-          onClick={() => openTransactionSheet('expense')}
+          onClick={() => openTransactionSheet(type)}
           className="
             flex w-full items-center justify-center gap-2 rounded-2xl
             bg-[linear-gradient(155deg,#E3B341,#B9862A)]
@@ -100,7 +110,7 @@ function Sidebar() {
           "
         >
           <Plus size={18} strokeWidth={2.4} />
-          ثبت تراکنش
+          {buttonLabel}
         </button>
       </div>
 

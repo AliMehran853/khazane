@@ -4,23 +4,16 @@ export async function getCategories(type) {
   let categories = await db.categories.toArray();
 
   if (type) {
-    categories = categories.filter(
-      (category) => category.type === type,
-    );
+    categories = categories.filter((category) => category.type === type);
   }
 
   return categories.sort(
-    (a, b) =>
-      (Number(a.sortOrder) || 0) -
-      (Number(b.sortOrder) || 0),
+    (a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0),
   );
 }
 
 export async function getCategoryById(id) {
-  if (!id) {
-    return null;
-  }
-
+  if (!id) return null;
   return db.categories.get(id);
 }
 
@@ -46,8 +39,7 @@ export async function createCategory({
   const existing = categories.find(
     (category) =>
       category.memberId === memberId &&
-      category.name.trim().toLowerCase() ===
-        cleanName.toLowerCase(),
+      category.name.trim().toLowerCase() === cleanName.toLowerCase(),
   );
 
   if (existing) {
@@ -55,8 +47,7 @@ export async function createCategory({
   }
 
   const maxSortOrder = categories.reduce(
-    (max, category) =>
-      Math.max(max, Number(category.sortOrder) || 0),
+    (max, category) => Math.max(max, Number(category.sortOrder) || 0),
     0,
   );
 
@@ -68,11 +59,12 @@ export async function createCategory({
     type,
     name: cleanName,
     icon,
-    color:
-      color ||
-      (type === 'income' ? '#4FD1BE' : '#E2574C'),
+    color: color || (type === 'income' ? '#4FD1BE' : '#E2574C'),
     isDefault: false,
     sortOrder: maxSortOrder + 1,
+    // ⭐ placeholder پیش‌فرض برای دسته‌های ساخت کاربر
+    placeholder:
+      type === 'income' ? 'توضیح این درآمد...' : 'توضیح این مصرف...',
     createdAt: now,
     updatedAt: now,
   };
@@ -82,7 +74,6 @@ export async function createCategory({
   return category;
 }
 
-// ⭐ تابع جدید: حذف دسته‌بندی
 export async function deleteCategory(id) {
   const category = await db.categories.get(id);
 
@@ -94,7 +85,6 @@ export async function deleteCategory(id) {
     throw new Error('دسته‌های پیش‌فرض قابل حذف نیستند.');
   }
 
-  // چک کن که تراکنشی از این دسته استفاده نمی‌کند
   const count = await db.transactions
     .where('categoryId')
     .equals(id)
@@ -102,7 +92,7 @@ export async function deleteCategory(id) {
 
   if (count > 0) {
     throw new Error(
-      `این دسته در ${count} تراکنش استفاده شده و قابل حذف نیست.`
+      `این دسته در ${count} تراکنش استفاده شده و قابل حذف نیست.`,
     );
   }
 

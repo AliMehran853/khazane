@@ -4,8 +4,10 @@ import { useEffect } from 'react';
 import TransactionForm from './TransactionForm';
 import { getTodayShort } from '../utils/dates';
 
-function TransactionSheet({ open, type, onClose }) {
-  const isIncome = type === 'income';
+function TransactionSheet({ open, type, editingTransaction, onClose }) {
+  const isEditing = Boolean(editingTransaction);
+  const effectiveType = isEditing ? editingTransaction.type : type;
+  const isIncome = effectiveType === 'income';
 
   // قفل اسکرول پس‌زمینه
   useEffect(() => {
@@ -36,6 +38,18 @@ function TransactionSheet({ open, type, onClose }) {
       window.scrollTo(0, scrollY);
     };
   }, [open]);
+
+  const headerSubtitle = isEditing
+    ? 'ویرایش تراکنش'
+    : isIncome
+      ? 'ثبت درآمد جدید'
+      : 'ثبت مصرف جدید';
+
+  const headerTitle = isEditing
+    ? 'ویرایش تراکنش'
+    : isIncome
+      ? 'ثبت درآمد'
+      : 'ثبت مصرف';
 
   return (
     <AnimatePresence>
@@ -76,11 +90,11 @@ function TransactionSheet({ open, type, onClose }) {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="text-[11px] text-[#5C736C] lg:text-[12px]">
-                    {isIncome ? 'ثبت درآمد جدید' : 'ثبت مصرف جدید'}
+                    {headerSubtitle}
                   </p>
 
                   <h2 className="mt-0.5 text-[18px] font-bold text-[#F2EFE9] lg:text-[20px]">
-                    {isIncome ? 'ثبت درآمد' : 'ثبت مصرف'}
+                    {headerTitle}
                   </h2>
 
                   <p className="mt-1 text-[10.5px] font-medium text-[#E3B341] lg:text-[11.5px]">
@@ -99,7 +113,11 @@ function TransactionSheet({ open, type, onClose }) {
               </div>
             </div>
 
-            <TransactionForm type={type} onSuccess={onClose} />
+            <TransactionForm
+              type={effectiveType}
+              editingTransaction={editingTransaction}
+              onSuccess={onClose}
+            />
           </motion.div>
         </>
       )}

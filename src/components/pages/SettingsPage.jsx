@@ -387,6 +387,14 @@ function SettingsPage() {
   const setLocked = useSecurityStore((s) => s.setLocked);
   const resetSecurity = useSecurityStore((s) => s.reset);
   const setMethod = useSecurityStore((s) => s.setMethod);
+  // ⭐ setterهای flagهای امنیتی
+  const setPinEnabledInStore = useSecurityStore((s) => s.setPinEnabled);
+  const setBiometricEnabledInStore = useSecurityStore(
+    (s) => s.setBiometricEnabled,
+  );
+  const setBiometricAvailableInStore = useSecurityStore(
+    (s) => s.setBiometricAvailable,
+  );
 
   const { forceShow: forceShowReminder } = useDailyReminder();
 
@@ -500,6 +508,10 @@ function SettingsPage() {
     setLocalPin(true);
     setLocalLock(true);
     await setLockEnabled(true);
+
+    // ⭐ flag را در store هم ست کن
+    setPinEnabledInStore(true);
+
     showToast('رمز تعیین شد و قفل فعال شد.');
     await loadAll();
   }
@@ -526,7 +538,7 @@ function SettingsPage() {
 
       if (!available) {
         throw new Error(
-          'اثر انگشت روی این دستگاه فعال نیست. در تنظیمات گوشی، قفل صفحه و اثر انگشت را فعال کن.'
+          'اثر انگشت روی این دستگاه فعال نیست. در تنظیمات گوشی، قفل صفحه و اثر انگشت را فعال کن.',
         );
       }
 
@@ -534,6 +546,11 @@ function SettingsPage() {
       setLocalBio(true);
       setLocalLock(true);
       await setLockEnabled(true);
+
+      // ⭐ flag را در store هم ست کن
+      setBiometricEnabledInStore(true);
+      setBiometricAvailableInStore(true);
+
       showToast('اثر انگشت فعال شد.');
     } catch (err) {
       console.error('Biometric error:', err);
@@ -556,12 +573,14 @@ function SettingsPage() {
   async function handleClearBiometric() {
     await clearBiometric();
     setLocalBio(false);
+    setBiometricEnabledInStore(false);
     showToast('اثر انگشت حذف شد.');
   }
 
   async function handleClearPin() {
     await clearPin();
     setLocalPin(false);
+    setPinEnabledInStore(false);
     if (!bioOn) {
       await setLockEnabled(false);
       setLocalLock(false);
@@ -615,17 +634,28 @@ function SettingsPage() {
     showToast('همه‌ی داده‌ها پاک شد.');
   }
 
+  // ⭐ خروج از حساب — رفع باگ با ست کردن flagها قبل از قفل
   async function handleLogout() {
     setConfirmLogout(false);
     setSheet(null);
 
+    // پاک کردن session
     sessionStorage.removeItem(SESSION_UNLOCK_KEY);
 
+    // ریست PIN flow (فقط pinBuffer و pinError)
     resetSecurity();
 
+    // ⭐ مهم: flagهای امنیتی رو در store ست کن
+    // چون useAppLock فقط یک بار اجرا می‌شه و این مقادیر رو نداره
+    setPinEnabledInStore(pinOn);
+    setBiometricEnabledInStore(bioOn);
+    setBiometricAvailableInStore(bioAvailable);
+
+    // انتخاب روش ورود
     const useBio = bioOn && bioAvailable;
     setMethod(useBio ? 'biometric' : 'pin');
 
+    // حالا قفل کن
     setLocked(true);
   }
 

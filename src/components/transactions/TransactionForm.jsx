@@ -9,19 +9,35 @@ import {
   getCategories,
   deleteCategory,
 } from '../services/categoryService';
-import { createTransaction } from '../services/transactionService';
+import {
+  createTransaction,
+  updateTransaction,
+} from '../services/transactionService';
 import { useAppStore } from '../store/appStore';
+
+// ⭐ محدودیت توضیحات
+const NOTE_MAX_LENGTH = 200;
+const NOTE_WARN_THRESHOLD = 140;
+const NOTE_DANGER_THRESHOLD = 180;
 
 const schema = z.object({
   amount: z.coerce
     .number({ invalid_type_error: 'مبلغ را وارد کنید.' })
     .positive('مبلغ باید بیشتر از صفر باشد.'),
-  note: z.string().optional(),
+  note: z.string().max(NOTE_MAX_LENGTH).optional(),
   categoryId: z.string().min(1, 'دسته‌بندی را انتخاب کنید.'),
 });
 
-function TransactionForm({ type = 'expense', onSuccess }) {
+function TransactionForm({
+  type: typeProp = 'expense',
+  editingTransaction = null,
+  onSuccess,
+}) {
   const refreshData = useAppStore((state) => state.refreshData);
+
+  const isEditing = Boolean(editingTransaction);
+  const type = isEditing ? editingTransaction.type : typeProp;
+  const isIncome = type === 'income';
 
   const [categories, setCategories] = useState([]);
   const [showNewCategory, setShowNewCategory] = useState(false);
@@ -34,6 +50,18 @@ function TransactionForm({ type = 'expense', onSuccess }) {
 
   const newCategoryInputRef = useRef(null);
 
+  // ⭐ default values — اگر در حالت ویرایش باشیم از تراکنش می‌گیریم
+  const getDefaultValues = () => {
+    if (isEditing && editingTransaction) {
+      return {
+        amount: String(editingTransaction.amount ?? ''),
+        note: editingTransaction.note || '',
+        categoryId: editingTransaction.categoryId || '',
+      };
+    }
+    return { amount: '', note: '', categoryId: '' };
+  };
+
   const {
     register,
     handleSubmit,
@@ -43,11 +71,29 @@ function TransactionForm({ type = 'expense', onSuccess }) {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(schema),
-    defaultValues: { amount: '', note: '', categoryId: '' },
+    defaultValues: getDefaultValues(),
   });
 
   const selectedCategory = watch('categoryId');
-  const isIncome = type === 'income';
+  const noteValue = watch('note') || '';
+
+  // پیدا کردن اطلاعات دسته‌ی انتخاب‌شده برای placeholder هوشمند
+  const selectedCategoryData = categories.find(
+    (c) => c.id === selectedCategory,
+  );
+
+  const notePlaceholder =
+    selectedCategoryData?.placeholder ||
+    (isIncome ? 'توضیح این درآمد...' : 'توضیح این مصرف...');
+
+  // شمارنده‌ی کاراکتر با رنگ‌بندی هوشمند
+  const noteLength = noteValue.length;
+  const counterColor =
+    noteLength >= NOTE_DANGER_THRESHOLD
+      ? 'text-[#E2574C]'
+      : noteLength >= NOTE_WARN_THRESHOLD
+        ? 'text-[#E3B341]'
+        : 'text-[#5C736C]';
 
   useEffect(() => {
     let cancelled = false;
@@ -118,6 +164,7 @@ function TransactionForm({ type = 'expense', onSuccess }) {
       await reloadCategories();
       if (selectedCategory === category.id) {
         setValue('categoryId', '', { shouldValidate: false });
+        setValue('note', '', { shouldValidate: false });
       }
     } catch (error) {
       setCategoryError(error?.message || 'حذف دسته ناموفق بود.');
@@ -132,17 +179,34 @@ function TransactionForm({ type = 'expense', onSuccess }) {
       setSubmitError('');
       setSaving(true);
 
-      await createTransaction({
+      const payload = {
         amount: data.amount,
-        note: data.note || '',
+        note: (data.note || '').trim(),
         categoryId: data.categoryId,
         type,
         memberId: 'self',
-        date: new Date(),
-      });
+      };
+
+      if (isEditing && editingTransaction) {
+        // ⭐ ویرایش
+        await updateTransaction(editingTransaction.id, {
+          ...payload,
+          date: editingTransaction.date,
+        });
+      } else {
+        // ⭐ ایجاد جدید
+        await createTransaction({
+          ...payload,
+          date: new Date(),
+        });
+      }
 
       refreshData();
-      reset({ amount: '', note: '', categoryId: '' });
+
+      if (!isEditing) {
+        reset({ amount: '', note: '', categoryId: '' });
+      }
+
       onSuccess?.();
     } catch (error) {
       console.error('Transaction save failed:', error);
@@ -151,6 +215,12 @@ function TransactionForm({ type = 'expense', onSuccess }) {
       setSaving(false);
     }
   }
+
+  const submitLabel = isEditing
+    ? 'ذخیره تغییرات'
+    : isIncome
+      ? 'ثبت درآمد'
+      : 'ثبت مصرف';
 
   return (
     <>
@@ -218,7 +288,9 @@ function TransactionForm({ type = 'expense', onSuccess }) {
                     <button
                       type="button"
                       onClick={() =>
-                        setValue('categoryId', category.id, { shouldValidate: true })
+                        setValue('categoryId', category.id, {
+                          shouldValidate: true,
+                        })
                       }
                       disabled={isDeleting}
                       className={[
@@ -270,7 +342,9 @@ function TransactionForm({ type = 'expense', onSuccess }) {
             )}
 
             {categoryError && (
-              <p className="mt-1.5 text-[11px] text-[#E2574C]">{categoryError}</p>
+              <p className="mt-1.5 text-[11px] text-[#E2574C]">
+                {categoryError}
+              </p>
             )}
 
             {showNewCategory && (
@@ -314,24 +388,42 @@ function TransactionForm({ type = 'expense', onSuccess }) {
             )}
           </div>
 
-          {/* توضیحات */}
-          <div>
-            <label className="mb-1.5 block text-[11px] font-medium text-[#8FA39D]">
-              توضیحات (اختیاری)
-            </label>
-            <input
-              {...register('note')}
-              placeholder={isIncome ? 'مثلاً معاش این ماه' : 'مثلاً نهار برنج'}
-              className="
-                w-full rounded-xl border border-white/[0.07] bg-[#153029]
-                px-3.5 py-2.5 text-[12.5px] text-[#F2EFE9] outline-none
-                placeholder:text-[#5C736C] focus:border-[#E3B341]/40
-              "
-            />
-          </div>
+          {/* توضیحات — فقط بعد از انتخاب دسته */}
+          {selectedCategory && (
+            <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="mb-1.5 flex items-center justify-between">
+                <label className="text-[11px] font-medium text-[#8FA39D]">
+                  توضیحات (اختیاری)
+                </label>
+                <span
+                  className={[
+                    'text-[10px] font-medium tabular-nums transition-colors',
+                    counterColor,
+                  ].join(' ')}
+                >
+                  {noteLength}/{NOTE_MAX_LENGTH}
+                </span>
+              </div>
+              <input
+                {...register('note')}
+                maxLength={NOTE_MAX_LENGTH}
+                placeholder={notePlaceholder}
+                className="
+                  w-full rounded-xl border border-white/[0.07] bg-[#153029]
+                  px-3.5 py-2.5 text-[12.5px] text-[#F2EFE9] outline-none
+                  placeholder:text-[#5C736C] focus:border-[#E3B341]/40
+                "
+              />
+              {errors.note && (
+                <p className="mt-1 text-[11px] text-[#E2574C]">
+                  {errors.note.message}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* ==================== ناحیه دکمه (چسبیده به Sheet) ==================== */}
+        {/* ==================== ناحیه دکمه ==================== */}
         <div className="shrink-0 px-4 pb-5 pt-4">
           {submitError && (
             <div className="mb-2 rounded-xl border border-[#E2574C]/20 bg-[#E2574C]/[0.08] px-3 py-2 text-[11px] text-[#E2574C]">
@@ -350,7 +442,7 @@ function TransactionForm({ type = 'expense', onSuccess }) {
               saving ? 'cursor-not-allowed opacity-60' : '',
             ].join(' ')}
           >
-            {saving ? 'در حال ذخیره...' : isIncome ? 'ثبت درآمد' : 'ثبت مصرف'}
+            {saving ? 'در حال ذخیره...' : submitLabel}
           </button>
         </div>
       </form>

@@ -19,6 +19,7 @@ function AppShell() {
 
   const transactionSheetOpen = useAppStore((s) => s.transactionSheetOpen);
   const transactionSheetType = useAppStore((s) => s.transactionSheetType);
+  const editingTransaction = useAppStore((s) => s.editingTransaction);
   const closeTransactionSheet = useAppStore((s) => s.closeTransactionSheet);
 
   if (checking) {
@@ -64,6 +65,7 @@ function AppShell() {
       <TransactionSheet
         open={transactionSheetOpen}
         type={transactionSheetType}
+        editingTransaction={editingTransaction}
         onClose={closeTransactionSheet}
       />
 

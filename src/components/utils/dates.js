@@ -112,17 +112,14 @@ export function getWeekDays(date = new Date()) {
 }
 
 // ============================================================
-// تعداد روزهای ماه شمسی (روش مطمئن: اختلاف با ماه بعد)
+// تعداد روزهای ماه شمسی
 // ============================================================
 
 export function getDaysInJalaliMonth(date = new Date()) {
   const start = dfStartOfMonth(date);
   const nextMonth = addMonths(start, 1);
-
   const diffMs = nextMonth.getTime() - start.getTime();
-  const days = Math.round(diffMs / (1000 * 60 * 60 * 24));
-
-  return days; // ۲۹، ۳۰ یا ۳۱
+  return Math.round(diffMs / (1000 * 60 * 60 * 24));
 }
 
 // ============================================================
@@ -139,7 +136,6 @@ export function getMonthDays(date = new Date()) {
   for (let i = 0; i < totalDays; i += 1) {
     days.push({
       date: new Date(cursor),
-      // مستقیم از اندیس می‌سازیم - بدون فرمت که باگ داشته باشد
       label: String(i + 1),
       key: cursor.toISOString(),
     });
@@ -180,7 +176,7 @@ export function getTodayLabel() {
   const dayNum = format(d, 'd');
   const monthIdx = Number(format(d, 'M')) - 1;
   const monthName = AFGHAN_MONTHS[monthIdx] || '';
-  const year = format(d, 'yyyy');
+  const year = format(d, 'jYYYY');
 
   return `${dayName} ${dayNum} ${monthName} ${year}`;
 }
@@ -196,24 +192,76 @@ export function getTodayShort() {
 }
 
 // ============================================================
-// فرمت تاریخ تراکنش (برای نمایش در لیست)
+// فرمت ساعت ۱۲ ساعته
+// ============================================================
+
+function formatTime12(dateInput) {
+  const d = new Date(dateInput);
+  const h24 = d.getHours();
+  const m = d.getMinutes();
+  const period = h24 < 12 ? 'صبح' : 'عصر';
+  let h12 = h24 % 12;
+  if (h12 === 0) h12 = 12;
+  const minute = String(m).padStart(2, '0');
+  return `${h12}:${minute} ${period}`;
+}
+
+// ============================================================
+// فرمت تاریخ تراکنش — سبک واتساپ
+//
+//  ۰ روز: امروز • ۲:۳۷ عصر
+//  ۱ روز: دیروز • ۹:۱۵ صبح
+//  ۲-۶ روز: سه‌شنبه • ۲:۳۷ عصر
+//  ۷-۱۳ روز: هفته‌ی پیش • ۲:۳۷ عصر
+//  ۱۴+ روز (سال جاری): ۲۶ سنبله • ۲:۳۷ عصر
+//  سال‌های قبل: ۲۶ سنبله ۱۴۰۲
 // ============================================================
 
 export function formatTransactionDate(dateInput) {
   const d = new Date(dateInput);
+  const now = new Date();
+
+  // فاصله به «روز» (بدون ساعت)
+  const diffDays = Math.floor(
+    (startOfDay(now).getTime() - startOfDay(d).getTime()) /
+      (1000 * 60 * 60 * 24),
+  );
+
+  const timePart = formatTime12(d);
+
+  // ---------- امروز ----------
+  if (diffDays === 0) {
+    return `امروز • ${timePart}`;
+  }
+
+  // ---------- دیروز ----------
+  if (diffDays === 1) {
+    return `دیروز • ${timePart}`;
+  }
+
+  // ---------- ۲ تا ۶ روز پیش: نام روز ----------
+  if (diffDays >= 2 && diffDays <= 6) {
+    const dayName = PERSIAN_DAYS[d.getDay()];
+    return `${dayName} • ${timePart}`;
+  }
+
+  // ---------- ۷ تا ۱۳ روز پیش: هفته‌ی پیش ----------
+  if (diffDays >= 7 && diffDays <= 13) {
+    return `هفته‌ی پیش • ${timePart}`;
+  }
+
+  // ---------- بقیه: تاریخ کامل شمسی ----------
   const dayNum = format(d, 'd');
   const monthIdx = Number(format(d, 'M')) - 1;
   const monthName = AFGHAN_MONTHS[monthIdx] || '';
-  const hour = String(d.getHours()).padStart(2, '0');
-  const minute = String(d.getMinutes()).padStart(2, '0');
+  const year = format(d, 'jYYYY');
+  const currentYear = format(now, 'jYYYY');
 
-  const today = new Date();
-  const isToday =
-    d.getDate() === today.getDate() &&
-    d.getMonth() === today.getMonth() &&
-    d.getFullYear() === today.getFullYear();
+  // اگر همان سال جاری است: تاریخ + ساعت
+  if (year === currentYear) {
+    return `${dayNum} ${monthName} • ${timePart}`;
+  }
 
-  if (isToday) return `امروز، ${hour}:${minute}`;
-
-  return `${dayNum} ${monthName}، ${hour}:${minute}`;
+  // سال‌های قبل: تاریخ + سال، بدون ساعت
+  return `${dayNum} ${monthName} ${year}`;
 }

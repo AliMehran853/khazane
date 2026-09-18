@@ -19,8 +19,9 @@ export default function TransactionList({
     );
   }
 
+  // ⭐ بدون overflow-hidden تا منوی سه‌نقطه بیرون نزند
   return (
-    <div className="overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E] lg:rounded-[22px]">
+    <div className="rounded-[24px] border border-white/[0.06] bg-[#0F211E] lg:rounded-[22px]">
       {transactions.map((t) => (
         <TransactionItem
           key={t.id}
