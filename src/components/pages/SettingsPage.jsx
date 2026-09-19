@@ -8,6 +8,7 @@ import {
   Fingerprint,
   LogOut,
   ShieldCheck,
+  Sparkles,
   Trash2,
   X,
 } from 'lucide-react';
@@ -21,12 +22,15 @@ import {
 } from '../settings/SettingsSections';
 
 import InstallCard from '../settings/InstallCard';
+import AboutCard from '../settings/AboutCard';
+import AboutModal from '../settings/AboutModal';
 import PinPad from '../lock/PinPad';
 
 import { useAppStore } from '../store/appStore';
 import { useSecurityStore } from '../store/securityStore';
 import { useDailyReminder } from '../hooks/useDailyReminder';
 import { useBiometricCheck } from '../hooks/useBiometricCheck';
+import { useGreeting } from '../hooks/useGreeting';
 import { SESSION_UNLOCK_KEY } from '../hooks/useAppLock';
 
 import {
@@ -55,9 +59,31 @@ import {
   clearBiometric,
 } from '../services/securityService';
 
-import { CURRENCY_OPTIONS } from '../utils/constants';
+import { CURRENCY_OPTIONS, APP_VERSION } from '../utils/constants';
 import { getTodayShort } from '../utils/dates';
 import { formatTime12, parseTime24, toTime24 } from '../utils/timeFormat';
+
+// ============================================================
+// Body Lock — سبک و بدون reflow
+// ============================================================
+
+function lockBody() {
+  const body = document.body;
+  const scrollbarWidth =
+    window.innerWidth - document.documentElement.clientWidth;
+  const prevOverflow = body.style.overflow;
+  const prevPaddingRight = body.style.paddingRight;
+
+  body.style.overflow = 'hidden';
+  if (scrollbarWidth > 0) {
+    body.style.paddingRight = `${scrollbarWidth}px`;
+  }
+
+  return () => {
+    body.style.overflow = prevOverflow;
+    body.style.paddingRight = prevPaddingRight;
+  };
+}
 
 // ============================================================
 // Time Picker
@@ -264,36 +290,13 @@ function PinSetupFlow({ onDone, onCancel }) {
 }
 
 // ============================================================
-// Sheet — با Framer Motion
+// Sheet — بدون fade مشکی
 // ============================================================
 
 function Sheet({ open, onClose, title, subtitle, children }) {
   useEffect(() => {
     if (!open) return;
-
-    const scrollY = window.scrollY;
-    const body = document.body;
-
-    const prevPosition = body.style.position;
-    const prevTop = body.style.top;
-    const prevLeft = body.style.left;
-    const prevRight = body.style.right;
-    const prevWidth = body.style.width;
-
-    body.style.position = 'fixed';
-    body.style.top = `-${scrollY}px`;
-    body.style.left = '0';
-    body.style.right = '0';
-    body.style.width = '100%';
-
-    return () => {
-      body.style.position = prevPosition;
-      body.style.top = prevTop;
-      body.style.left = prevLeft;
-      body.style.right = prevRight;
-      body.style.width = prevWidth;
-      window.scrollTo(0, scrollY);
-    };
+    return lockBody();
   }, [open]);
 
   return (
@@ -304,18 +307,18 @@ function Sheet({ open, onClose, title, subtitle, children }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
             onClick={onClose}
-            className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-[2px]"
+            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-[2px]"
           />
 
           <motion.div
-            initial={{ y: '100%', opacity: 0.6 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: '100%', opacity: 0.6 }}
-            transition={{ type: 'spring', damping: 30, stiffness: 320 }}
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ duration: 0.34, ease: [0.32, 0.72, 0, 1] }}
             className="
-              fixed inset-x-3 bottom-3 z-[70] mx-auto
+              fixed inset-x-3 bottom-3 z-[110] mx-auto
               flex max-h-[88svh] w-auto max-w-[420px] flex-col
               overflow-hidden rounded-[24px] border border-white/[0.07] bg-[#0F211E]
               outline-none
@@ -365,7 +368,7 @@ function Sheet({ open, onClose, title, subtitle, children }) {
 }
 
 // ============================================================
-// Section Title (فقط دسکتاپ)
+// Section Title
 // ============================================================
 
 function SectionTitle({ children }) {
@@ -387,7 +390,6 @@ function SettingsPage() {
   const setLocked = useSecurityStore((s) => s.setLocked);
   const resetSecurity = useSecurityStore((s) => s.reset);
   const setMethod = useSecurityStore((s) => s.setMethod);
-  // ⭐ setterهای flagهای امنیتی
   const setPinEnabledInStore = useSecurityStore((s) => s.setPinEnabled);
   const setBiometricEnabledInStore = useSecurityStore(
     (s) => s.setBiometricEnabled,
@@ -397,6 +399,7 @@ function SettingsPage() {
   );
 
   const { forceShow: forceShowReminder } = useDailyReminder();
+  const { resetToday: resetGreetingToday } = useGreeting({ enabled: false });
 
   const { available: bioAvailable, checking: bioChecking } = useBiometricCheck();
 
@@ -417,6 +420,7 @@ function SettingsPage() {
   const [pinSetupFromToggle, setPinSetupFromToggle] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   async function loadAll() {
     const [name, cur, remOn, remTime, lockState, pinState, bioState] =
@@ -454,6 +458,7 @@ function SettingsPage() {
     setLocalName(clean);
     setSheet(null);
     showToast('پروفایل به‌روزرسانی شد.');
+    refreshData();
   }
 
   async function changeCurrency(label) {
@@ -509,7 +514,6 @@ function SettingsPage() {
     setLocalLock(true);
     await setLockEnabled(true);
 
-    // ⭐ flag را در store هم ست کن
     setPinEnabledInStore(true);
 
     showToast('رمز تعیین شد و قفل فعال شد.');
@@ -547,7 +551,6 @@ function SettingsPage() {
       setLocalLock(true);
       await setLockEnabled(true);
 
-      // ⭐ flag را در store هم ست کن
       setBiometricEnabledInStore(true);
       setBiometricAvailableInStore(true);
 
@@ -634,28 +637,21 @@ function SettingsPage() {
     showToast('همه‌ی داده‌ها پاک شد.');
   }
 
-  // ⭐ خروج از حساب — رفع باگ با ست کردن flagها قبل از قفل
   async function handleLogout() {
     setConfirmLogout(false);
     setSheet(null);
 
-    // پاک کردن session
     sessionStorage.removeItem(SESSION_UNLOCK_KEY);
 
-    // ریست PIN flow (فقط pinBuffer و pinError)
     resetSecurity();
 
-    // ⭐ مهم: flagهای امنیتی رو در store ست کن
-    // چون useAppLock فقط یک بار اجرا می‌شه و این مقادیر رو نداره
     setPinEnabledInStore(pinOn);
     setBiometricEnabledInStore(bioOn);
     setBiometricAvailableInStore(bioAvailable);
 
-    // انتخاب روش ورود
     const useBio = bioOn && bioAvailable;
     setMethod(useBio ? 'biometric' : 'pin');
 
-    // حالا قفل کن
     setLocked(true);
   }
 
@@ -664,9 +660,13 @@ function SettingsPage() {
     await forceShowReminder();
   }
 
-  // ==========================================================
-  // Currency Row (مشترک بین موبایل و دسکتاپ)
-  // ==========================================================
+  function handleTestGreeting() {
+    resetGreetingToday();
+    refreshData();
+    setSheet(null);
+    showToast('پیام خوش‌آمدگویی بعد از چند لحظه نمایش داده می‌شود.');
+  }
+
   const currencyRow = (
     <SettingsButtonRow
       icon={Coins}
@@ -690,7 +690,7 @@ function SettingsPage() {
         </header>
 
         {/* ============================================ */}
-        {/* موبایل — تک‌ستونی، دست‌نخورده               */}
+        {/* موبایل                                        */}
         {/* ============================================ */}
         <div className="lg:hidden">
           <InstallCard />
@@ -763,9 +763,10 @@ function SettingsPage() {
               title="پاک‌سازی همه داده‌ها"
               subtitle="حذف کامل تراکنش‌ها و تنظیمات"
               tone="danger"
-              isLast
               onClick={() => setConfirmClear(true)}
             />
+
+            <AboutCard onClick={() => setAboutOpen(true)} isLast />
           </SettingsGroup>
 
           {lockOn && (
@@ -780,15 +781,14 @@ function SettingsPage() {
           )}
 
           <p className="mt-6 text-center text-[10.5px] text-[#5C736C]">
-            خزانه • نسخه ۱.۰ • {getTodayShort()}
+            خزانه • نسخه {APP_VERSION} • {getTodayShort()}
           </p>
         </div>
 
         {/* ============================================ */}
-        {/* دسکتاپ — گرید ۳ ردیفی با ارتفاع یکسان        */}
+        {/* دسکتاپ                                        */}
         {/* ============================================ */}
         <div className="mt-8 hidden lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-x-5 lg:gap-y-6">
-          {/* ---------- ردیف ۱: حساب کاربری | ترجیحات ---------- */}
           <div className="flex flex-col">
             <SectionTitle>حساب کاربری</SectionTitle>
             <div className="flex-1 [&>*]:!mt-0 [&>*]:h-full">
@@ -806,7 +806,6 @@ function SettingsPage() {
             </div>
           </div>
 
-          {/* ---------- ردیف ۲: امنیت | داده‌ها ---------- */}
           <div className="flex flex-col">
             <SectionTitle>امنیت</SectionTitle>
             <div className="flex-1 [&>*]:!mt-0 [&>*]:h-full">
@@ -852,14 +851,13 @@ function SettingsPage() {
                   title="پاک‌سازی همه داده‌ها"
                   subtitle="حذف کامل تراکنش‌ها و تنظیمات"
                   tone="danger"
-                  isLast
                   onClick={() => setConfirmClear(true)}
                 />
+                <AboutCard onClick={() => setAboutOpen(true)} isLast />
               </SettingsGroup>
             </div>
           </div>
 
-          {/* ---------- ردیف ۳: یادآوری | نصب و خروج ---------- */}
           <div className="flex flex-col">
             <SectionTitle>یادآوری</SectionTitle>
             <div className="flex-1 [&>*]:!mt-0 [&>*]:h-full">
@@ -907,14 +905,13 @@ function SettingsPage() {
           </div>
         </div>
 
-        {/* ---------- فوتر دسکتاپ ---------- */}
         <p className="mt-10 hidden text-center text-[10.5px] text-[#5C736C] lg:block">
-          خزانه • نسخه ۱.۰ • {getTodayShort()}
+          خزانه • نسخه {APP_VERSION} • {getTodayShort()}
         </p>
       </div>
 
       {/* ============================================ */}
-      {/* Sheets — مشترک                               */}
+      {/* Sheets                                        */}
       {/* ============================================ */}
 
       <Sheet
@@ -933,6 +930,10 @@ function SettingsPage() {
           className="w-full rounded-2xl border border-white/[0.07] bg-[#153029] px-4 py-3 text-[13px] text-[#F2EFE9] outline-none placeholder:text-[#5C736C] focus:border-[#E3B341]/40"
         />
 
+        <p className="mt-2 text-[10.5px] leading-relaxed text-[#5C736C]">
+          نام نمایشی برای پیام‌های خوش‌آمدگویی و پروفایل استفاده می‌شود.
+        </p>
+
         <button
           type="button"
           onClick={saveName}
@@ -940,6 +941,17 @@ function SettingsPage() {
         >
           ذخیره
         </button>
+
+        {userName && (
+          <button
+            type="button"
+            onClick={handleTestGreeting}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-[#4FD1BE]/30 bg-[#4FD1BE]/[0.08] py-3 text-[12px] font-semibold text-[#4FD1BE] active:scale-[0.98]"
+          >
+            <Sparkles size={14} />
+            نمایش آزمایشی پیام خوش‌آمدگویی
+          </button>
+        )}
       </Sheet>
 
       <Sheet
@@ -1223,6 +1235,8 @@ function SettingsPage() {
           </button>
         </div>
       </Sheet>
+
+      <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
 
       {toast && (
         <div className="pointer-events-none fixed bottom-[100px] left-1/2 z-[200] max-w-[90vw] -translate-x-1/2">

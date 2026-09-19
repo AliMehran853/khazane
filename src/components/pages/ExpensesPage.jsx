@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ArrowUpRight, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowUpRight, FileText, Search } from 'lucide-react';
 
 import PeriodTabs from '../common/PeriodTabs';
 import StatCard from '../common/StatCard';
@@ -26,6 +27,8 @@ const periodLabels = {
 };
 
 function ExpensesPage() {
+  const navigate = useNavigate();
+
   const period = useAppStore((s) => s.period);
   const dataVersion = useAppStore((s) => s.dataVersion);
 
@@ -102,21 +105,39 @@ function ExpensesPage() {
         </h1>
       </div>
 
-      <button
-        type="button"
-        onClick={handleExportPDF}
-        disabled={exporting || transactions.length === 0}
-        className="
-          flex h-11 shrink-0 items-center gap-2 rounded-2xl
-          border border-white/[0.06] bg-[#0F211E] px-3.5
-          text-[11.5px] font-semibold text-[#E3B341]
-          active:scale-95 disabled:opacity-40
-          lg:h-10 lg:text-[12px]
-        "
-      >
-        <FileText size={17} strokeWidth={1.9} />
-        {exporting ? 'صبر...' : 'PDF'}
-      </button>
+      <div className="flex items-center gap-2">
+        {/* ⭐ سرچ */}
+        <button
+          type="button"
+          onClick={() => navigate('/search')}
+          aria-label="جستجو"
+          className="
+            flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl
+            border border-white/[0.06] bg-[#0F211E] text-[#8FA39D]
+            transition-colors hover:text-[#E3B341]
+            active:scale-95
+            lg:h-10 lg:w-10
+          "
+        >
+          <Search size={18} strokeWidth={1.9} />
+        </button>
+
+        <button
+          type="button"
+          onClick={handleExportPDF}
+          disabled={exporting || transactions.length === 0}
+          className="
+            flex h-11 shrink-0 items-center gap-2 rounded-2xl
+            border border-white/[0.06] bg-[#0F211E] px-3.5
+            text-[11.5px] font-semibold text-[#E3B341]
+            active:scale-95 disabled:opacity-40
+            lg:h-10 lg:text-[12px]
+          "
+        >
+          <FileText size={17} strokeWidth={1.9} />
+          {exporting ? 'صبر...' : 'PDF'}
+        </button>
+      </div>
     </header>
   );
 
@@ -124,9 +145,7 @@ function ExpensesPage() {
     <div className="px-4 pb-6 pt-6 lg:px-0 lg:pt-8">
       {Header}
 
-      {/* ============================================ */}
-      {/* موبایل — تک‌ستونی، دست‌نخورده               */}
-      {/* ============================================ */}
+      {/* موبایل */}
       <div className="lg:hidden">
         <div className="mt-6">
           <PeriodTabs />
@@ -232,7 +251,7 @@ function ExpensesPage() {
           <h2 className="text-[15px] font-bold text-[#F2EFE9]">آخرین مصارف</h2>
           <div className="mt-3">
             <TransactionList
-              transactions={transactions}
+              transactions={transactions.slice(0, 8)}
               categoriesMap={categoriesMap}
               emptyTitle="هنوز مصرفی ثبت نشده است"
               emptyHint="از دکمه + برای ثبت اولین مصرف استفاده کن."
@@ -241,11 +260,8 @@ function ExpensesPage() {
         </section>
       </div>
 
-      {/* ============================================ */}
-      {/* دسکتاپ — چیدمان حرفه‌ای                      */}
-      {/* ============================================ */}
+      {/* دسکتاپ */}
       <div className="hidden lg:mt-6 lg:block lg:space-y-4">
-        {/* ⭐ ردیف بالا: فیلتر (راست) + کارت کل مصارف (چپ) */}
         <div className="flex items-stretch gap-4">
           <div className="w-[230px] shrink-0">
             <PeriodTabs />
@@ -262,7 +278,6 @@ function ExpensesPage() {
           </div>
         </div>
 
-        {/* ⭐ ردیف وسط: روند (راست) + دونات (چپ) */}
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-7">
             <div className="flex h-[440px] flex-col overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E]">
@@ -329,7 +344,6 @@ function ExpensesPage() {
           </div>
         </div>
 
-        {/* ⭐ ردیف پایین: دسته‌ها (راست) + تراکنش‌ها (چپ) */}
         <div className="grid grid-cols-12 gap-4">
           {preparedCategories.length > 0 && (
             <div className="col-span-5">
@@ -407,18 +421,26 @@ function ExpensesPage() {
                         هنوز مصرفی ثبت نشده است
                       </p>
                       <p className="mt-1 text-[11px] text-[#5C736C]">
-                        از دکمه‌ی + در سایدبار یا گوشه استفاده کن.
+                        از دکمه‌ی + در سایدبار استفاده کن.
                       </p>
                     </div>
                   </div>
                 ) : (
                   <div>
-                    {transactions.map((t) => (
-                      <TransactionItem
+                    {transactions.map((t, index) => (
+                      <div
                         key={t.id}
-                        transaction={t}
-                        category={categoriesMap[t.categoryId]}
-                      />
+                        className="tx-list-item"
+                        style={{
+                          contentVisibility:
+                            index >= 10 ? 'auto' : 'visible',
+                        }}
+                      >
+                        <TransactionItem
+                          transaction={t}
+                          category={categoriesMap[t.categoryId]}
+                        />
+                      </div>
                     ))}
                   </div>
                 )}

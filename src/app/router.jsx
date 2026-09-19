@@ -6,6 +6,7 @@ import HomePage from '../components/pages/HomePage';
 import IncomePage from '../components/pages/IncomePage';
 import ExpensesPage from '../components/pages/ExpensesPage';
 import SettingsPage from '../components/pages/SettingsPage';
+import SearchPage from '../components/pages/SearchPage';
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,7 @@ const router = createBrowserRouter([
       { path: '/income', element: <IncomePage /> },
       { path: '/expenses', element: <ExpensesPage /> },
       { path: '/settings', element: <SettingsPage /> },
+      { path: '/search', element: <SearchPage /> },
     ],
   },
   {

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowDownLeft,
   ArrowUpRight,
   FileText,
+  Search,
   WalletCards,
 } from 'lucide-react';
 
@@ -31,6 +33,8 @@ const periodLabels = {
 };
 
 function HomePage() {
+  const navigate = useNavigate();
+
   const period = useAppStore((s) => s.period);
   const dataVersion = useAppStore((s) => s.dataVersion);
 
@@ -105,6 +109,22 @@ function HomePage() {
       </div>
 
       <div className="flex items-center gap-2">
+        {/* ⭐ سرچ */}
+        <button
+          type="button"
+          onClick={() => navigate('/search')}
+          aria-label="جستجو"
+          className="
+            flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl
+            border border-white/[0.06] bg-[#0F211E] text-[#8FA39D]
+            transition-colors hover:text-[#E3B341]
+            active:scale-95
+            lg:h-10 lg:w-10
+          "
+        >
+          <Search size={18} strokeWidth={1.9} />
+        </button>
+
         <button
           type="button"
           onClick={handleExportPDF}
@@ -134,7 +154,7 @@ function HomePage() {
       {Header}
 
       {/* ============================================ */}
-      {/* موبایل — تک‌ستونی، دست‌نخورده               */}
+      {/* موبایل                                        */}
       {/* ============================================ */}
       <div className="lg:hidden">
         <BalanceHero summary={summary} period={period} />
@@ -180,16 +200,16 @@ function HomePage() {
           transactions={recentTransactions}
           categoriesMap={categoriesMap}
           limit={5}
+          showNavigateButton={false}
         />
       </div>
 
       {/* ============================================ */}
-      {/* دسکتاپ — چیدمان حرفه‌ای                      */}
+      {/* دسکتاپ                                        */}
       {/* ============================================ */}
       <div className="hidden lg:mt-6 lg:block lg:space-y-4">
-        {/* ⭐ ردیف بالا: 1/4 راست (Stats + Tabs) + 3/4 چپ (BalanceHero) */}
+        {/* ردیف بالا */}
         <div className="grid grid-cols-12 items-stretch gap-4">
-          {/* راست 1/4 — کارت‌های آماری + تب‌ها */}
           <div className="col-span-4 flex flex-col gap-3">
             <div className="grid flex-1 grid-cols-2 gap-3">
               <StatCard
@@ -209,7 +229,6 @@ function HomePage() {
             <PeriodTabs forceTabs />
           </div>
 
-          {/* چپ 3/4 — کارت موجودی */}
           <div className="col-span-8">
             <BalanceHero
               summary={summary}
@@ -219,9 +238,8 @@ function HomePage() {
           </div>
         </div>
 
-        {/* ⭐ ردیف پایین: گراف (راست) + تراکنش‌ها (چپ) */}
+        {/* ردیف پایین */}
         <div className="grid grid-cols-12 gap-4">
-          {/* گراف */}
           <div className="col-span-8">
             <div className="flex h-[480px] flex-col overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E]">
               <div className="flex shrink-0 items-center justify-between px-5 pt-4 pb-2">
@@ -249,7 +267,6 @@ function HomePage() {
             </div>
           </div>
 
-          {/* تراکنش‌های اخیر */}
           <div className="col-span-4">
             <div className="flex h-[480px] flex-col overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E]">
               <div className="flex shrink-0 items-center justify-between px-5 pt-4 pb-3">
@@ -271,18 +288,26 @@ function HomePage() {
                         هنوز تراکنشی ثبت نشده است
                       </p>
                       <p className="mt-1 text-[11px] text-[#5C736C]">
-                        از دکمه‌ی + در سایدبار یا گوشه استفاده کن.
+                        از دکمه‌ی + در سایدبار استفاده کن.
                       </p>
                     </div>
                   </div>
                 ) : (
                   <div>
-                    {recentTransactions.map((t) => (
-                      <TransactionItem
+                    {recentTransactions.slice(0, 10).map((t, index) => (
+                      <div
                         key={t.id}
-                        transaction={t}
-                        category={categoriesMap[t.categoryId]}
-                      />
+                        className="tx-list-item"
+                        style={{
+                          contentVisibility:
+                            index >= 8 ? 'auto' : 'visible',
+                        }}
+                      >
+                        <TransactionItem
+                          transaction={t}
+                          category={categoriesMap[t.categoryId]}
+                        />
+                      </div>
                     ))}
                   </div>
                 )}

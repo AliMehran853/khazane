@@ -135,7 +135,6 @@ export default function IncomeExpenseChart({
     { name: 'مصرف', data: expense },
   ];
 
-  // اگر fixedHeight داده شده، همان را استفاده کن
   const height =
     fixedHeight ||
     (isDesktop

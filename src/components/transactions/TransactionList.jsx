@@ -19,15 +19,24 @@ export default function TransactionList({
     );
   }
 
-  // ⭐ بدون overflow-hidden تا منوی سه‌نقطه بیرون نزند
   return (
     <div className="rounded-[24px] border border-white/[0.06] bg-[#0F211E] lg:rounded-[22px]">
-      {transactions.map((t) => (
-        <TransactionItem
+      {transactions.map((t, index) => (
+        // ⭐ content-visibility برای آیتم‌های بعدی (FPS بالاتر)
+        <div
           key={t.id}
-          transaction={t}
-          category={categoriesMap[t.categoryId]}
-        />
+          className="tx-list-item"
+          style={{
+            // ۱۵ آیتم اول بدون content-visibility (سریع لود می‌شن)
+            // آیتم‌های بعدی به صورت خودکار مدیریت می‌شن
+            contentVisibility: index >= 15 ? 'auto' : 'visible',
+          }}
+        >
+          <TransactionItem
+            transaction={t}
+            category={categoriesMap[t.categoryId]}
+          />
+        </div>
       ))}
     </div>
   );

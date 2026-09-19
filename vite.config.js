@@ -11,12 +11,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
 
-      // در حالت توسعه، PWA خاموش است
       devOptions: {
         enabled: false,
       },
 
-      // فایل‌های اضافی که کش می‌شوند
       includeAssets: ['192.png', '512.png', 'fonts/*.ttf'],
 
       manifest: {
@@ -31,13 +29,18 @@ export default defineConfig({
 
         start_url: '/',
         scope: '/',
+
         display: 'standalone',
+        display_override: ['standalone', 'minimal-ui'],
         orientation: 'portrait',
 
         theme_color: '#0A1614',
         background_color: '#0A1614',
 
         categories: ['finance', 'productivity'],
+
+        // ⭐ مهم برای Chrome جدید: پیشنهاد نصب اپ native نده
+        prefer_related_applications: false,
 
         icons: [
           {
@@ -52,6 +55,7 @@ export default defineConfig({
             type: 'image/png',
             purpose: 'any',
           },
+          // ⭐ یک entry برای هر دو purpose (روش استاندارد)
           {
             src: '/512.png',
             sizes: '512x512',
@@ -68,8 +72,10 @@ export default defineConfig({
           '**/*.{js,css,html,ico,png,svg,webp,woff,woff2,ttf}',
         ],
 
-        // درخواست‌های PDF/Blob را کش نکن
         navigateFallbackDenylist: [/^\/api/, /\.pdf$/],
+
+        // ⭐ اجازه بده صفحه اصلی کش بشه
+        navigateFallback: '/index.html',
       },
     }),
   ],

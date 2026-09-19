@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ArrowDownLeft, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowDownLeft, FileText, Search } from 'lucide-react';
 
 import PeriodTabs from '../common/PeriodTabs';
 import StatCard from '../common/StatCard';
@@ -24,6 +25,8 @@ const periodLabels = {
 };
 
 function IncomePage() {
+  const navigate = useNavigate();
+
   const period = useAppStore((s) => s.period);
   const dataVersion = useAppStore((s) => s.dataVersion);
 
@@ -92,21 +95,39 @@ function IncomePage() {
         </h1>
       </div>
 
-      <button
-        type="button"
-        onClick={handleExportPDF}
-        disabled={exporting || transactions.length === 0}
-        className="
-          flex h-11 shrink-0 items-center gap-2 rounded-2xl
-          border border-white/[0.06] bg-[#0F211E] px-3.5
-          text-[11.5px] font-semibold text-[#E3B341]
-          active:scale-95 disabled:opacity-40
-          lg:h-10 lg:text-[12px]
-        "
-      >
-        <FileText size={17} strokeWidth={1.9} />
-        {exporting ? 'صبر...' : 'PDF'}
-      </button>
+      <div className="flex items-center gap-2">
+        {/* ⭐ سرچ */}
+        <button
+          type="button"
+          onClick={() => navigate('/search')}
+          aria-label="جستجو"
+          className="
+            flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl
+            border border-white/[0.06] bg-[#0F211E] text-[#8FA39D]
+            transition-colors hover:text-[#E3B341]
+            active:scale-95
+            lg:h-10 lg:w-10
+          "
+        >
+          <Search size={18} strokeWidth={1.9} />
+        </button>
+
+        <button
+          type="button"
+          onClick={handleExportPDF}
+          disabled={exporting || transactions.length === 0}
+          className="
+            flex h-11 shrink-0 items-center gap-2 rounded-2xl
+            border border-white/[0.06] bg-[#0F211E] px-3.5
+            text-[11.5px] font-semibold text-[#E3B341]
+            active:scale-95 disabled:opacity-40
+            lg:h-10 lg:text-[12px]
+          "
+        >
+          <FileText size={17} strokeWidth={1.9} />
+          {exporting ? 'صبر...' : 'PDF'}
+        </button>
+      </div>
     </header>
   );
 
@@ -114,9 +135,7 @@ function IncomePage() {
     <div className="px-4 pb-6 pt-6 lg:px-0 lg:pt-8">
       {Header}
 
-      {/* ============================================ */}
-      {/* موبایل — تک‌ستونی، دست‌نخورده               */}
-      {/* ============================================ */}
+      {/* موبایل */}
       <div className="lg:hidden">
         <div className="mt-6">
           <PeriodTabs />
@@ -155,7 +174,7 @@ function IncomePage() {
           <h2 className="text-[15px] font-bold text-[#F2EFE9]">آخرین درآمدها</h2>
           <div className="mt-3">
             <TransactionList
-              transactions={transactions}
+              transactions={transactions.slice(0, 8)}
               categoriesMap={categoriesMap}
               emptyTitle="هنوز درآمدی ثبت نشده است"
               emptyHint="از دکمه + برای ثبت اولین درآمد استفاده کن."
@@ -164,11 +183,8 @@ function IncomePage() {
         </section>
       </div>
 
-      {/* ============================================ */}
-      {/* دسکتاپ — چیدمان حرفه‌ای                      */}
-      {/* ============================================ */}
+      {/* دسکتاپ */}
       <div className="hidden lg:mt-6 lg:block lg:space-y-4">
-        {/* ⭐ ردیف: فیلتر (راست) + کارت کل درآمد (چپ) */}
         <div className="flex items-stretch gap-4">
           <div className="w-[230px] shrink-0">
             <PeriodTabs />
@@ -185,7 +201,6 @@ function IncomePage() {
           </div>
         </div>
 
-        {/* ⭐ ردیف پایین: گراف (راست) + تراکنش‌ها (چپ) */}
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-8">
             <div className="flex h-[480px] flex-col overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E]">
@@ -235,18 +250,26 @@ function IncomePage() {
                         هنوز درآمدی ثبت نشده است
                       </p>
                       <p className="mt-1 text-[11px] text-[#5C736C]">
-                        از دکمه‌ی + در سایدبار یا گوشه استفاده کن.
+                        از دکمه‌ی + در سایدبار استفاده کن.
                       </p>
                     </div>
                   </div>
                 ) : (
                   <div>
-                    {transactions.map((t) => (
-                      <TransactionItem
+                    {transactions.map((t, index) => (
+                      <div
                         key={t.id}
-                        transaction={t}
-                        category={categoriesMap[t.categoryId]}
-                      />
+                        className="tx-list-item"
+                        style={{
+                          contentVisibility:
+                            index >= 10 ? 'auto' : 'visible',
+                        }}
+                      >
+                        <TransactionItem
+                          transaction={t}
+                          category={categoriesMap[t.categoryId]}
+                        />
+                      </div>
                     ))}
                   </div>
                 )}

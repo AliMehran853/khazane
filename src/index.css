@@ -1,13 +1,36 @@
 @import "tailwindcss";
 
 /* =========================================================
-   Vazirmatn
+   Vazirmatn — از public/fonts (برای PWA cache + دسترسی سریع)
    ========================================================= */
 
 @font-face {
   font-family: "Vazirmatn";
-  src: url("./components/assets/fonts/Vazirmatn-Regular.ttf")
-    format("truetype");
+  src: url("/fonts/Vazirmatn-Thin.ttf") format("truetype");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("/fonts/Vazirmatn-ExtraLight.ttf") format("truetype");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("/fonts/Vazirmatn-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("/fonts/Vazirmatn-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -15,8 +38,7 @@
 
 @font-face {
   font-family: "Vazirmatn";
-  src: url("./components/assets/fonts/Vazirmatn-Medium.ttf")
-    format("truetype");
+  src: url("/fonts/Vazirmatn-Medium.ttf") format("truetype");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -24,18 +46,8 @@
 
 @font-face {
   font-family: "Vazirmatn";
-  src: url("./components/assets/fonts/Vazirmatn-SemiBold.ttf")
-    format("truetype");
+  src: url("/fonts/Vazirmatn-SemiBold.ttf") format("truetype");
   font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Vazirmatn";
-  src: url("./components/assets/fonts/Vazirmatn-ExtraLight.ttf")
-    format("truetype");
-  font-weight: 200;
   font-style: normal;
   font-display: swap;
 }
@@ -158,6 +170,57 @@ input,
 textarea,
 select {
   scroll-margin: 0;
+}
+
+/* =========================================================
+   FPS Optimizations
+   ========================================================= */
+
+.will-transform {
+  will-change: transform;
+}
+
+.will-opacity {
+  will-change: opacity;
+}
+
+.gpu-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.tx-list-item {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 64px;
+}
+
+.card-vm {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 100px;
+}
+
+.scroll-ios {
+  -webkit-overflow-scrolling: touch;
+}
+
+.contain-paint {
+  contain: paint;
+}
+
+/* =========================================================
+   Reduced Motion
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* =========================================================
