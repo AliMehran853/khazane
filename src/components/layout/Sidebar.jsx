@@ -56,15 +56,19 @@ function SidebarItem({ label, to, icon: Icon, end = false }) {
 function Sidebar() {
   const location = useLocation();
   const openTransactionSheet = useAppStore((s) => s.openTransactionSheet);
+  const openDateChoice = useAppStore((s) => s.openDateChoice);
+  const weekOffset = useAppStore((s) => s.weekOffset);
 
-  // ⭐ تعیین نوع تراکنش بر اساس صفحه‌ی فعلی
   const type = location.pathname === '/income' ? 'income' : 'expense';
-
-  // ⭐ متن دکمه هم بر اساس صفحه تغییر می‌کند
   const buttonLabel = type === 'income' ? 'ثبت درآمد' : 'ثبت مصرف';
 
-  // اگر در صفحه‌ی تنظیمات هستیم، دکمه رو مخفی نکنیم؟ — کاربر خواسته بماند
-  // اما اگر ترجیح می‌دهی مخفی بشه، بگو
+  function handleClick() {
+    if (weekOffset === 0) {
+      openTransactionSheet(type);
+    } else {
+      openDateChoice(type);
+    }
+  }
 
   return (
     <aside
@@ -75,7 +79,6 @@ function Sidebar() {
         lg:flex
       "
     >
-      {/* برند */}
       <div className="flex items-center gap-3 px-5 py-6">
         <div className="flex h-[44px] w-[44px] items-center justify-center overflow-hidden rounded-2xl">
           <AppLogo size={44} withShadow={false} />
@@ -90,18 +93,16 @@ function Sidebar() {
 
       <div className="mx-4 h-px bg-white/[0.06]" />
 
-      {/* ناوبری */}
       <nav className="mt-4 flex-1 space-y-1.5 px-3">
         {items.map((item) => (
           <SidebarItem key={item.to} {...item} />
         ))}
       </nav>
 
-      {/* دکمه ثبت */}
       <div className="border-t border-white/[0.06] px-4 py-4">
         <button
           type="button"
-          onClick={() => openTransactionSheet(type)}
+          onClick={handleClick}
           className="
             flex w-full items-center justify-center gap-2 rounded-2xl
             bg-[linear-gradient(155deg,#E3B341,#B9862A)]
@@ -114,7 +115,6 @@ function Sidebar() {
         </button>
       </div>
 
-      {/* فوتر */}
       <div className="px-5 pb-5 pt-1">
         <p className="text-center text-[10.5px] leading-relaxed text-[#5C736C]">
           خزانه • نسخه ۱.۰ • کاملاً آفلاین

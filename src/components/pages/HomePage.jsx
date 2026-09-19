@@ -20,7 +20,7 @@ import { useAnalytics } from '../hooks/useAnalytics';
 import { getCategories } from '../services/categoryService';
 import { getTransactions } from '../services/transactionService';
 import { exportTransactionsToPDF } from '../services/exportService';
-import { getRange } from '../utils/dates';
+import { getRange, getWeekRangeFromOffset } from '../utils/dates';
 
 function formatNumber(value) {
   return new Intl.NumberFormat('fa-AF').format(Math.round(value || 0));
@@ -36,10 +36,12 @@ function HomePage() {
   const navigate = useNavigate();
 
   const period = useAppStore((s) => s.period);
+  const weekOffset = useAppStore((s) => s.weekOffset);
   const dataVersion = useAppStore((s) => s.dataVersion);
 
   const { summary, trend, recentTransactions, loading } = useAnalytics({
     period,
+    weekOffset,
   });
 
   const [categoriesMap, setCategoriesMap] = useState({});
@@ -65,7 +67,10 @@ function HomePage() {
   async function handleExportPDF() {
     setExporting(true);
     try {
-      const { start, end } = getRange(period);
+      const { start, end } =
+        period === 'weekly'
+          ? getWeekRangeFromOffset(weekOffset)
+          : getRange(period);
       const all = await getTransactions();
 
       const inPeriod = all.filter((t) => {
@@ -109,7 +114,6 @@ function HomePage() {
       </div>
 
       <div className="flex items-center gap-2">
-        {/* ⭐ سرچ */}
         <button
           type="button"
           onClick={() => navigate('/search')}
@@ -153,9 +157,6 @@ function HomePage() {
     <div className="px-4 pb-6 pt-6 lg:px-0 lg:pt-8">
       {Header}
 
-      {/* ============================================ */}
-      {/* موبایل                                        */}
-      {/* ============================================ */}
       <div className="lg:hidden">
         <BalanceHero summary={summary} period={period} />
 
@@ -191,7 +192,11 @@ function HomePage() {
                 در حال بارگذاری...
               </div>
             ) : (
-              <IncomeExpenseChart data={trend} period={period} />
+              <IncomeExpenseChart
+                data={trend}
+                period={period}
+                weekOffset={weekOffset}
+              />
             )}
           </div>
         </section>
@@ -204,11 +209,7 @@ function HomePage() {
         />
       </div>
 
-      {/* ============================================ */}
-      {/* دسکتاپ                                        */}
-      {/* ============================================ */}
       <div className="hidden lg:mt-6 lg:block lg:space-y-4">
-        {/* ردیف بالا */}
         <div className="grid grid-cols-12 items-stretch gap-4">
           <div className="col-span-4 flex flex-col gap-3">
             <div className="grid flex-1 grid-cols-2 gap-3">
@@ -238,7 +239,6 @@ function HomePage() {
           </div>
         </div>
 
-        {/* ردیف پایین */}
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-8">
             <div className="flex h-[480px] flex-col overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E]">
@@ -260,6 +260,7 @@ function HomePage() {
                   <IncomeExpenseChart
                     data={trend}
                     period={period}
+                    weekOffset={weekOffset}
                     fixedHeight={400}
                   />
                 )}

@@ -46,6 +46,12 @@ export default function ExpenseTrendChart({
       parentHeightOffset: 0,
       redrawOnParentResize: false,
       redrawOnWindowResize: false,
+      animations: {
+        enabled: true,
+        speed: 900,
+        animateGradually: { enabled: false },
+        dynamicAnimation: { enabled: true, speed: 350 },
+      },
     },
     colors: ['#E2574C'],
 

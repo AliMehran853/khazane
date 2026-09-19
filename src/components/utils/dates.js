@@ -7,7 +7,6 @@ import {
   startOfYear as dfStartOfYear,
   endOfYear as dfEndOfYear,
   addMonths,
-  eachDayOfInterval,
 } from 'date-fns-jalali';
 
 // ============================================================
@@ -41,6 +40,8 @@ const AFGHAN_MONTHS = [
   'حوت',
 ];
 
+const FA_NUM = new Intl.NumberFormat('fa-AF');
+
 // ============================================================
 // Helpers
 // ============================================================
@@ -65,8 +66,14 @@ export function endOfWeek(date = new Date()) {
   return dfEndOfWeek(date, WEEK_OPTIONS);
 }
 
+function addWeeksLocal(date, n) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + n * 7);
+  return d;
+}
+
 // ============================================================
-// دوره (Period) → بازه (Range)
+// دوره → بازه
 // ============================================================
 
 export function getRange(period = 'weekly', date = new Date()) {
@@ -82,37 +89,68 @@ export function getRange(period = 'weekly', date = new Date()) {
   }
 
   if (period === 'yearly') {
-    return {
-      start: dfStartOfYear(date),
-      end: dfEndOfYear(date),
-    };
+    return { start: dfStartOfYear(date), end: dfEndOfYear(date) };
   }
 
   return { start: startOfDay(date), end: endOfDay(date) };
 }
 
 // ============================================================
-// لیست روزهای هفته (شنبه تا جمعه)
+// ناوبری هفته
+// ============================================================
+
+export function getWeekBaseDate(offset = 0) {
+  return addWeeksLocal(new Date(), offset);
+}
+
+export function getWeekRangeFromOffset(offset = 0) {
+  const baseDate = getWeekBaseDate(offset);
+  return { ...getRange('weekly', baseDate), baseDate };
+}
+
+export function getWeekOffsetLabel(offset) {
+  if (offset === 0) return 'این هفته';
+  if (offset === -1) return 'هفته‌ی گذشته';
+  return `${FA_NUM.format(Math.abs(offset))} هفته پیش`;
+}
+
+export function formatWeekRange(start, end) {
+  const sDay = Number(format(start, 'd'));
+  const eDay = Number(format(end, 'd'));
+  const sMonthIdx = Number(format(start, 'M')) - 1;
+  const eMonthIdx = Number(format(end, 'M')) - 1;
+  const sMonth = AFGHAN_MONTHS[sMonthIdx] || '';
+  const eMonth = AFGHAN_MONTHS[eMonthIdx] || '';
+
+  if (sMonthIdx === eMonthIdx) {
+    return `${FA_NUM.format(sDay)} - ${FA_NUM.format(eDay)} ${sMonth}`;
+  }
+  return `${FA_NUM.format(sDay)} ${sMonth} - ${FA_NUM.format(eDay)} ${eMonth}`;
+}
+
+// ============================================================
+// روزهای هفته
 // ============================================================
 
 export function getWeekDays(date = new Date()) {
-  const start = startOfWeek(date);
-  const end = endOfWeek(date);
-  const days = eachDayOfInterval({ start, end });
-
-  return days.map((d) => {
-    const dayName = PERSIAN_DAYS[d.getDay()];
-    return {
+  const weekStart = startOfDay(startOfWeek(date));
+  const days = [];
+  for (let i = 0; i < 7; i += 1) {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + i);
+    const dayName = PERSIAN_DAYS[d.getDay()] || '';
+    days.push({
       date: d,
       label: dayName,
       shortLabel: dayName.slice(0, 2),
       key: d.toISOString(),
-    };
-  });
+    });
+  }
+  return days;
 }
 
 // ============================================================
-// تعداد روزهای ماه شمسی
+// روزهای ماه
 // ============================================================
 
 export function getDaysInJalaliMonth(date = new Date()) {
@@ -122,14 +160,9 @@ export function getDaysInJalaliMonth(date = new Date()) {
   return Math.round(diffMs / (1000 * 60 * 60 * 24));
 }
 
-// ============================================================
-// لیست روزهای ماه جاری (شمسی)
-// ============================================================
-
 export function getMonthDays(date = new Date()) {
   const start = dfStartOfMonth(date);
   const totalDays = getDaysInJalaliMonth(date);
-
   const days = [];
   const cursor = new Date(start);
 
@@ -141,12 +174,11 @@ export function getMonthDays(date = new Date()) {
     });
     cursor.setDate(cursor.getDate() + 1);
   }
-
   return days;
 }
 
 // ============================================================
-// لیست ۱۲ ماه سال شمسی
+// ماه‌های سال
 // ============================================================
 
 export function getYearMonths(date = new Date()) {
@@ -156,7 +188,6 @@ export function getYearMonths(date = new Date()) {
     const monthStart = addMonths(startYear, i);
     const nextMonthStart = addMonths(monthStart, 1);
     const monthEnd = new Date(nextMonthStart.getTime() - 1);
-
     return {
       startDate: dfStartOfMonth(monthStart),
       endDate: monthEnd,
@@ -167,7 +198,7 @@ export function getYearMonths(date = new Date()) {
 }
 
 // ============================================================
-// برچسب امروز به شمسی
+// برچسب‌های امروز
 // ============================================================
 
 export function getTodayLabel() {
@@ -176,8 +207,7 @@ export function getTodayLabel() {
   const dayNum = format(d, 'd');
   const monthIdx = Number(format(d, 'M')) - 1;
   const monthName = AFGHAN_MONTHS[monthIdx] || '';
-  const year = format(d, 'jYYYY');
-
+  const year = format(d, 'yyyy');
   return `${dayName} ${dayNum} ${monthName} ${year}`;
 }
 
@@ -187,41 +217,62 @@ export function getTodayShort() {
   const dayNum = format(d, 'd');
   const monthIdx = Number(format(d, 'M')) - 1;
   const monthName = AFGHAN_MONTHS[monthIdx] || '';
-
   return `${dayName} ${dayNum} ${monthName}`;
 }
 
 // ============================================================
-// فرمت ساعت ۱۲ ساعته
+// فرمت‌های تاریخ مشخص
 // ============================================================
 
-function formatTime12(dateInput) {
+export function formatShortDate(dateInput) {
+  const d = new Date(dateInput);
+  const dayName = PERSIAN_DAYS[d.getDay()];
+  const dayNum = format(d, 'd');
+  const monthIdx = Number(format(d, 'M')) - 1;
+  const monthName = AFGHAN_MONTHS[monthIdx] || '';
+  return `${dayName} ${dayNum} ${monthName}`;
+}
+
+export function formatFullDate(dateInput) {
+  const d = new Date(dateInput);
+  const dayName = PERSIAN_DAYS[d.getDay()];
+  const dayNum = format(d, 'd');
+  const monthIdx = Number(format(d, 'M')) - 1;
+  const monthName = AFGHAN_MONTHS[monthIdx] || '';
+  const year = format(d, 'yyyy');
+  return `${dayName} ${dayNum} ${monthName} ${year}`;
+}
+
+// ============================================================
+// ساعت ۱۲ ساعته — export می‌کنیم
+// ============================================================
+
+export function formatTime12(dateInput) {
   const d = new Date(dateInput);
   const h24 = d.getHours();
   const m = d.getMinutes();
   const period = h24 < 12 ? 'صبح' : 'عصر';
   let h12 = h24 % 12;
   if (h12 === 0) h12 = 12;
-  const minute = String(m).padStart(2, '0');
-  return `${h12}:${minute} ${period}`;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+}
+
+export function formatFullDateTime(dateInput) {
+  return `${formatFullDate(dateInput)} • ${formatTime12(dateInput)}`;
 }
 
 // ============================================================
-// فرمت تاریخ تراکنش — سبک واتساپ
-//
-//  ۰ روز: امروز • ۲:۳۷ عصر
-//  ۱ روز: دیروز • ۹:۱۵ صبح
-//  ۲-۶ روز: سه‌شنبه • ۲:۳۷ عصر
-//  ۷-۱۳ روز: هفته‌ی پیش • ۲:۳۷ عصر
-//  ۱۴+ روز (سال جاری): ۲۶ سنبله • ۲:۳۷ عصر
-//  سال‌های قبل: ۲۶ سنبله ۱۴۰۲
+// ⭐ فرمت تاریخ تراکنش — همیشه با تاریخ
+//    امروز • ۲:۳۷ عصر
+//    دیروز • ۹:۱۵ صبح
+//    پنجشنبه ۲۶ سنبله • ۱۰:۴۲ صبح
+//    پنجشنبه ۲۶ سنبله ۱۴۰۳
 // ============================================================
 
 export function formatTransactionDate(dateInput) {
   const d = new Date(dateInput);
   const now = new Date();
 
-  // فاصله به «روز» (بدون ساعت)
   const diffDays = Math.floor(
     (startOfDay(now).getTime() - startOfDay(d).getTime()) /
       (1000 * 60 * 60 * 24),
@@ -229,39 +280,19 @@ export function formatTransactionDate(dateInput) {
 
   const timePart = formatTime12(d);
 
-  // ---------- امروز ----------
-  if (diffDays === 0) {
-    return `امروز • ${timePart}`;
-  }
+  if (diffDays === 0) return `امروز • ${timePart}`;
+  if (diffDays === 1) return `دیروز • ${timePart}`;
 
-  // ---------- دیروز ----------
-  if (diffDays === 1) {
-    return `دیروز • ${timePart}`;
-  }
-
-  // ---------- ۲ تا ۶ روز پیش: نام روز ----------
-  if (diffDays >= 2 && diffDays <= 6) {
-    const dayName = PERSIAN_DAYS[d.getDay()];
-    return `${dayName} • ${timePart}`;
-  }
-
-  // ---------- ۷ تا ۱۳ روز پیش: هفته‌ی پیش ----------
-  if (diffDays >= 7 && diffDays <= 13) {
-    return `هفته‌ی پیش • ${timePart}`;
-  }
-
-  // ---------- بقیه: تاریخ کامل شمسی ----------
+  const dayName = PERSIAN_DAYS[d.getDay()];
   const dayNum = format(d, 'd');
   const monthIdx = Number(format(d, 'M')) - 1;
   const monthName = AFGHAN_MONTHS[monthIdx] || '';
-  const year = format(d, 'jYYYY');
-  const currentYear = format(now, 'jYYYY');
+  const year = format(d, 'yyyy');
+  const currentYear = format(now, 'yyyy');
 
-  // اگر همان سال جاری است: تاریخ + ساعت
   if (year === currentYear) {
-    return `${dayNum} ${monthName} • ${timePart}`;
+    return `${dayName} ${dayNum} ${monthName} • ${timePart}`;
   }
 
-  // سال‌های قبل: تاریخ + سال، بدون ساعت
-  return `${dayNum} ${monthName} ${year}`;
+  return `${dayName} ${dayNum} ${monthName} ${year}`;
 }

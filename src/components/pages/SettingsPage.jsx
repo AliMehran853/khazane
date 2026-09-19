@@ -8,7 +8,6 @@ import {
   Fingerprint,
   LogOut,
   ShieldCheck,
-  Sparkles,
   Trash2,
   X,
 } from 'lucide-react';
@@ -30,7 +29,6 @@ import { useAppStore } from '../store/appStore';
 import { useSecurityStore } from '../store/securityStore';
 import { useDailyReminder } from '../hooks/useDailyReminder';
 import { useBiometricCheck } from '../hooks/useBiometricCheck';
-import { useGreeting } from '../hooks/useGreeting';
 import { SESSION_UNLOCK_KEY } from '../hooks/useAppLock';
 
 import {
@@ -399,7 +397,6 @@ function SettingsPage() {
   );
 
   const { forceShow: forceShowReminder } = useDailyReminder();
-  const { resetToday: resetGreetingToday } = useGreeting({ enabled: false });
 
   const { available: bioAvailable, checking: bioChecking } = useBiometricCheck();
 
@@ -660,13 +657,6 @@ function SettingsPage() {
     await forceShowReminder();
   }
 
-  function handleTestGreeting() {
-    resetGreetingToday();
-    refreshData();
-    setSheet(null);
-    showToast('پیام خوش‌آمدگویی بعد از چند لحظه نمایش داده می‌شود.');
-  }
-
   const currencyRow = (
     <SettingsButtonRow
       icon={Coins}
@@ -689,9 +679,7 @@ function SettingsPage() {
           </h1>
         </header>
 
-        {/* ============================================ */}
-        {/* موبایل                                        */}
-        {/* ============================================ */}
+        {/* موبایل */}
         <div className="lg:hidden">
           <InstallCard />
           <SettingsProfileCard
@@ -785,9 +773,7 @@ function SettingsPage() {
           </p>
         </div>
 
-        {/* ============================================ */}
-        {/* دسکتاپ                                        */}
-        {/* ============================================ */}
+        {/* دسکتاپ */}
         <div className="mt-8 hidden lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-x-5 lg:gap-y-6">
           <div className="flex flex-col">
             <SectionTitle>حساب کاربری</SectionTitle>
@@ -910,9 +896,7 @@ function SettingsPage() {
         </p>
       </div>
 
-      {/* ============================================ */}
-      {/* Sheets                                        */}
-      {/* ============================================ */}
+      {/* Sheets */}
 
       <Sheet
         open={sheet === 'profile'}
@@ -941,17 +925,6 @@ function SettingsPage() {
         >
           ذخیره
         </button>
-
-        {userName && (
-          <button
-            type="button"
-            onClick={handleTestGreeting}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-[#4FD1BE]/30 bg-[#4FD1BE]/[0.08] py-3 text-[12px] font-semibold text-[#4FD1BE] active:scale-[0.98]"
-          >
-            <Sparkles size={14} />
-            نمایش آزمایشی پیام خوش‌آمدگویی
-          </button>
-        )}
       </Sheet>
 
       <Sheet

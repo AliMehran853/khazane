@@ -13,6 +13,7 @@ import { useAnalytics } from '../hooks/useAnalytics';
 import { getTransactions } from '../services/transactionService';
 import { getCategories } from '../services/categoryService';
 import { exportTransactionsToPDF } from '../services/exportService';
+import { getRange, getWeekRangeFromOffset } from '../utils/dates';
 
 function formatNumber(value) {
   return new Intl.NumberFormat('fa-AF').format(Math.round(value || 0));
@@ -28,9 +29,14 @@ function IncomePage() {
   const navigate = useNavigate();
 
   const period = useAppStore((s) => s.period);
+  const weekOffset = useAppStore((s) => s.weekOffset);
   const dataVersion = useAppStore((s) => s.dataVersion);
 
-  const { summary, trend, loading } = useAnalytics({ period, type: 'income' });
+  const { summary, trend, loading } = useAnalytics({
+    period,
+    type: 'income',
+    weekOffset,
+  });
 
   const [transactions, setTransactions] = useState([]);
   const [categoriesMap, setCategoriesMap] = useState({});
@@ -40,8 +46,18 @@ function IncomePage() {
     let cancelled = false;
 
     async function load() {
+      // ⭐ فیلتر بر اساس دوره
+      const range =
+        period === 'weekly'
+          ? getWeekRangeFromOffset(weekOffset)
+          : getRange(period);
+
       const [txs, cats] = await Promise.all([
-        getTransactions({ type: 'income' }),
+        getTransactions({
+          type: 'income',
+          startDate: range.start,
+          endDate: range.end,
+        }),
         getCategories('income'),
       ]);
       if (cancelled) return;
@@ -58,7 +74,7 @@ function IncomePage() {
     return () => {
       cancelled = true;
     };
-  }, [dataVersion, period]);
+  }, [dataVersion, period, weekOffset]);
 
   async function handleExportPDF() {
     if (transactions.length === 0) return;
@@ -96,7 +112,6 @@ function IncomePage() {
       </div>
 
       <div className="flex items-center gap-2">
-        {/* ⭐ سرچ */}
         <button
           type="button"
           onClick={() => navigate('/search')}
@@ -165,7 +180,11 @@ function IncomePage() {
                 در حال بارگذاری...
               </div>
             ) : (
-              <IncomeTrendChart data={trend} period={period} />
+              <IncomeTrendChart
+                data={trend}
+                period={period}
+                weekOffset={weekOffset}
+              />
             )}
           </div>
         </section>
@@ -176,8 +195,8 @@ function IncomePage() {
             <TransactionList
               transactions={transactions.slice(0, 8)}
               categoriesMap={categoriesMap}
-              emptyTitle="هنوز درآمدی ثبت نشده است"
-              emptyHint="از دکمه + برای ثبت اولین درآمد استفاده کن."
+              emptyTitle="در این دوره درآمدی ثبت نشده است"
+              emptyHint="از دکمه + برای ثبت درآمد استفاده کن."
             />
           </div>
         </section>
@@ -222,6 +241,7 @@ function IncomePage() {
                   <IncomeTrendChart
                     data={trend}
                     period={period}
+                    weekOffset={weekOffset}
                     fixedHeight={400}
                   />
                 )}
@@ -247,7 +267,7 @@ function IncomePage() {
                   <div className="flex h-full items-center justify-center px-4 text-center">
                     <div>
                       <p className="text-[13px] font-semibold text-[#8FA39D]">
-                        هنوز درآمدی ثبت نشده است
+                        در این دوره درآمدی ثبت نشده است
                       </p>
                       <p className="mt-1 text-[11px] text-[#5C736C]">
                         از دکمه‌ی + در سایدبار استفاده کن.

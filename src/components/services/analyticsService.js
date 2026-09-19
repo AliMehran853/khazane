@@ -37,8 +37,12 @@ function countBetween(transactions, start, end) {
 // خلاصه دوره
 // ============================================================
 
-export async function getPeriodSummary({ period = 'weekly', memberId = 'self' } = {}) {
-  const { start, end } = getRange(period);
+export async function getPeriodSummary({
+  period = 'weekly',
+  memberId = 'self',
+  baseDate,
+} = {}) {
+  const { start, end } = getRange(period, baseDate || new Date());
   const transactions = await getMemberTransactions(memberId);
 
   const income = sumBetween(transactions, 'income', start, end);
@@ -60,8 +64,9 @@ export async function getCategorySummary({
   period = 'weekly',
   type = 'expense',
   memberId = 'self',
+  baseDate,
 } = {}) {
-  const { start, end } = getRange(period);
+  const { start, end } = getRange(period, baseDate || new Date());
   const transactions = await getMemberTransactions(memberId);
 
   const totals = new Map();
@@ -91,14 +96,16 @@ export async function getCategorySummary({
 export async function getIncomeExpenseTrend({
   period = 'weekly',
   memberId = 'self',
+  baseDate,
 } = {}) {
   const transactions = await getMemberTransactions(memberId);
   const today = new Date();
   const todayKey = today.toDateString();
+  const refDate = baseDate || today;
 
   // -------- هفتگی: ۷ روز هفته --------
   if (period === 'weekly') {
-    const days = getWeekDays();
+    const days = getWeekDays(refDate);
     return days.map((day) => {
       const s = startOfDay(day.date);
       const e = endOfDay(day.date);
@@ -111,9 +118,9 @@ export async function getIncomeExpenseTrend({
     });
   }
 
-  // -------- ماهانه: ۳۰ روز ماه --------
+  // -------- ماهانه: روزهای ماه --------
   if (period === 'monthly') {
-    const days = getMonthDays();
+    const days = getMonthDays(refDate);
     return days.map((day) => {
       const s = startOfDay(day.date);
       const e = endOfDay(day.date);
@@ -128,7 +135,7 @@ export async function getIncomeExpenseTrend({
 
   // -------- سالانه: ۱۲ ماه --------
   if (period === 'yearly') {
-    const months = getYearMonths();
+    const months = getYearMonths(refDate);
     return months.map((m) => ({
       label: m.label,
       income: sumBetween(transactions, 'income', m.startDate, m.endDate),
@@ -141,13 +148,28 @@ export async function getIncomeExpenseTrend({
 }
 
 // ============================================================
-// تراکنش‌های اخیر
+// تراکنش‌های اخیر (با فیلتر دوره)
 // ============================================================
 
-export async function getRecentTransactions({ limit = 8, memberId = 'self' } = {}) {
+export async function getRecentTransactions({
+  limit = 8,
+  memberId = 'self',
+  period,
+  baseDate,
+} = {}) {
   const transactions = await getMemberTransactions(memberId);
 
-  return transactions
+  let filtered = transactions;
+
+  if (period) {
+    const { start, end } = getRange(period, baseDate || new Date());
+    filtered = transactions.filter((t) => {
+      const d = new Date(t.date);
+      return d >= start && d <= end;
+    });
+  }
+
+  return filtered
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, limit);
 }

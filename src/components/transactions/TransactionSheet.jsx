@@ -2,9 +2,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
 import TransactionForm from './TransactionForm';
-import { getTodayShort } from '../utils/dates';
+import { getTodayShort, formatShortDate } from '../utils/dates';
 
-function TransactionSheet({ open, type, editingTransaction, onClose }) {
+function TransactionSheet({
+  open,
+  type,
+  editingTransaction,
+  prefilledDate,
+  onClose,
+}) {
   const isEditing = Boolean(editingTransaction);
   const effectiveType = isEditing ? editingTransaction.type : type;
   const isIncome = effectiveType === 'income';
@@ -13,29 +19,20 @@ function TransactionSheet({ open, type, editingTransaction, onClose }) {
   useEffect(() => {
     if (!open) return;
 
-    const scrollY = window.scrollY;
     const body = document.body;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+    const prevOverflow = body.style.overflow;
+    const prevPaddingRight = body.style.paddingRight;
 
-    const prevPosition = body.style.position;
-    const prevTop = body.style.top;
-    const prevLeft = body.style.left;
-    const prevRight = body.style.right;
-    const prevWidth = body.style.width;
-
-    body.style.position = 'fixed';
-    body.style.top = `-${scrollY}px`;
-    body.style.left = '0';
-    body.style.right = '0';
-    body.style.width = '100%';
+    body.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) {
+      body.style.paddingRight = `${scrollbarWidth}px`;
+    }
 
     return () => {
-      body.style.position = prevPosition;
-      body.style.top = prevTop;
-      body.style.left = prevLeft;
-      body.style.right = prevRight;
-      body.style.width = prevWidth;
-
-      window.scrollTo(0, scrollY);
+      body.style.overflow = prevOverflow;
+      body.style.paddingRight = prevPaddingRight;
     };
   }, [open]);
 
@@ -50,6 +47,11 @@ function TransactionSheet({ open, type, editingTransaction, onClose }) {
     : isIncome
       ? 'ثبت درآمد'
       : 'ثبت مصرف';
+
+  // ⭐ نمایش تاریخ (پیش‌فرض یا انتخاب‌شده)
+  const displayDate = prefilledDate
+    ? formatShortDate(prefilledDate)
+    : getTodayShort();
 
   return (
     <AnimatePresence>
@@ -98,7 +100,7 @@ function TransactionSheet({ open, type, editingTransaction, onClose }) {
                   </h2>
 
                   <p className="mt-1 text-[10.5px] font-medium text-[#E3B341] lg:text-[11.5px]">
-                    📅 {getTodayShort()}
+                    📅 {displayDate}
                   </p>
                 </div>
 
@@ -116,6 +118,7 @@ function TransactionSheet({ open, type, editingTransaction, onClose }) {
             <TransactionForm
               type={effectiveType}
               editingTransaction={editingTransaction}
+              prefilledDate={prefilledDate}
               onSuccess={onClose}
             />
           </motion.div>

@@ -21,6 +21,12 @@ export default function ExpenseCategoryChart({ categories = [], fixedHeight }) {
       background: 'transparent',
       fontFamily: 'Vazirmatn, sans-serif',
       parentHeightOffset: 0,
+      animations: {
+        enabled: true,
+        speed: 900,
+        animateGradually: { enabled: false },
+        dynamicAnimation: { enabled: true, speed: 350 },
+      },
     },
     labels,
     colors,

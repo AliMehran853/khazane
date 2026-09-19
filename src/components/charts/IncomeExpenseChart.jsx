@@ -47,6 +47,12 @@ export default function IncomeExpenseChart({
       parentHeightOffset: 0,
       redrawOnParentResize: false,
       redrawOnWindowResize: false,
+      animations: {
+        enabled: true,
+        speed: 900,
+        animateGradually: { enabled: false },
+        dynamicAnimation: { enabled: true, speed: 350 },
+      },
     },
     colors: ['#4FD1BE', '#E2574C'],
 

@@ -15,6 +15,7 @@ import { getTransactions } from '../services/transactionService';
 import { getCategories } from '../services/categoryService';
 import { prepareCategoryChartData } from '../utils/categoryPalette';
 import { exportTransactionsToPDF } from '../services/exportService';
+import { getRange, getWeekRangeFromOffset } from '../utils/dates';
 
 function formatNumber(value) {
   return new Intl.NumberFormat('fa-AF').format(Math.round(value || 0));
@@ -30,6 +31,7 @@ function ExpensesPage() {
   const navigate = useNavigate();
 
   const period = useAppStore((s) => s.period);
+  const weekOffset = useAppStore((s) => s.weekOffset);
   const dataVersion = useAppStore((s) => s.dataVersion);
 
   const {
@@ -37,7 +39,7 @@ function ExpensesPage() {
     trend,
     categories: categorySummary,
     loading,
-  } = useAnalytics({ period, type: 'expense' });
+  } = useAnalytics({ period, type: 'expense', weekOffset });
 
   const [transactions, setTransactions] = useState([]);
   const [categoriesMap, setCategoriesMap] = useState({});
@@ -47,8 +49,17 @@ function ExpensesPage() {
     let cancelled = false;
 
     async function load() {
+      const range =
+        period === 'weekly'
+          ? getWeekRangeFromOffset(weekOffset)
+          : getRange(period);
+
       const [txs, cats] = await Promise.all([
-        getTransactions({ type: 'expense' }),
+        getTransactions({
+          type: 'expense',
+          startDate: range.start,
+          endDate: range.end,
+        }),
         getCategories('expense'),
       ]);
       if (cancelled) return;
@@ -65,7 +76,7 @@ function ExpensesPage() {
     return () => {
       cancelled = true;
     };
-  }, [dataVersion, period]);
+  }, [dataVersion, period, weekOffset]);
 
   const preparedCategories = prepareCategoryChartData(categorySummary);
   const maxTotal = Math.max(...preparedCategories.map((c) => c.total || 0), 1);
@@ -106,7 +117,6 @@ function ExpensesPage() {
       </div>
 
       <div className="flex items-center gap-2">
-        {/* ⭐ سرچ */}
         <button
           type="button"
           onClick={() => navigate('/search')}
@@ -174,7 +184,11 @@ function ExpensesPage() {
                 در حال بارگذاری...
               </div>
             ) : (
-              <ExpenseTrendChart data={trend} period={period} />
+              <ExpenseTrendChart
+                data={trend}
+                period={period}
+                weekOffset={weekOffset}
+              />
             )}
           </div>
         </section>
@@ -197,7 +211,7 @@ function ExpensesPage() {
               <div className="flex h-[220px] items-center justify-center text-center">
                 <div>
                   <p className="text-[13px] font-semibold text-[#8FA39D]">
-                    هنوز مصرفی ثبت نشده است
+                    در این دوره مصرفی ثبت نشده است
                   </p>
                   <p className="mt-1 text-[11px] text-[#5C736C]">
                     نمودار دسته‌بندی بعد از ثبت مصارف نمایش داده می‌شود.
@@ -253,8 +267,8 @@ function ExpensesPage() {
             <TransactionList
               transactions={transactions.slice(0, 8)}
               categoriesMap={categoriesMap}
-              emptyTitle="هنوز مصرفی ثبت نشده است"
-              emptyHint="از دکمه + برای ثبت اولین مصرف استفاده کن."
+              emptyTitle="در این دوره مصرفی ثبت نشده است"
+              emptyHint="از دکمه + برای ثبت مصرف استفاده کن."
             />
           </div>
         </section>
@@ -299,6 +313,7 @@ function ExpensesPage() {
                   <ExpenseTrendChart
                     data={trend}
                     period={period}
+                    weekOffset={weekOffset}
                     fixedHeight={360}
                   />
                 )}
@@ -326,7 +341,7 @@ function ExpensesPage() {
                   <div className="flex h-full items-center justify-center px-4 text-center">
                     <div>
                       <p className="text-[13px] font-semibold text-[#8FA39D]">
-                        هنوز مصرفی ثبت نشده است
+                        در این دوره مصرفی ثبت نشده است
                       </p>
                       <p className="mt-1 text-[11px] text-[#5C736C]">
                         نمودار دسته‌بندی بعد از ثبت مصارف نمایش داده می‌شود.
@@ -418,7 +433,7 @@ function ExpensesPage() {
                   <div className="flex h-full items-center justify-center px-4 text-center">
                     <div>
                       <p className="text-[13px] font-semibold text-[#8FA39D]">
-                        هنوز مصرفی ثبت نشده است
+                        در این دوره مصرفی ثبت نشده است
                       </p>
                       <p className="mt-1 text-[11px] text-[#5C736C]">
                         از دکمه‌ی + در سایدبار استفاده کن.

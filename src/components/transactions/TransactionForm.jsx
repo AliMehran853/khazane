@@ -15,7 +15,6 @@ import {
 } from '../services/transactionService';
 import { useAppStore } from '../store/appStore';
 
-// ⭐ محدودیت توضیحات
 const NOTE_MAX_LENGTH = 200;
 const NOTE_WARN_THRESHOLD = 140;
 const NOTE_DANGER_THRESHOLD = 180;
@@ -31,6 +30,7 @@ const schema = z.object({
 function TransactionForm({
   type: typeProp = 'expense',
   editingTransaction = null,
+  prefilledDate = null,
   onSuccess,
 }) {
   const refreshData = useAppStore((state) => state.refreshData);
@@ -50,7 +50,6 @@ function TransactionForm({
 
   const newCategoryInputRef = useRef(null);
 
-  // ⭐ default values — اگر در حالت ویرایش باشیم از تراکنش می‌گیریم
   const getDefaultValues = () => {
     if (isEditing && editingTransaction) {
       return {
@@ -77,7 +76,6 @@ function TransactionForm({
   const selectedCategory = watch('categoryId');
   const noteValue = watch('note') || '';
 
-  // پیدا کردن اطلاعات دسته‌ی انتخاب‌شده برای placeholder هوشمند
   const selectedCategoryData = categories.find(
     (c) => c.id === selectedCategory,
   );
@@ -86,7 +84,6 @@ function TransactionForm({
     selectedCategoryData?.placeholder ||
     (isIncome ? 'توضیح این درآمد...' : 'توضیح این مصرف...');
 
-  // شمارنده‌ی کاراکتر با رنگ‌بندی هوشمند
   const noteLength = noteValue.length;
   const counterColor =
     noteLength >= NOTE_DANGER_THRESHOLD
@@ -188,16 +185,19 @@ function TransactionForm({
       };
 
       if (isEditing && editingTransaction) {
-        // ⭐ ویرایش
         await updateTransaction(editingTransaction.id, {
           ...payload,
           date: editingTransaction.date,
         });
       } else {
-        // ⭐ ایجاد جدید
+        // ⭐ تاریخ پیش‌فرض اگر داده شده، استفاده کن
+        const dateToUse = prefilledDate
+          ? new Date(prefilledDate)
+          : new Date();
+
         await createTransaction({
           ...payload,
-          date: new Date(),
+          date: dateToUse,
         });
       }
 
@@ -228,7 +228,6 @@ function TransactionForm({
         onSubmit={handleSubmit(onSubmit)}
         className="flex min-h-0 flex-1 flex-col"
       >
-        {/* ==================== ناحیه اسکرول‌شدنی ==================== */}
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-4">
           {/* مبلغ */}
           <div>
@@ -388,7 +387,6 @@ function TransactionForm({
             )}
           </div>
 
-          {/* توضیحات — فقط بعد از انتخاب دسته */}
           {selectedCategory && (
             <div className="animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="mb-1.5 flex items-center justify-between">
@@ -423,7 +421,6 @@ function TransactionForm({
           )}
         </div>
 
-        {/* ==================== ناحیه دکمه ==================== */}
         <div className="shrink-0 px-4 pb-5 pt-4">
           {submitError && (
             <div className="mb-2 rounded-xl border border-[#E2574C]/20 bg-[#E2574C]/[0.08] px-3 py-2 text-[11px] text-[#E2574C]">
@@ -447,7 +444,6 @@ function TransactionForm({
         </div>
       </form>
 
-      {/* ==================== مودال حذف دسته ==================== */}
       {confirmDelete && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-5">
           <div

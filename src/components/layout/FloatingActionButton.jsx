@@ -8,6 +8,8 @@ function FloatingActionButton() {
   const location = useLocation();
 
   const openTransactionSheet = useAppStore((s) => s.openTransactionSheet);
+  const openDateChoice = useAppStore((s) => s.openDateChoice);
+  const weekOffset = useAppStore((s) => s.weekOffset);
 
   if (location.pathname === '/settings') {
     return null;
@@ -15,11 +17,20 @@ function FloatingActionButton() {
 
   const type = location.pathname === '/income' ? 'income' : 'expense';
 
+  function handleClick() {
+    // ⭐ در هفته‌های گذشته، سوال تاریخ بپرس
+    if (weekOffset === 0) {
+      openTransactionSheet(type);
+    } else {
+      openDateChoice(type);
+    }
+  }
+
   return (
     <motion.button
       type="button"
       aria-label={type === 'income' ? 'ثبت درآمد' : 'ثبت مصرف'}
-      onClick={() => openTransactionSheet(type)}
+      onClick={handleClick}
       whileTap={{ scale: 0.92 }}
       whileHover={{ scale: 1.04 }}
       transition={{ duration: 0.16 }}

@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
 import BottomNav from './BottomNav';
 import Sidebar from './Sidebar';
 import FloatingActionButton from './FloatingActionButton';
 import TransactionSheet from '../transactions/TransactionSheet';
+import DateChoiceModal from '../transactions/DateChoiceModal';
 import LockScreen from '../lock/LockScreen';
 import DailyReminderModal from '../dashboard/DailyReminderModal';
 import GreetingToast from '../common/GreetingToast';
@@ -30,7 +32,15 @@ function AppShell() {
   const transactionSheetOpen = useAppStore((s) => s.transactionSheetOpen);
   const transactionSheetType = useAppStore((s) => s.transactionSheetType);
   const editingTransaction = useAppStore((s) => s.editingTransaction);
+  const prefilledDate = useAppStore((s) => s.prefilledDate);
   const closeTransactionSheet = useAppStore((s) => s.closeTransactionSheet);
+
+  const resetWeekOffset = useAppStore((s) => s.resetWeekOffset);
+
+  // ⭐ با هر تغییر صفحه، هفته برگرده به «این هفته»
+  useEffect(() => {
+    resetWeekOffset();
+  }, [location.pathname, resetWeekOffset]);
 
   if (checking) {
     return (
@@ -53,7 +63,6 @@ function AppShell() {
 
       <main className="mx-auto w-full max-w-[420px] pb-24 lg:max-w-none lg:pb-12 lg:pr-[260px]">
         <div className="lg:mx-auto lg:max-w-[1200px] lg:px-8 lg:pt-2">
-          {/* ⭐ بدون انیمیشن — سرعت حداکثر */}
           <div key={location.pathname}>
             <Outlet />
           </div>
@@ -67,8 +76,12 @@ function AppShell() {
         open={transactionSheetOpen}
         type={transactionSheetType}
         editingTransaction={editingTransaction}
+        prefilledDate={prefilledDate}
         onClose={closeTransactionSheet}
       />
+
+      {/* ⭐ انتخاب تاریخ (فقط در هفته‌های گذشته) */}
+      <DateChoiceModal />
 
       <DailyReminderModal
         open={reminderVisible}
