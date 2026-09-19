@@ -7,6 +7,7 @@ import {
   Database,
   Fingerprint,
   LogOut,
+  RotateCcw,
   ShieldCheck,
   Trash2,
   X,
@@ -29,6 +30,7 @@ import { useAppStore } from '../store/appStore';
 import { useSecurityStore } from '../store/securityStore';
 import { useDailyReminder } from '../hooks/useDailyReminder';
 import { useBiometricCheck } from '../hooks/useBiometricCheck';
+import { useHaptic } from '../hooks/useHaptic';
 import { SESSION_UNLOCK_KEY } from '../hooks/useAppLock';
 
 import {
@@ -42,7 +44,7 @@ import {
   setReminderTime,
   exportAllData,
   importAllData,
-  clearAllData,
+  resetApp,
 } from '../services/settingsService';
 
 import {
@@ -62,7 +64,7 @@ import { getTodayShort } from '../utils/dates';
 import { formatTime12, parseTime24, toTime24 } from '../utils/timeFormat';
 
 // ============================================================
-// Body Lock — سبک و بدون reflow
+// Body Lock
 // ============================================================
 
 function lockBody() {
@@ -89,18 +91,15 @@ function lockBody() {
 
 function TimePicker({ value, onChange }) {
   const { hour, minute, period } = parseTime24(value);
-
   const hours = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   const minutes = [0, 15, 30, 45];
 
   function setHour(h) {
     onChange(toTime24(h, minute, period));
   }
-
   function setMinute(m) {
     onChange(toTime24(hour, m, period));
   }
-
   function setPeriod(p) {
     onChange(toTime24(hour, minute, p));
   }
@@ -199,7 +198,6 @@ function PinSetupFlow({ onDone, onCancel }) {
   const [pinValue, setPinValue] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
-
   const PIN_LENGTH = 4;
 
   function handleKey(digit) {
@@ -222,7 +220,6 @@ function PinSetupFlow({ onDone, onCancel }) {
               await savePinToStorage(next);
               onDone?.();
             } catch (err) {
-              console.error('setPin failed:', err);
               setError(err?.message || 'ذخیره رمز ناموفق بود.');
               setPinValue('');
               setFirstPin('');
@@ -245,7 +242,6 @@ function PinSetupFlow({ onDone, onCancel }) {
       <p className="text-[14px] font-bold text-[#F2EFE9]">
         {step === 'enter' ? 'رمز جدید را وارد کنید' : 'رمز را دوباره وارد کنید'}
       </p>
-
       <p className="mt-1.5 text-[11px] text-[#5C736C]">
         {step === 'enter' ? '۴ رقم دلخواه' : 'برای اطمینان، تکرار کنید'}
       </p>
@@ -288,7 +284,7 @@ function PinSetupFlow({ onDone, onCancel }) {
 }
 
 // ============================================================
-// Sheet — بدون fade مشکی
+// Sheet
 // ============================================================
 
 function Sheet({ open, onClose, title, subtitle, children }) {
@@ -320,18 +316,14 @@ function Sheet({ open, onClose, title, subtitle, children }) {
               flex max-h-[88svh] w-auto max-w-[420px] flex-col
               overflow-hidden rounded-[24px] border border-white/[0.07] bg-[#0F211E]
               outline-none
-
               lg:inset-x-auto lg:bottom-auto lg:left-1/2 lg:top-1/2
               lg:max-h-[85vh] lg:w-full lg:max-w-[520px]
               lg:-translate-x-1/2 lg:-translate-y-1/2
             "
-            style={{
-              paddingBottom: 'env(safe-area-inset-bottom)',
-            }}
+            style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <div className="shrink-0 px-4 pt-3 pb-3 lg:px-6 lg:pt-4 lg:pb-4">
               <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/[0.12] lg:hidden" />
-
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   {subtitle && (
@@ -343,7 +335,6 @@ function Sheet({ open, onClose, title, subtitle, children }) {
                     {title}
                   </h2>
                 </div>
-
                 <button
                   type="button"
                   onClick={onClose}
@@ -354,7 +345,6 @@ function Sheet({ open, onClose, title, subtitle, children }) {
                 </button>
               </div>
             </div>
-
             <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-5 lg:px-6 lg:pb-6">
               {children}
             </div>
@@ -364,10 +354,6 @@ function Sheet({ open, onClose, title, subtitle, children }) {
     </AnimatePresence>
   );
 }
-
-// ============================================================
-// Section Title
-// ============================================================
 
 function SectionTitle({ children }) {
   return (
@@ -384,6 +370,7 @@ function SectionTitle({ children }) {
 function SettingsPage() {
   const dataVersion = useAppStore((s) => s.dataVersion);
   const refreshData = useAppStore((s) => s.refreshData);
+  const haptic = useHaptic();
 
   const setLocked = useSecurityStore((s) => s.setLocked);
   const resetSecurity = useSecurityStore((s) => s.reset);
@@ -397,14 +384,12 @@ function SettingsPage() {
   );
 
   const { forceShow: forceShowReminder } = useDailyReminder();
-
   const { available: bioAvailable, checking: bioChecking } = useBiometricCheck();
 
   const [userName, setLocalName] = useState('');
   const [currency, setLocalCurrency] = useState('افغانی');
   const [reminderOn, setLocalReminder] = useState(false);
   const [reminderTime, setLocalReminderTime] = useState('21:00');
-
   const [lockOn, setLocalLock] = useState(false);
   const [pinOn, setLocalPin] = useState(false);
   const [bioOn, setLocalBio] = useState(false);
@@ -415,7 +400,8 @@ function SettingsPage() {
   const [toast, setToast] = useState('');
   const [pinSetupOpen, setPinSetupOpen] = useState(false);
   const [pinSetupFromToggle, setPinSetupFromToggle] = useState(false);
-  const [confirmClear, setConfirmClear] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
 
@@ -489,7 +475,6 @@ function SettingsPage() {
         setLocalLock(true);
         showToast('قفل برنامه فعال شد.');
       } catch (err) {
-        console.error(err);
         showToast('فعال‌سازی قفل ناموفق بود.');
       }
     } else {
@@ -498,7 +483,6 @@ function SettingsPage() {
         setLocalLock(false);
         showToast('قفل برنامه غیرفعال شد.');
       } catch (err) {
-        console.error(err);
         showToast('غیرفعال‌سازی ناموفق بود.');
       }
     }
@@ -510,9 +494,7 @@ function SettingsPage() {
     setLocalPin(true);
     setLocalLock(true);
     await setLockEnabled(true);
-
     setPinEnabledInStore(true);
-
     showToast('رمز تعیین شد و قفل فعال شد.');
     await loadAll();
   }
@@ -547,23 +529,16 @@ function SettingsPage() {
       setLocalBio(true);
       setLocalLock(true);
       await setLockEnabled(true);
-
       setBiometricEnabledInStore(true);
       setBiometricAvailableInStore(true);
-
       showToast('اثر انگشت فعال شد.');
     } catch (err) {
-      console.error('Biometric error:', err);
-
       let message = err?.message || 'ثبت اثر انگشت ناموفق بود.';
-      if (err?.name === 'NotAllowedError') {
-        message = 'لغو شد یا اجازه داده نشد.';
-      } else if (err?.name === 'NotSupportedError') {
+      if (err?.name === 'NotAllowedError') message = 'لغو شد یا اجازه داده نشد.';
+      else if (err?.name === 'NotSupportedError')
         message = 'این دستگاه از اثر انگشت پشتیبانی نمی‌کند.';
-      } else if (err?.name === 'InvalidStateError') {
+      else if (err?.name === 'InvalidStateError')
         message = 'اثر انگشت قبلاً روی این دستگاه ثبت شده است.';
-      }
-
       showToast(message);
     } finally {
       setBusy(false);
@@ -611,7 +586,6 @@ function SettingsPage() {
   async function handleImport(event) {
     const file = event.target.files?.[0];
     if (!file) return;
-
     try {
       const text = await file.text();
       const data = JSON.parse(text);
@@ -626,29 +600,30 @@ function SettingsPage() {
     event.target.value = '';
   }
 
-  async function handleClearAll() {
-    await clearAllData();
-    refreshData();
-    setConfirmClear(false);
-    setSheet(null);
-    showToast('همه‌ی داده‌ها پاک شد.');
+  // ⭐ حالا این دکمه همه‌چیز رو پاک می‌کنه و اپ از صفر شروع می‌شه
+  async function handleResetApp() {
+    setResetting(true);
+    haptic.warning();
+    try {
+      await resetApp();
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      setResetting(false);
+      showToast('شروع مجدد ناموفق بود.');
+    }
   }
 
   async function handleLogout() {
     setConfirmLogout(false);
     setSheet(null);
-
     sessionStorage.removeItem(SESSION_UNLOCK_KEY);
-
     resetSecurity();
-
     setPinEnabledInStore(pinOn);
     setBiometricEnabledInStore(bioOn);
     setBiometricAvailableInStore(bioAvailable);
-
     const useBio = bioOn && bioAvailable;
     setMethod(useBio ? 'biometric' : 'pin');
-
     setLocked(true);
   }
 
@@ -699,7 +674,6 @@ function SettingsPage() {
               checked={lockOn}
               onChange={toggleLock}
             />
-
             <SettingsButtonRow
               icon={Fingerprint}
               title="روش‌های ورود"
@@ -725,7 +699,6 @@ function SettingsPage() {
               onChange={toggleReminder}
               isLast={!reminderOn}
             />
-
             {reminderOn && (
               <SettingsButtonRow
                 icon={Clock}
@@ -745,15 +718,13 @@ function SettingsPage() {
               subtitle="خروجی و بازیابی اطلاعات"
               onClick={() => setSheet('backup')}
             />
-
             <SettingsButtonRow
-              icon={Trash2}
-              title="پاک‌سازی همه داده‌ها"
-              subtitle="حذف کامل تراکنش‌ها و تنظیمات"
+              icon={RotateCcw}
+              title="پاک‌سازی و شروع مجدد"
+              subtitle="همه‌چیز از صفر — مثل اولین نصب"
               tone="danger"
-              onClick={() => setConfirmClear(true)}
+              onClick={() => setConfirmReset(true)}
             />
-
             <AboutCard onClick={() => setAboutOpen(true)} isLast />
           </SettingsGroup>
 
@@ -833,11 +804,11 @@ function SettingsPage() {
                   onClick={() => setSheet('backup')}
                 />
                 <SettingsButtonRow
-                  icon={Trash2}
-                  title="پاک‌سازی همه داده‌ها"
-                  subtitle="حذف کامل تراکنش‌ها و تنظیمات"
+                  icon={RotateCcw}
+                  title="پاک‌سازی و شروع مجدد"
+                  subtitle="همه‌چیز از صفر — مثل اولین نصب"
                   tone="danger"
-                  onClick={() => setConfirmClear(true)}
+                  onClick={() => setConfirmReset(true)}
                 />
                 <AboutCard onClick={() => setAboutOpen(true)} isLast />
               </SettingsGroup>
@@ -972,7 +943,6 @@ function SettingsPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#153029] text-[#8FA39D]">
                 <ShieldCheck size={19} />
               </div>
-
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-semibold text-[#F2EFE9]">
                   رمز عبور
@@ -981,7 +951,6 @@ function SettingsPage() {
                   <StatusBadge active={pinOn} />
                 </div>
               </div>
-
               {pinOn ? (
                 <button
                   type="button"
@@ -1008,7 +977,6 @@ function SettingsPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#153029] text-[#8FA39D]">
                 <Fingerprint size={19} />
               </div>
-
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-semibold text-[#F2EFE9]">
                   اثر انگشت / Face ID
@@ -1028,7 +996,6 @@ function SettingsPage() {
                   )}
                 </div>
               </div>
-
               {bioOn ? (
                 <button
                   type="button"
@@ -1091,9 +1058,10 @@ function SettingsPage() {
                     </p>
                   </div>
                 </div>
-
                 {isActive && (
-                  <span className="text-[11px] font-bold text-[#E3B341]">✓</span>
+                  <span className="text-[11px] font-bold text-[#E3B341]">
+                    ✓
+                  </span>
                 )}
               </button>
             );
@@ -1148,31 +1116,52 @@ function SettingsPage() {
         </div>
       </Sheet>
 
+      {/* ⭐ مودال پاک‌سازی و شروع مجدد */}
       <Sheet
-        open={confirmClear}
-        onClose={() => setConfirmClear(false)}
-        title="پاک‌سازی همه‌ی داده‌ها"
-        subtitle="این عملیات قابل بازگشت نیست"
+        open={confirmReset}
+        onClose={() => (resetting ? null : setConfirmReset(false))}
+        title="پاک‌سازی و شروع مجدد"
+        subtitle="همه‌چیز مثل اولین نصب"
       >
         <p className="rounded-2xl border border-[#E2574C]/20 bg-[#E2574C]/[0.08] p-4 text-[12px] leading-relaxed text-[#E2574C]">
-          تمام تراکنش‌ها، دسته‌بندی‌ها و تنظیمات شما برای همیشه حذف می‌شود.
-          توصیه می‌کنیم قبل از این کار پشتیبان تهیه کنید.
+          با این کار{' '}
+          <span className="font-bold">
+            همه‌ی تراکنش‌ها، دسته‌بندی‌ها، تنظیمات، پروفایل، قفل،
+            یادآوری‌ها و پشتیبان‌ها
+          </span>{' '}
+          پاک می‌شود و برنامه کاملاً از نو شروع می‌شود.
         </p>
+
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-[#0A1614]/60 p-4">
+          <p className="text-[11.5px] leading-relaxed text-[#8FA39D]">
+            بعد از این کار دوباره سؤال‌های اولیه پرسیده می‌شود — دقیقاً انگار
+            همین حالا اپ رو نصب کرده‌ای.
+          </p>
+        </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3">
           <button
             type="button"
-            onClick={() => setConfirmClear(false)}
-            className="rounded-2xl border border-white/[0.08] bg-[#153029] py-3.5 text-[12.5px] font-semibold text-[#8FA39D]"
+            disabled={resetting}
+            onClick={() => setConfirmReset(false)}
+            className="rounded-2xl border border-white/[0.08] bg-[#153029] py-3.5 text-[12.5px] font-semibold text-[#8FA39D] disabled:opacity-50"
           >
             انصراف
           </button>
           <button
             type="button"
-            onClick={handleClearAll}
-            className="rounded-2xl bg-[linear-gradient(155deg,#E2574C,#B8392F)] py-3.5 text-[12.5px] font-bold text-white"
+            disabled={resetting}
+            onClick={handleResetApp}
+            className="flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(155deg,#E2574C,#B8392F)] py-3.5 text-[12.5px] font-bold text-white disabled:opacity-60"
           >
-            بله، پاک کن
+            {resetting ? (
+              '...'
+            ) : (
+              <>
+                <RotateCcw size={14} />
+                بله، شروع مجدد
+              </>
+            )}
           </button>
         </div>
       </Sheet>
@@ -1189,7 +1178,6 @@ function SettingsPage() {
           {pinOn && bioOn ? ' یا ' : ''}
           {bioOn ? 'اثر انگشت' : ''} نیاز خواهید داشت.
         </p>
-
         <div className="mt-4 grid grid-cols-2 gap-3">
           <button
             type="button"

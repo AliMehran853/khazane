@@ -4,7 +4,7 @@ import { X, Code2, Heart, Sparkles } from 'lucide-react';
 
 import AppLogo from '../common/AppLogo';
 import ContactCard from './ContactCard';
-import { APP_NAME, APP_VERSION } from '../utils/constants';
+import { APP_NAME, APP_VERSION, CHANGELOG } from '../utils/constants';
 
 const FEATURES = [
   { emoji: '📊', label: 'نمودارها' },
@@ -62,7 +62,6 @@ export default function AboutModal({ open, onClose }) {
               shadow-2xl
             "
           >
-            {/* هاله‌ی طلایی بالای مودال */}
             <div
               className="pointer-events-none absolute inset-x-0 top-0 h-48"
               style={{
@@ -85,7 +84,6 @@ export default function AboutModal({ open, onClose }) {
             </button>
 
             <div className="relative min-h-0 flex-1 overflow-y-auto px-6 pt-8 pb-6">
-              {/* لوگو + نام */}
               <div className="flex flex-col items-center">
                 <div className="relative">
                   <div className="absolute inset-0 rounded-3xl bg-[#E3B341]/25 blur-2xl" />
@@ -101,7 +99,6 @@ export default function AboutModal({ open, onClose }) {
                 </p>
               </div>
 
-              {/* توضیح اپ */}
               <div className="mt-6 rounded-2xl border border-white/[0.06] bg-[#0A1614]/40 p-4">
                 <p className="text-center text-[12.5px] leading-relaxed text-[#8FA39D]">
                   اپلیکیشن مدیریت درآمد و مصارف شخصی، ساخته شده با علاقه برای
@@ -110,7 +107,6 @@ export default function AboutModal({ open, onClose }) {
                 </p>
               </div>
 
-              {/* ویژگی‌ها */}
               <div className="mt-4 grid grid-cols-3 gap-2.5">
                 {FEATURES.map((f) => (
                   <div
@@ -161,6 +157,43 @@ export default function AboutModal({ open, onClose }) {
                 </div>
               </div>
 
+              {/* ⭐ تغییرات نسخه‌ها */}
+              <div className="mt-6">
+                <h3 className="mb-3 text-center text-[11px] font-bold uppercase tracking-wider text-[#5C736C]">
+                  تغییرات نسخه‌ها
+                </h3>
+
+                <div className="space-y-3">
+                  {CHANGELOG.map((log) => (
+                    <div
+                      key={log.version}
+                      className="rounded-2xl border border-white/[0.06] bg-[#0A1614]/40 p-4"
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="rounded-lg bg-[#E3B341]/[0.14] px-2 py-0.5 text-[11px] font-bold text-[#E3B341]">
+                          نسخه {log.version}
+                        </span>
+                        <span className="text-[10.5px] text-[#5C736C]">
+                          {log.date}
+                        </span>
+                      </div>
+
+                      <ul className="space-y-1">
+                        {log.items.map((item, i) => (
+                          <li
+                            key={i}
+                            className="flex items-start gap-2 text-[11.5px] leading-relaxed text-[#8FA39D]"
+                          >
+                            <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-[#E3B341]/60" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* ارتباط */}
               <div className="mt-5">
                 <h3 className="mb-3 text-center text-[11px] font-bold uppercase tracking-wider text-[#5C736C]">
@@ -169,7 +202,6 @@ export default function AboutModal({ open, onClose }) {
                 <ContactCard />
               </div>
 
-              {/* فوتر */}
               <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-[10.5px] text-[#5C736C]">
                 ساخته شده با
                 <Heart size={11} className="fill-[#E2574C] text-[#E2574C]" />

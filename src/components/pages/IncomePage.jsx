@@ -32,7 +32,7 @@ function IncomePage() {
   const weekOffset = useAppStore((s) => s.weekOffset);
   const dataVersion = useAppStore((s) => s.dataVersion);
 
-  const { summary, trend, loading } = useAnalytics({
+  const { summary, trend, comparison, loading } = useAnalytics({
     period,
     type: 'income',
     weekOffset,
@@ -46,7 +46,6 @@ function IncomePage() {
     let cancelled = false;
 
     async function load() {
-      // ⭐ فیلتر بر اساس دوره
       const range =
         period === 'weekly'
           ? getWeekRangeFromOffset(weekOffset)
@@ -99,6 +98,13 @@ function IncomePage() {
       setExporting(false);
     }
   }
+
+  const incomeChange = comparison
+    ? {
+        current: comparison.current.income,
+        previous: comparison.previous.income,
+      }
+    : null;
 
   const Header = (
     <header className="flex items-start justify-between gap-3">
@@ -163,6 +169,7 @@ function IncomePage() {
             icon={ArrowDownLeft}
             tone="income"
             featured
+            change={incomeChange}
           />
         </section>
 
@@ -216,6 +223,7 @@ function IncomePage() {
               icon={ArrowDownLeft}
               tone="income"
               featured
+              change={incomeChange}
             />
           </div>
         </div>

@@ -9,6 +9,8 @@ import {
 
 import AppLogo from '../common/AppLogo';
 import { useAppStore } from '../store/appStore';
+import { useHaptic } from '../hooks/useHaptic';
+import { APP_VERSION } from '../utils/constants';
 
 const items = [
   { label: 'خانه', to: '/', icon: Home, end: true },
@@ -18,8 +20,15 @@ const items = [
 ];
 
 function SidebarItem({ label, to, icon: Icon, end = false }) {
+  const haptic = useHaptic();
+
   return (
-    <NavLink to={to} end={end} className="block">
+    <NavLink
+      to={to}
+      end={end}
+      className="block"
+      onClick={() => haptic.tap()}
+    >
       {({ isActive }) => (
         <div
           className={[
@@ -55,6 +64,8 @@ function SidebarItem({ label, to, icon: Icon, end = false }) {
 
 function Sidebar() {
   const location = useLocation();
+  const haptic = useHaptic();
+
   const openTransactionSheet = useAppStore((s) => s.openTransactionSheet);
   const openDateChoice = useAppStore((s) => s.openDateChoice);
   const weekOffset = useAppStore((s) => s.weekOffset);
@@ -63,6 +74,8 @@ function Sidebar() {
   const buttonLabel = type === 'income' ? 'ثبت درآمد' : 'ثبت مصرف';
 
   function handleClick() {
+    haptic.medium();
+
     if (weekOffset === 0) {
       openTransactionSheet(type);
     } else {
@@ -117,7 +130,7 @@ function Sidebar() {
 
       <div className="px-5 pb-5 pt-1">
         <p className="text-center text-[10.5px] leading-relaxed text-[#5C736C]">
-          خزانه • نسخه ۱.۰ • کاملاً آفلاین
+          خزانه • نسخه {APP_VERSION} • کاملاً آفلاین
         </p>
       </div>
     </aside>

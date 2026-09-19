@@ -38,6 +38,7 @@ function ExpensesPage() {
     summary,
     trend,
     categories: categorySummary,
+    comparison,
     loading,
   } = useAnalytics({ period, type: 'expense', weekOffset });
 
@@ -80,6 +81,13 @@ function ExpensesPage() {
 
   const preparedCategories = prepareCategoryChartData(categorySummary);
   const maxTotal = Math.max(...preparedCategories.map((c) => c.total || 0), 1);
+
+  const expenseChange = comparison
+    ? {
+        current: comparison.current.expense,
+        previous: comparison.previous.expense,
+      }
+    : null;
 
   async function handleExportPDF() {
     if (transactions.length === 0) return;
@@ -168,6 +176,7 @@ function ExpensesPage() {
             icon={ArrowUpRight}
             tone="expense"
             featured
+            change={expenseChange}
           />
         </section>
 
@@ -288,6 +297,7 @@ function ExpensesPage() {
               icon={ArrowUpRight}
               tone="expense"
               featured
+              change={expenseChange}
             />
           </div>
         </div>

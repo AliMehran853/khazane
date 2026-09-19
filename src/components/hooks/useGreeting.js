@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { getPeriodForHour } from '../utils/greetings';
-import { getUserName } from '../services/settingsService';
+import {
+  getUserName,
+  hasSeenWelcome,
+  markWelcomeSeen,
+} from '../services/settingsService';
 import { useAppStore } from '../store/appStore';
 
 const STORAGE_SHOWN_KEY = 'khazane_greetings_shown';
@@ -50,16 +54,10 @@ function saveCounter(counter) {
   }
 }
 
-/**
- * useGreeting
- * @param {{ enabled?: boolean }} options
- *   enabled: فقط وقتی true باشه چک می‌کنه (بعد از unlock)
- */
 export function useGreeting({ enabled = true } = {}) {
   const [visible, setVisible] = useState(false);
   const [greeting, setGreeting] = useState(null);
 
-  // ⭐ با هر refreshData (مثلاً ذخیره‌ی اسم) دوباره چک می‌شه
   const dataVersion = useAppStore((s) => s.dataVersion);
 
   useEffect(() => {
@@ -70,22 +68,32 @@ export function useGreeting({ enabled = true } = {}) {
       try {
         const rawName = await getUserName();
         const name = String(rawName || '').trim();
-        if (!name) {
-          console.log('[Greeting] نام کاربر ست نشده — پیام نمایش داده نمی‌شود');
-          return;
-        }
+        if (!name) return;
         if (cancelled) return;
 
+        // ⭐ پیام خوش‌آمدگویی مخصوص — فقط یک بار پس از onboarding
+        const seenWelcome = await hasSeenWelcome();
+        if (!seenWelcome) {
+          await markWelcomeSeen();
+          if (cancelled) return;
+
+          setGreeting({
+            name,
+            greeting: 'خوش آمدی',
+            emoji: '👋',
+            message:
+              'این اولین روز تو با خزانه‌ست. هر روز یه پیام کوچیک برات داریم — چه برای انگیزه، چه برای یادآوری.',
+          });
+          setVisible(true);
+          return;
+        }
+
+        // ... منطق معمولی ۶ بازه × ۳۰ پیام
         const period = getPeriodForHour(new Date().getHours());
         if (!period.messages?.length) return;
 
         const shown = loadShown();
-        if (shown[period.id]) {
-          console.log(
-            `[Greeting] بازه‌ی «${period.id}» امروز قبلاً نمایش داده شده`,
-          );
-          return;
-        }
+        if (shown[period.id]) return;
 
         const counter = loadCounter();
         const idx = Number(counter[period.id]) || 0;
@@ -100,7 +108,6 @@ export function useGreeting({ enabled = true } = {}) {
 
         if (cancelled) return;
 
-        console.log(`[Greeting] نمایش پیام بازه‌ی «${period.id}»`);
         setGreeting({
           name,
           greeting: period.greeting,
@@ -123,7 +130,6 @@ export function useGreeting({ enabled = true } = {}) {
 
   const dismiss = useCallback(() => setVisible(false), []);
 
-  // ⭐ برای تست از تنظیمات
   const resetToday = useCallback(() => {
     try {
       localStorage.removeItem(STORAGE_SHOWN_KEY);

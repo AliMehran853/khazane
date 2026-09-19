@@ -254,3 +254,27 @@ select {
   background: rgba(227, 179, 65, 0.24);
   color: #f2efe9;
 }
+
+/* =========================================================
+   Skeleton Shimmer — انیمیشن لودینگ
+   ========================================================= */
+
+@keyframes kh-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.kh-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(242, 239, 233, 0.05) 0%,
+    rgba(242, 239, 233, 0.11) 50%,
+    rgba(242, 239, 233, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: kh-shimmer 1.6s ease-in-out infinite;
+}

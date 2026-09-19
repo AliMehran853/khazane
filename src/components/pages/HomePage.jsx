@@ -14,9 +14,11 @@ import IncomeExpenseChart from '../charts/IncomeExpenseChart';
 import BalanceHero from '../dashboard/BalanceHero';
 import RecentTransactions from '../dashboard/RecentTransactions';
 import TransactionItem from '../transactions/TransactionItem';
+import { SkeletonChart, SkeletonList } from '../common/Skeleton';
 
 import { useAppStore } from '../store/appStore';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useAllTimeSummary } from '../hooks/useAllTimeSummary';
 import { getCategories } from '../services/categoryService';
 import { getTransactions } from '../services/transactionService';
 import { exportTransactionsToPDF } from '../services/exportService';
@@ -39,10 +41,10 @@ function HomePage() {
   const weekOffset = useAppStore((s) => s.weekOffset);
   const dataVersion = useAppStore((s) => s.dataVersion);
 
-  const { summary, trend, recentTransactions, loading } = useAnalytics({
-    period,
-    weekOffset,
-  });
+  const { summary, trend, recentTransactions, comparison, loading } =
+    useAnalytics({ period, weekOffset });
+
+  const { summary: allTime } = useAllTimeSummary();
 
   const [categoriesMap, setCategoriesMap] = useState({});
   const [exporting, setExporting] = useState(false);
@@ -157,28 +159,50 @@ function HomePage() {
     <div className="px-4 pb-6 pt-6 lg:px-0 lg:pt-8">
       {Header}
 
+      {/* ============================================ */}
+      {/* موبایل — چیدمان جدید                          */}
+      {/* ============================================ */}
       <div className="lg:hidden">
-        <BalanceHero summary={summary} period={period} />
-
+        {/* ۱. انتخاب بازه (اول!) */}
         <section className="mt-6">
           <PeriodTabs />
         </section>
 
-        <section className="mt-4 grid grid-cols-2 gap-3">
-          <StatCard
-            title="کل درآمد"
-            value={formatNumber(summary.income)}
-            icon={ArrowDownLeft}
-            tone="income"
-          />
-          <StatCard
-            title="کل مصرف"
-            value={formatNumber(summary.expense)}
-            icon={ArrowUpRight}
-            tone="expense"
-          />
+        {/* ۲. BalanceHero برای بازه‌ی انتخاب‌شده */}
+        <BalanceHero
+          summary={summary}
+          period={period}
+          weekOffset={weekOffset}
+          comparison={comparison}
+        />
+
+        {/* ۳. مجموع کل با برچسب واضح */}
+        <section className="mt-6">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="h-px flex-1 bg-white/[0.06]" />
+            <span className="text-[10.5px] font-semibold text-[#5C736C]">
+              مجموع از ابتدا تا کنون
+            </span>
+            <span className="h-px flex-1 bg-white/[0.06]" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <StatCard
+              title="کل درآمد"
+              value={formatNumber(allTime.income)}
+              icon={ArrowDownLeft}
+              tone="income"
+            />
+            <StatCard
+              title="کل مصرف"
+              value={formatNumber(allTime.expense)}
+              icon={ArrowUpRight}
+              tone="expense"
+            />
+          </div>
         </section>
 
+        {/* ۴. نمودار روند */}
         <section className="mt-6">
           <div className="flex items-center justify-between">
             <h2 className="text-[15px] font-bold text-[#F2EFE9]">روند مالی</h2>
@@ -188,9 +212,7 @@ function HomePage() {
           </div>
           <div className="mt-3 overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E] py-3">
             {loading ? (
-              <div className="flex h-[250px] items-center justify-center text-[12px] text-[#5C736C]">
-                در حال بارگذاری...
-              </div>
+              <SkeletonChart height={250} />
             ) : (
               <IncomeExpenseChart
                 data={trend}
@@ -201,43 +223,63 @@ function HomePage() {
           </div>
         </section>
 
-        <RecentTransactions
-          transactions={recentTransactions}
-          categoriesMap={categoriesMap}
-          limit={5}
-          showNavigateButton={false}
-        />
+        {/* ۵. تراکنش‌های اخیر */}
+        {loading ? (
+          <section className="mt-6">
+            <h2 className="mb-3 text-[15px] font-bold text-[#F2EFE9]">
+              تراکنش‌های اخیر
+            </h2>
+            <SkeletonList rows={4} />
+          </section>
+        ) : (
+          <RecentTransactions
+            transactions={recentTransactions}
+            categoriesMap={categoriesMap}
+            limit={5}
+            showNavigateButton={false}
+          />
+        )}
       </div>
 
+      {/* ============================================ */}
+      {/* دسکتاپ                                        */}
+      {/* ============================================ */}
       <div className="hidden lg:mt-6 lg:block lg:space-y-4">
         <div className="grid grid-cols-12 items-stretch gap-4">
           <div className="col-span-4 flex flex-col gap-3">
-            <div className="grid flex-1 grid-cols-2 gap-3">
-              <StatCard
-                title="کل درآمد"
-                value={formatNumber(summary.income)}
-                icon={ArrowDownLeft}
-                tone="income"
-              />
-              <StatCard
-                title="کل مصرف"
-                value={formatNumber(summary.expense)}
-                icon={ArrowUpRight}
-                tone="expense"
-              />
-            </div>
-
             <PeriodTabs forceTabs />
           </div>
 
-          <div className="col-span-8">
-            <BalanceHero
-              summary={summary}
-              period={period}
-              variant="desktop"
+          <div className="col-span-4">
+            <StatCard
+              title="کل درآمد"
+              value={formatNumber(allTime.income)}
+              icon={ArrowDownLeft}
+              tone="income"
+              featured
+              fillHeight
+            />
+          </div>
+
+          <div className="col-span-4">
+            <StatCard
+              title="کل مصرف"
+              value={formatNumber(allTime.expense)}
+              icon={ArrowUpRight}
+              tone="expense"
+              featured
+              fillHeight
             />
           </div>
         </div>
+
+        <BalanceHero
+          summary={summary}
+          period={period}
+          weekOffset={weekOffset}
+          comparison={comparison}
+          variant="desktop"
+        />
 
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-8">
@@ -253,9 +295,7 @@ function HomePage() {
 
               <div className="min-h-0 flex-1 px-2 pb-2">
                 {loading ? (
-                  <div className="flex h-full items-center justify-center text-[13px] text-[#5C736C]">
-                    در حال بارگذاری...
-                  </div>
+                  <SkeletonChart height={400} />
                 ) : (
                   <IncomeExpenseChart
                     data={trend}
@@ -282,7 +322,9 @@ function HomePage() {
               <div className="mx-5 h-px shrink-0 bg-white/[0.06]" />
 
               <div className="min-h-0 flex-1 overflow-y-auto">
-                {recentTransactions.length === 0 ? (
+                {loading ? (
+                  <SkeletonList rows={6} />
+                ) : recentTransactions.length === 0 ? (
                   <div className="flex h-full items-center justify-center px-4 text-center">
                     <div>
                       <p className="text-[13px] font-semibold text-[#8FA39D]">

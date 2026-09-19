@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
 import BottomNav from './BottomNav';
@@ -9,11 +9,14 @@ import DateChoiceModal from '../transactions/DateChoiceModal';
 import LockScreen from '../lock/LockScreen';
 import DailyReminderModal from '../dashboard/DailyReminderModal';
 import GreetingToast from '../common/GreetingToast';
+import OnboardingFlow from '../onboarding/OnboardingFlow';
 
 import { useAppStore } from '../store/appStore';
 import { useAppLock } from '../hooks/useAppLock';
 import { useDailyReminder } from '../hooks/useDailyReminder';
 import { useGreeting } from '../hooks/useGreeting';
+
+import { isOnboardingCompleted } from '../services/settingsService';
 
 // ⭐ فقط بعد از unlock رندر می‌شه
 function GreetingHost() {
@@ -36,13 +39,36 @@ function AppShell() {
   const closeTransactionSheet = useAppStore((s) => s.closeTransactionSheet);
 
   const resetWeekOffset = useAppStore((s) => s.resetWeekOffset);
+  const refreshData = useAppStore((s) => s.refreshData);
+  const dataVersion = useAppStore((s) => s.dataVersion);
+
+  // ⭐ چک onboarding
+  const [onboardingLoading, setOnboardingLoading] = useState(true);
+  const [onboardingCompleted, setLocalOnboardingCompleted] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    isOnboardingCompleted()
+      .then((done) => {
+        if (cancelled) return;
+        setLocalOnboardingCompleted(done);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setOnboardingLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [dataVersion]);
 
   // ⭐ با هر تغییر صفحه، هفته برگرده به «این هفته»
   useEffect(() => {
     resetWeekOffset();
   }, [location.pathname, resetWeekOffset]);
 
-  if (checking) {
+  // در حال بررسی قفل یا onboarding
+  if (checking || onboardingLoading) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-[#0A1614]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/[0.1] border-t-[#E3B341]" />
@@ -52,6 +78,31 @@ function AppShell() {
 
   if (locked) {
     return <LockScreen />;
+  }
+
+  // ⭐ اگه onboarding تکمیل نشده → فقط OnboardingFlow + Sheet
+  if (!onboardingCompleted) {
+    return (
+      <>
+        <OnboardingFlow
+          onComplete={() => {
+            setLocalOnboardingCompleted(true);
+            refreshData();
+          }}
+        />
+
+        {/* برای اینکه کاربر بتونه در مرحله‌ی درآمد/مصرف ثبت کنه */}
+        <TransactionSheet
+          open={transactionSheetOpen}
+          type={transactionSheetType}
+          editingTransaction={editingTransaction}
+          prefilledDate={prefilledDate}
+          onClose={closeTransactionSheet}
+        />
+
+        <DateChoiceModal />
+      </>
+    );
   }
 
   return (
@@ -80,7 +131,6 @@ function AppShell() {
         onClose={closeTransactionSheet}
       />
 
-      {/* ⭐ انتخاب تاریخ (فقط در هفته‌های گذشته) */}
       <DateChoiceModal />
 
       <DailyReminderModal

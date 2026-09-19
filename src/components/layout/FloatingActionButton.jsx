@@ -3,9 +3,11 @@ import { Plus } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
 import { useAppStore } from '../store/appStore';
+import { useHaptic } from '../hooks/useHaptic';
 
 function FloatingActionButton() {
   const location = useLocation();
+  const haptic = useHaptic();
 
   const openTransactionSheet = useAppStore((s) => s.openTransactionSheet);
   const openDateChoice = useAppStore((s) => s.openDateChoice);
@@ -18,7 +20,8 @@ function FloatingActionButton() {
   const type = location.pathname === '/income' ? 'income' : 'expense';
 
   function handleClick() {
-    // ⭐ در هفته‌های گذشته، سوال تاریخ بپرس
+    haptic.medium();
+
     if (weekOffset === 0) {
       openTransactionSheet(type);
     } else {

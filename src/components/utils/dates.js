@@ -129,6 +129,58 @@ export function formatWeekRange(start, end) {
 }
 
 // ============================================================
+// ⭐ متن توصیفی مقایسه
+//
+//   این هفته      → «این هفته نسبت به هفته‌ی گذشته»
+//   هفته‌ی گذشته  → «هفته‌ی گذشته نسبت به این هفته»
+//   ۴ هفته پیش    → «۴ هفته پیش نسبت به این هفته»
+// ============================================================
+
+export function getComparisonLabel(period, weekOffset) {
+  if (period === 'weekly') {
+    if (weekOffset === 0) return 'این هفته نسبت به هفته‌ی گذشته';
+    if (weekOffset === -1) return 'هفته‌ی گذشته نسبت به این هفته';
+
+    const n = Math.abs(weekOffset);
+    return `${FA_NUM.format(n)} هفته پیش نسبت به این هفته`;
+  }
+
+  if (period === 'monthly') {
+    return 'این ماه نسبت به ماه گذشته';
+  }
+
+  if (period === 'yearly') {
+    return 'امسال نسبت به سال گذشته';
+  }
+
+  return '';
+}
+
+// ============================================================
+// دوره‌ی قبل (برای حالت این هفته / ماه / سال)
+// ============================================================
+
+export function getPreviousPeriodDate(period, baseDate) {
+  const d = new Date(baseDate || new Date());
+
+  if (period === 'weekly') {
+    d.setDate(d.getDate() - 7);
+    return d;
+  }
+
+  if (period === 'monthly') {
+    return addMonths(d, -1);
+  }
+
+  if (period === 'yearly') {
+    d.setFullYear(d.getFullYear() - 1);
+    return d;
+  }
+
+  return d;
+}
+
+// ============================================================
 // روزهای هفته
 // ============================================================
 
@@ -220,10 +272,6 @@ export function getTodayShort() {
   return `${dayName} ${dayNum} ${monthName}`;
 }
 
-// ============================================================
-// فرمت‌های تاریخ مشخص
-// ============================================================
-
 export function formatShortDate(dateInput) {
   const d = new Date(dateInput);
   const dayName = PERSIAN_DAYS[d.getDay()];
@@ -244,7 +292,7 @@ export function formatFullDate(dateInput) {
 }
 
 // ============================================================
-// ساعت ۱۲ ساعته — export می‌کنیم
+// ساعت
 // ============================================================
 
 export function formatTime12(dateInput) {
@@ -262,11 +310,7 @@ export function formatFullDateTime(dateInput) {
 }
 
 // ============================================================
-// ⭐ فرمت تاریخ تراکنش — همیشه با تاریخ
-//    امروز • ۲:۳۷ عصر
-//    دیروز • ۹:۱۵ صبح
-//    پنجشنبه ۲۶ سنبله • ۱۰:۴۲ صبح
-//    پنجشنبه ۲۶ سنبله ۱۴۰۳
+// فرمت تاریخ تراکنش
 // ============================================================
 
 export function formatTransactionDate(dateInput) {

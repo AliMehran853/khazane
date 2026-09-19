@@ -5,6 +5,7 @@ import {
   getIncomeExpenseTrend,
   getPeriodSummary,
   getRecentTransactions,
+  getPeriodComparison,
 } from '../services/analyticsService';
 import { useAppStore } from '../store/appStore';
 import { getWeekBaseDate } from '../utils/dates';
@@ -26,16 +27,15 @@ export function useAnalytics({
   const [trend, setTrend] = useState([]);
   const [categories, setCategories] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
+  const [comparison, setComparison] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ⭐ تاریخ پایه برای هفته‌ی انتخابی
   const baseDate = useMemo(() => {
     if (period !== 'weekly') return new Date();
     if (weekOffset === 0) return new Date();
     return getWeekBaseDate(weekOffset);
   }, [period, weekOffset]);
 
-  // ⭐ برای وابستگی useEffect (چون Date object هر رندر متفاوته)
   const baseTime = baseDate.getTime();
 
   useEffect(() => {
@@ -44,18 +44,26 @@ export function useAnalytics({
     async function load() {
       try {
         setLoading(true);
-        const [summaryData, trendData, categoryData, recentData] =
-          await Promise.all([
-            getPeriodSummary({ period, baseDate }),
-            getIncomeExpenseTrend({ period, type, categoryId, baseDate }),
-            getCategorySummary({ period, type: type || 'expense', baseDate }),
-            getRecentTransactions({ period, baseDate }),
-          ]);
+        const [
+          summaryData,
+          trendData,
+          categoryData,
+          recentData,
+          comparisonData,
+        ] = await Promise.all([
+          getPeriodSummary({ period, baseDate }),
+          getIncomeExpenseTrend({ period, type, categoryId, baseDate }),
+          getCategorySummary({ period, type: type || 'expense', baseDate }),
+          getRecentTransactions({ period, baseDate }),
+          // ⭐ weekOffset رو پاس می‌دیم تا baseline درست انتخاب بشه
+          getPeriodComparison({ period, baseDate, weekOffset }),
+        ]);
         if (cancelled) return;
         setSummary(summaryData);
         setTrend(trendData);
         setCategories(categoryData);
         setRecentTransactions(recentData);
+        setComparison(comparisonData);
       } catch (error) {
         console.error('Analytics loading failed:', error);
       } finally {
@@ -68,7 +76,15 @@ export function useAnalytics({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [period, type, categoryId, dataVersion, baseTime]);
+  }, [period, type, categoryId, dataVersion, baseTime, weekOffset]);
 
-  return { summary, trend, categories, recentTransactions, loading, baseDate };
+  return {
+    summary,
+    trend,
+    categories,
+    recentTransactions,
+    comparison,
+    loading,
+    baseDate,
+  };
 }

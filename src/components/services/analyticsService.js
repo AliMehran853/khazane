@@ -6,6 +6,7 @@ import {
   getYearMonths,
   startOfDay,
   endOfDay,
+  getPreviousPeriodDate,
 } from '../utils/dates';
 
 // ============================================================
@@ -57,6 +58,30 @@ export async function getPeriodSummary({
 }
 
 // ============================================================
+// ⭐ خلاصه‌ی کل — مجموع همه‌ی دوره‌ها
+// ============================================================
+
+export async function getAllTimeSummary({ memberId = 'self' } = {}) {
+  const transactions = await getMemberTransactions(memberId);
+
+  let income = 0;
+  let expense = 0;
+
+  for (const t of transactions) {
+    const amount = Number(t.amount) || 0;
+    if (t.type === 'income') income += amount;
+    else if (t.type === 'expense') expense += amount;
+  }
+
+  return {
+    income,
+    expense,
+    balance: income - expense,
+    transactionCount: transactions.length,
+  };
+}
+
+// ============================================================
 // خلاصه دسته‌بندی‌ها
 // ============================================================
 
@@ -75,7 +100,6 @@ export async function getCategorySummary({
     if (t.type !== type) continue;
     const d = new Date(t.date);
     if (d < start || d > end) continue;
-
     const current = totals.get(t.categoryId) || 0;
     totals.set(t.categoryId, current + Number(t.amount));
   }
@@ -90,7 +114,7 @@ export async function getCategorySummary({
 }
 
 // ============================================================
-// روند درآمد و مصرف (با isCurrent)
+// روند درآمد و مصرف
 // ============================================================
 
 export async function getIncomeExpenseTrend({
@@ -103,7 +127,6 @@ export async function getIncomeExpenseTrend({
   const todayKey = today.toDateString();
   const refDate = baseDate || today;
 
-  // -------- هفتگی: ۷ روز هفته --------
   if (period === 'weekly') {
     const days = getWeekDays(refDate);
     return days.map((day) => {
@@ -118,7 +141,6 @@ export async function getIncomeExpenseTrend({
     });
   }
 
-  // -------- ماهانه: روزهای ماه --------
   if (period === 'monthly') {
     const days = getMonthDays(refDate);
     return days.map((day) => {
@@ -133,7 +155,6 @@ export async function getIncomeExpenseTrend({
     });
   }
 
-  // -------- سالانه: ۱۲ ماه --------
   if (period === 'yearly') {
     const months = getYearMonths(refDate);
     return months.map((m) => ({
@@ -158,7 +179,6 @@ export async function getRecentTransactions({
   baseDate,
 } = {}) {
   const transactions = await getMemberTransactions(memberId);
-
   let filtered = transactions;
 
   if (period) {
@@ -172,4 +192,50 @@ export async function getRecentTransactions({
   return filtered
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, limit);
+}
+
+// ============================================================
+// ⭐ مقایسه با دوره‌ی مرجع
+//
+//   این هفته     → مقایسه با هفته‌ی گذشته
+//   هفته‌ی گذشته → مقایسه با این هفته‌ی جاری
+//   ۴ هفته پیش   → مقایسه با این هفته‌ی جاری
+// ============================================================
+
+export async function getPeriodComparison({
+  period = 'weekly',
+  memberId = 'self',
+  baseDate,
+  weekOffset = 0,
+} = {}) {
+  const refDate = baseDate || new Date();
+
+  let baselineDate;
+
+  if (period === 'weekly' && weekOffset < 0) {
+    // ⭐ کاربر در یک هفته‌ی گذشته → مقایسه با این هفته‌ی جاری
+    baselineDate = new Date();
+  } else {
+    // این هفته یا ماه/سال → مقایسه با دوره‌ی قبل
+    baselineDate = getPreviousPeriodDate(period, refDate);
+  }
+
+  const [current, previous] = await Promise.all([
+    getPeriodSummary({ period, memberId, baseDate: refDate }),
+    getPeriodSummary({ period, memberId, baseDate: baselineDate }),
+  ]);
+
+  function pct(curr, prev) {
+    if (prev === 0) {
+      return curr === 0 ? 0 : null;
+    }
+    return ((curr - prev) / prev) * 100;
+  }
+
+  return {
+    current,
+    previous,
+    incomeChange: pct(current.income, previous.income),
+    expenseChange: pct(current.expense, previous.expense),
+  };
 }
