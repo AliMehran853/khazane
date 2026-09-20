@@ -110,10 +110,10 @@ function ExpensesPage() {
   const Header = (
     <header className="flex items-start justify-between gap-3">
       <div>
-        <p className="text-[11px] text-[#5C736C] lg:text-[12px]">
+        <p className="text-[11px] text-[#64748B] lg:text-[12px]">
           مدیریت هزینه‌ها
         </p>
-        <h1 className="mt-1 text-[21px] font-bold text-[#F2EFE9] lg:text-[26px]">
+        <h1 className="mt-1 text-[21px] font-bold text-[#F8FAFC] lg:text-[26px]">
           مصارف
         </h1>
       </div>
@@ -124,11 +124,10 @@ function ExpensesPage() {
           onClick={() => navigate('/search')}
           aria-label="جستجو"
           className="
-            flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl
-            border border-white/[0.06] bg-[#0F211E] text-[#8FA39D]
-            transition-colors hover:text-[#E3B341]
-            active:scale-95
-            lg:h-10 lg:w-10
+            glass flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl
+            text-[#94A3B8] transition-colors
+            hover:border-[#00D1A7]/30 hover:text-[#00D1A7]
+            active:scale-95 lg:h-10 lg:w-10
           "
         >
           <Search size={18} strokeWidth={1.9} />
@@ -139,11 +138,10 @@ function ExpensesPage() {
           onClick={handleExportPDF}
           disabled={exporting || transactions.length === 0}
           className="
-            flex h-11 shrink-0 items-center gap-2 rounded-2xl
-            border border-white/[0.06] bg-[#0F211E] px-3.5
-            text-[11.5px] font-semibold text-[#E3B341]
-            active:scale-95 disabled:opacity-40
-            lg:h-10 lg:text-[12px]
+            glass flex h-11 shrink-0 items-center gap-2 rounded-2xl px-3.5
+            text-[11.5px] font-semibold text-[#00D1A7]
+            transition-all hover:border-[#00D1A7]/30
+            active:scale-95 disabled:opacity-40 lg:h-10 lg:text-[12px]
           "
         >
           <FileText size={17} strokeWidth={1.9} />
@@ -182,14 +180,14 @@ function ExpensesPage() {
 
         <section className="mt-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-[15px] font-bold text-[#F2EFE9]">روند مصارف</h2>
-            <span className="text-[11px] text-[#5C736C]">
+            <h2 className="text-[15px] font-bold text-[#F8FAFC]">روند مصارف</h2>
+            <span className="text-[11px] text-[#64748B]">
               {getPeriodOffsetLabel(period, periodOffset)}
             </span>
           </div>
-          <div className="mt-3 overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E] py-3">
+          <div className="glass mt-3 overflow-hidden rounded-[24px] py-3">
             {loading ? (
-              <div className="flex h-[230px] items-center justify-center text-[12px] text-[#5C736C]">
+              <div className="flex h-[230px] items-center justify-center text-[12px] text-[#64748B]">
                 در حال بارگذاری...
               </div>
             ) : (
@@ -204,25 +202,25 @@ function ExpensesPage() {
 
         <section className="mt-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-[15px] font-bold text-[#F2EFE9]">
+            <h2 className="text-[15px] font-bold text-[#F8FAFC]">
               دسته‌بندی مصارف
             </h2>
-            <span className="text-[11px] text-[#5C736C]">
+            <span className="text-[11px] text-[#64748B]">
               {getPeriodOffsetLabel(period, periodOffset)}
             </span>
           </div>
-          <div className="mt-3 overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E] py-3">
+          <div className="glass mt-3 overflow-hidden rounded-[24px] py-3">
             {loading ? (
-              <div className="flex h-[260px] items-center justify-center text-[12px] text-[#5C736C]">
+              <div className="flex h-[260px] items-center justify-center text-[12px] text-[#64748B]">
                 در حال بارگذاری...
               </div>
             ) : categorySummary.length === 0 ? (
               <div className="flex h-[220px] items-center justify-center text-center">
                 <div>
-                  <p className="text-[13px] font-semibold text-[#8FA39D]">
+                  <p className="text-[13px] font-semibold text-[#94A3B8]">
                     در این دوره مصرفی ثبت نشده است
                   </p>
-                  <p className="mt-1 text-[11px] text-[#5C736C]">
+                  <p className="mt-1 text-[11px] text-[#64748B]">
                     نمودار دسته‌بندی بعد از ثبت مصارف نمایش داده می‌شود.
                   </p>
                 </div>
@@ -235,15 +233,15 @@ function ExpensesPage() {
 
         {preparedCategories.length > 0 && (
           <section className="mt-6">
-            <h2 className="text-[15px] font-bold text-[#F2EFE9]">دسته‌ها</h2>
+            <h2 className="text-[15px] font-bold text-[#F8FAFC]">دسته‌ها</h2>
 
-            <div className="mt-3 space-y-3 rounded-[24px] border border-white/[0.06] bg-[#0F211E] p-4">
+            <div className="glass mt-3 space-y-3 rounded-[24px] p-4">
               {preparedCategories.map((cat) => {
                 const percent = maxTotal > 0 ? (cat.total / maxTotal) * 100 : 0;
                 return (
                   <div key={cat.id}>
                     <div className="mb-1.5 flex items-center justify-between">
-                      <span className="text-[12px] font-semibold text-[#F2EFE9]">
+                      <span className="text-[12px] font-semibold text-[#F8FAFC]">
                         {cat.name}
                       </span>
                       <span
@@ -254,7 +252,7 @@ function ExpensesPage() {
                       </span>
                     </div>
 
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{
@@ -271,7 +269,7 @@ function ExpensesPage() {
         )}
 
         <section className="mt-6">
-          <h2 className="text-[15px] font-bold text-[#F2EFE9]">آخرین مصارف</h2>
+          <h2 className="text-[15px] font-bold text-[#F8FAFC]">آخرین مصارف</h2>
           <div className="mt-3">
             <TransactionList
               transactions={transactions.slice(0, 8)}
@@ -308,19 +306,19 @@ function ExpensesPage() {
 
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-7">
-            <div className="flex h-[440px] flex-col overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E]">
+            <div className="glass flex h-[440px] flex-col overflow-hidden rounded-[24px]">
               <div className="flex shrink-0 items-center justify-between px-5 pt-4 pb-2">
-                <h2 className="text-[16px] font-bold text-[#F2EFE9]">
+                <h2 className="text-[16px] font-bold text-[#F8FAFC]">
                   روند مصارف
                 </h2>
-                <span className="text-[12px] text-[#5C736C]">
+                <span className="text-[12px] text-[#64748B]">
                   {getPeriodOffsetLabel(period, periodOffset)}
                 </span>
               </div>
 
               <div className="min-h-0 flex-1 px-2 pb-2">
                 {loading ? (
-                  <div className="flex h-full items-center justify-center text-[13px] text-[#5C736C]">
+                  <div className="flex h-full items-center justify-center text-[13px] text-[#64748B]">
                     در حال بارگذاری...
                   </div>
                 ) : (
@@ -336,28 +334,28 @@ function ExpensesPage() {
           </div>
 
           <div className="col-span-5">
-            <div className="flex h-[440px] flex-col overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E]">
+            <div className="glass flex h-[440px] flex-col overflow-hidden rounded-[24px]">
               <div className="flex shrink-0 items-center justify-between px-5 pt-4 pb-2">
-                <h2 className="text-[16px] font-bold text-[#F2EFE9]">
+                <h2 className="text-[16px] font-bold text-[#F8FAFC]">
                   دسته‌بندی مصارف
                 </h2>
-                <span className="text-[12px] text-[#5C736C]">
+                <span className="text-[12px] text-[#64748B]">
                   {getPeriodOffsetLabel(period, periodOffset)}
                 </span>
               </div>
 
               <div className="min-h-0 flex-1 px-2 pb-2">
                 {loading ? (
-                  <div className="flex h-full items-center justify-center text-[13px] text-[#5C736C]">
+                  <div className="flex h-full items-center justify-center text-[13px] text-[#64748B]">
                     در حال بارگذاری...
                   </div>
                 ) : categorySummary.length === 0 ? (
                   <div className="flex h-full items-center justify-center px-4 text-center">
                     <div>
-                      <p className="text-[13px] font-semibold text-[#8FA39D]">
+                      <p className="text-[13px] font-semibold text-[#94A3B8]">
                         در این دوره مصرفی ثبت نشده است
                       </p>
-                      <p className="mt-1 text-[11px] text-[#5C736C]">
+                      <p className="mt-1 text-[11px] text-[#64748B]">
                         نمودار دسته‌بندی بعد از ثبت مصارف نمایش داده می‌شود.
                       </p>
                     </div>
@@ -376,17 +374,17 @@ function ExpensesPage() {
         <div className="grid grid-cols-12 gap-4">
           {preparedCategories.length > 0 && (
             <div className="col-span-5">
-              <div className="flex h-[440px] flex-col overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E]">
+              <div className="glass flex h-[440px] flex-col overflow-hidden rounded-[24px]">
                 <div className="flex shrink-0 items-center justify-between px-5 pt-4 pb-3">
-                  <h2 className="text-[15px] font-bold text-[#F2EFE9]">
+                  <h2 className="text-[15px] font-bold text-[#F8FAFC]">
                     دسته‌ها
                   </h2>
-                  <span className="text-[11px] text-[#5C736C]">
+                  <span className="text-[11px] text-[#64748B]">
                     {formatNumber(preparedCategories.length)} دسته
                   </span>
                 </div>
 
-                <div className="mx-5 h-px shrink-0 bg-white/[0.06]" />
+                <div className="mx-5 h-px shrink-0 bg-white/[0.08]" />
 
                 <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
                   <div className="space-y-3.5">
@@ -396,7 +394,7 @@ function ExpensesPage() {
                       return (
                         <div key={cat.id}>
                           <div className="mb-1.5 flex items-center justify-between">
-                            <span className="text-[12.5px] font-semibold text-[#F2EFE9]">
+                            <span className="text-[12.5px] font-semibold text-[#F8FAFC]">
                               {cat.name}
                             </span>
                             <span
@@ -407,7 +405,7 @@ function ExpensesPage() {
                             </span>
                           </div>
 
-                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
                             <div
                               className="h-full rounded-full transition-all duration-500"
                               style={{
@@ -430,26 +428,26 @@ function ExpensesPage() {
               preparedCategories.length > 0 ? 'col-span-7' : 'col-span-12'
             }
           >
-            <div className="flex h-[440px] flex-col overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E]">
+            <div className="glass flex h-[440px] flex-col overflow-hidden rounded-[24px]">
               <div className="flex shrink-0 items-center justify-between px-5 pt-4 pb-3">
-                <h2 className="text-[15px] font-bold text-[#F2EFE9]">
+                <h2 className="text-[15px] font-bold text-[#F8FAFC]">
                   آخرین مصارف
                 </h2>
-                <span className="text-[11px] text-[#5C736C]">
+                <span className="text-[11px] text-[#64748B]">
                   {formatNumber(transactions.length)} مورد
                 </span>
               </div>
 
-              <div className="mx-5 h-px shrink-0 bg-white/[0.06]" />
+              <div className="mx-5 h-px shrink-0 bg-white/[0.08]" />
 
               <div className="min-h-0 flex-1 overflow-y-auto">
                 {transactions.length === 0 ? (
                   <div className="flex h-full items-center justify-center px-4 text-center">
                     <div>
-                      <p className="text-[13px] font-semibold text-[#8FA39D]">
+                      <p className="text-[13px] font-semibold text-[#94A3B8]">
                         در این دوره مصرفی ثبت نشده است
                       </p>
-                      <p className="mt-1 text-[11px] text-[#5C736C]">
+                      <p className="mt-1 text-[11px] text-[#64748B]">
                         از دکمه‌ی + در سایدبار استفاده کن.
                       </p>
                     </div>

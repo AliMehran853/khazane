@@ -19,14 +19,12 @@ function StatCard({
 
   const accent = isIncome
     ? {
-        text: 'text-[#4FD1BE]',
-        iconBg: 'bg-[#4FD1BE]/[0.10]',
-        border: 'border-[#4FD1BE]/[0.08]',
+        text: 'text-[#00D1A7]',
+        iconBg: 'bg-[#00D1A7]/[0.12]',
       }
     : {
-        text: 'text-[#E2574C]',
-        iconBg: 'bg-[#E2574C]/[0.10]',
-        border: 'border-[#E2574C]/[0.08]',
+        text: 'text-[#F43F5E]',
+        iconBg: 'bg-[#F43F5E]/[0.12]',
       };
 
   const numericValue =
@@ -38,33 +36,27 @@ function StatCard({
 
   return (
     <Wrapper
-      {...(clickable
-        ? {
-            type: 'button',
-            onClick,
-          }
-        : {})}
+      {...(clickable ? { type: 'button', onClick } : {})}
       className={[
-        'rounded-[22px] border bg-[#0F211E] text-right',
+        'glass rounded-[22px] text-right',
         'transition-all duration-200',
-        accent.border,
         featured ? 'p-5 lg:p-6' : 'p-4 lg:p-5',
         fillHeight ? 'flex h-full flex-col justify-center' : '',
         clickable
-          ? 'w-full hover:border-[#E3B341]/25 hover:bg-[#153029]/40 active:scale-[0.99]'
+          ? 'w-full hover:border-[#00D1A7]/30 active:scale-[0.99]'
           : '',
       ].join(' ')}
     >
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-medium text-[#5C736C] lg:text-[12px]">
+          <p className="text-[11px] font-medium text-[#64748B] lg:text-[12px]">
             {title}
           </p>
 
           <div className="mt-2 flex items-center gap-2">
             <p
               className={[
-                'font-extrabold tracking-tight text-[#F2EFE9]',
+                'font-extrabold tracking-tight text-[#F8FAFC]',
                 featured
                   ? 'text-[28px] lg:text-[32px]'
                   : 'text-[19px] lg:text-[22px]',
@@ -88,7 +80,7 @@ function StatCard({
           </div>
 
           {clickable && clickHint && (
-            <p className="mt-1.5 text-[10.5px] font-semibold text-[#E3B341]/80">
+            <p className="mt-1.5 text-[10.5px] font-semibold text-[#00D1A7]/80">
               {clickHint}
             </p>
           )}
@@ -117,7 +109,7 @@ function StatCard({
             <ChevronLeft
               size={16}
               strokeWidth={2.2}
-              className="text-[#E3B341]"
+              className="text-[#00D1A7]"
             />
           )}
         </div>

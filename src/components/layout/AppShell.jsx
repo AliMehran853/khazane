@@ -67,8 +67,8 @@ function AppShell() {
 
   if (checking || onboardingLoading) {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-[#0A1614]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/[0.1] border-t-[#E3B341]" />
+      <div className="flex min-h-dvh items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/[0.1] border-t-[#00D1A7]" />
       </div>
     );
   }
@@ -101,10 +101,7 @@ function AppShell() {
   }
 
   return (
-    <div
-      className="relative min-h-dvh bg-[#0A1614] text-[#F2EFE9]"
-      data-vaul-drawer-wrapper
-    >
+    <div className="relative min-h-dvh text-[#F8FAFC]" data-vaul-drawer-wrapper>
       <Sidebar />
 
       <main className="mx-auto w-full max-w-[420px] pb-24 lg:max-w-none lg:pb-12 lg:pr-[260px]">
@@ -128,14 +125,10 @@ function AppShell() {
 
       <DateChoiceModal />
 
-      <DailyReminderModal
-        open={reminderVisible}
-        onClose={dismissReminder}
-      />
+      <DailyReminderModal open={reminderVisible} onClose={dismissReminder} />
 
       <GreetingHost />
 
-      {/* ⭐ Toast قفل دوره */}
       <PeriodLockToast />
     </div>
   );

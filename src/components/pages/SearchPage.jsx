@@ -15,7 +15,6 @@ const FILTERS = [
   { id: 'expense', label: 'مصارف' },
 ];
 
-// نرمال‌سازی برای جستجو: پایین‌سازی، یکسان‌سازی «ی/ک»، حذف کاراکترهای کنترلی
 function normalizeText(str) {
   return String(str || '')
     .toLowerCase()
@@ -85,7 +84,7 @@ function SearchPage() {
   return (
     <div className="min-h-dvh pb-24 lg:pb-12">
       {/* هدر چسبان */}
-      <div className="sticky top-0 z-30 border-b border-white/[0.06] bg-[#0A1614]/95 backdrop-blur-xl">
+      <div className="glass-strong sticky top-0 z-30 rounded-none border-x-0 border-t-0">
         <div className="px-4 pb-3 pt-4 lg:px-0 lg:pt-6">
           <div className="flex items-center gap-2">
             <button
@@ -93,10 +92,8 @@ function SearchPage() {
               onClick={() => navigate(-1)}
               aria-label="بازگشت"
               className="
-                flex h-11 w-11 shrink-0 items-center justify-center
-                rounded-2xl border border-white/[0.06] bg-[#0F211E]
-                text-[#8FA39D] active:scale-95
-                lg:h-10 lg:w-10
+                glass flex h-11 w-11 shrink-0 items-center justify-center
+                rounded-2xl text-[#94A3B8] active:scale-95 lg:h-10 lg:w-10
               "
             >
               <ArrowRight size={18} strokeWidth={2} />
@@ -106,7 +103,7 @@ function SearchPage() {
               <Search
                 size={17}
                 strokeWidth={2}
-                className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#5C736C]"
+                className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#64748B]"
               />
               <input
                 type="text"
@@ -115,10 +112,10 @@ function SearchPage() {
                 placeholder="جستجو در دسته، توضیحات یا مبلغ..."
                 autoFocus
                 className="
-                  w-full rounded-2xl border border-white/[0.06] bg-[#0F211E]
-                  py-3 pr-10 pl-10 text-[13px] text-[#F2EFE9]
-                  outline-none placeholder:text-[#5C736C]
-                  focus:border-[#E3B341]/40
+                  glass-inner w-full rounded-2xl
+                  py-3 pr-10 pl-10 text-[13px] text-[#F8FAFC]
+                  outline-none placeholder:text-[#64748B]
+                  focus:border-[#00D1A7]/50
                   lg:py-2.5
                 "
               />
@@ -129,8 +126,8 @@ function SearchPage() {
                   aria-label="پاک کردن"
                   className="
                     absolute left-2.5 top-1/2 flex h-7 w-7 -translate-y-1/2
-                    items-center justify-center rounded-full text-[#5C736C]
-                    transition-colors hover:bg-white/[0.05] hover:text-[#F2EFE9]
+                    items-center justify-center rounded-full text-[#64748B]
+                    transition-colors hover:bg-white/[0.08] hover:text-[#F8FAFC]
                   "
                 >
                   <X size={14} />
@@ -149,12 +146,12 @@ function SearchPage() {
                   type="button"
                   onClick={() => setFilter(f.id)}
                   className={[
-                    'flex min-h-[34px] items-center rounded-xl px-3.5',
-                    'text-[11.5px] font-semibold',
+                    'flex min-h-[34px] items-center rounded-xl px-3.5 backdrop-blur-md',
+                    'text-[11.5px] font-semibold border',
                     'transition-all active:scale-[0.97]',
                     active
-                      ? 'bg-[#E3B341]/[0.14] text-[#E3B341]'
-                      : 'bg-[#0F211E] text-[#8FA39D] hover:bg-[#153029]',
+                      ? 'border-[#00D1A7]/30 bg-[#00D1A7]/[0.14] text-[#00D1A7]'
+                      : 'border-white/[0.08] bg-white/[0.04] text-[#94A3B8] hover:bg-white/[0.06]',
                   ].join(' ')}
                 >
                   {f.label}
@@ -168,31 +165,31 @@ function SearchPage() {
       {/* نتایج */}
       <div className="px-4 pt-4 lg:px-0 lg:pt-6">
         {loading && (
-          <p className="py-10 text-center text-[12px] text-[#5C736C]">
+          <p className="py-10 text-center text-[12px] text-[#64748B]">
             در حال بارگذاری...
           </p>
         )}
 
         {showHint && (
-          <div className="rounded-3xl border border-white/[0.06] bg-[#0F211E] px-5 py-10 text-center">
-            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#153029] text-[#E3B341]">
+          <div className="glass rounded-3xl px-5 py-10 text-center">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.14] text-[#00D1A7]">
               <Search size={24} strokeWidth={1.8} />
             </div>
-            <p className="text-[13.5px] font-semibold text-[#F2EFE9]">
+            <p className="text-[13.5px] font-semibold text-[#F8FAFC]">
               جستجو در تراکنش‌ها
             </p>
-            <p className="mt-1.5 text-[11.5px] leading-relaxed text-[#8FA39D]">
+            <p className="mt-1.5 text-[11.5px] leading-relaxed text-[#94A3B8]">
               با تایپ نام دسته، توضیحات یا مبلغ، تراکنش مورد نظرت رو پیدا کن.
             </p>
           </div>
         )}
 
         {showEmpty && (
-          <div className="rounded-3xl border border-white/[0.06] bg-[#0F211E] px-5 py-10 text-center">
-            <p className="text-[13.5px] font-semibold text-[#8FA39D]">
+          <div className="glass rounded-3xl px-5 py-10 text-center">
+            <p className="text-[13.5px] font-semibold text-[#94A3B8]">
               نتیجه‌ای پیدا نشد
             </p>
-            <p className="mt-1.5 text-[11.5px] text-[#5C736C]">
+            <p className="mt-1.5 text-[11.5px] text-[#64748B]">
               عبارت دیگری را امتحان کن یا فیلتر را تغییر بده.
             </p>
           </div>
@@ -200,7 +197,7 @@ function SearchPage() {
 
         {showResults && (
           <>
-            <p className="mb-3 text-[11px] text-[#5C736C]">
+            <p className="mb-3 text-[11px] text-[#64748B]">
               {new Intl.NumberFormat('fa-AF').format(results.length)} نتیجه
             </p>
             <TransactionList

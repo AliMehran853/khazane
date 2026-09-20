@@ -30,8 +30,8 @@ export default function TransactionItem({ transaction, category }) {
   const isIncome = transaction.type === 'income';
 
   const iconBg = isIncome
-    ? 'bg-[#4FD1BE]/[0.10] text-[#4FD1BE]'
-    : 'bg-[#E2574C]/[0.10] text-[#E2574C]';
+    ? 'bg-[#00D1A7]/[0.14] text-[#00D1A7] border-[#00D1A7]/20'
+    : 'bg-[#F43F5E]/[0.14] text-[#F43F5E] border-[#F43F5E]/20';
 
   const note = (transaction.note || '').trim();
   const dateTimeText = formatTransactionDate(transaction.date);
@@ -81,12 +81,12 @@ export default function TransactionItem({ transaction, category }) {
 
   return (
     <>
-      <div className="relative border-b border-white/[0.05] last:border-b-0">
+      <div className="relative border-b border-white/[0.06] last:border-b-0">
         <div className="flex items-start gap-3 px-4 py-3 lg:px-5 lg:py-3.5">
           {/* آیکون دسته */}
           <div
             className={[
-              'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl lg:h-11 lg:w-11',
+              'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border backdrop-blur-md lg:h-11 lg:w-11',
               iconBg,
             ].join(' ')}
           >
@@ -95,17 +95,17 @@ export default function TransactionItem({ transaction, category }) {
 
           {/* محتوا */}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-semibold text-[#F2EFE9] lg:text-[13.5px]">
+            <p className="truncate text-[13px] font-semibold text-[#F8FAFC] lg:text-[13.5px]">
               {category?.name || 'بدون دسته'}
             </p>
 
             {note && (
-              <p className="mt-0.5 truncate text-[10.5px] text-[#5C736C] lg:text-[11px]">
+              <p className="mt-0.5 truncate text-[10.5px] text-[#64748B] lg:text-[11px]">
                 {note}
               </p>
             )}
 
-            <p className="mt-0.5 truncate text-[9.5px] font-medium text-[#5C736C]/80 lg:text-[10px]">
+            <p className="mt-0.5 truncate text-[9.5px] font-medium text-[#64748B]/80 lg:text-[10px]">
               {dateTimeText}
             </p>
           </div>
@@ -115,14 +115,13 @@ export default function TransactionItem({ transaction, category }) {
             <span
               className={[
                 'text-[14px] font-bold lg:text-[15px]',
-                isIncome ? 'text-[#4FD1BE]' : 'text-[#E2574C]',
+                isIncome ? 'text-[#00D1A7]' : 'text-[#F43F5E]',
               ].join(' ')}
             >
               {isIncome ? '+' : '-'}
               {formatNumber(transaction.amount)}
             </span>
 
-            {/* چوون باز کردن جزئیات */}
             <button
               type="button"
               onClick={() => setExpanded((v) => !v)}
@@ -130,8 +129,8 @@ export default function TransactionItem({ transaction, category }) {
               aria-expanded={expanded}
               className="
                 -mr-1 flex h-6 w-6 items-center justify-center rounded-lg
-                text-[#5C736C]/60 transition-colors
-                hover:bg-white/[0.05] hover:text-[#8FA39D]
+                text-[#64748B]/70 transition-colors
+                hover:bg-white/[0.06] hover:text-[#94A3B8]
                 active:scale-90
               "
             >
@@ -145,7 +144,6 @@ export default function TransactionItem({ transaction, category }) {
               />
             </button>
 
-            {/* منوی سه‌نقطه */}
             <div ref={menuRef} className="relative">
               <button
                 type="button"
@@ -154,8 +152,8 @@ export default function TransactionItem({ transaction, category }) {
                 aria-expanded={menuOpen}
                 className="
                   -mr-1 flex h-6 w-6 items-center justify-center rounded-lg
-                  text-[#5C736C]/60 transition-colors
-                  hover:bg-white/[0.05] hover:text-[#8FA39D]
+                  text-[#64748B]/70 transition-colors
+                  hover:bg-white/[0.06] hover:text-[#94A3B8]
                   active:scale-90
                 "
               >
@@ -165,21 +163,20 @@ export default function TransactionItem({ transaction, category }) {
               {menuOpen && (
                 <div
                   className="
-                    absolute left-0 top-[calc(100%+4px)] z-50 min-w-[130px]
-                    overflow-hidden rounded-xl border border-white/[0.08]
-                    bg-[#153029] py-1 shadow-2xl
+                    glass-strong absolute left-0 top-[calc(100%+4px)] z-50 min-w-[130px]
+                    overflow-hidden rounded-xl py-1 shadow-2xl
                   "
                   dir="rtl"
                 >
                   <button
                     type="button"
                     onClick={handleEdit}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-right text-[12.5px] font-semibold text-[#F2EFE9] transition-colors hover:bg-white/[0.04]"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-right text-[12.5px] font-semibold text-[#F8FAFC] transition-colors hover:bg-white/[0.06]"
                   >
                     <Pencil
                       size={14}
                       strokeWidth={2}
-                      className="text-[#E3B341]"
+                      className="text-[#00D1A7]"
                     />
                     ویرایش
                   </button>
@@ -189,7 +186,7 @@ export default function TransactionItem({ transaction, category }) {
                   <button
                     type="button"
                     onClick={handleDeleteClick}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-right text-[12.5px] font-semibold text-[#E2574C] transition-colors hover:bg-[#E2574C]/[0.08]"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-right text-[12.5px] font-semibold text-[#F43F5E] transition-colors hover:bg-[#F43F5E]/[0.10]"
                   >
                     <Trash2 size={14} strokeWidth={2} />
                     حذف
@@ -200,7 +197,6 @@ export default function TransactionItem({ transaction, category }) {
           </div>
         </div>
 
-        {/* پنل بازشوی جزئیات سریع */}
         <AnimatePresence initial={false}>
           {expanded && (
             <motion.div
@@ -210,16 +206,14 @@ export default function TransactionItem({ transaction, category }) {
               transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               className="overflow-hidden"
             >
-              <div className="space-y-2 bg-[#0A1614]/40 px-4 py-3 lg:px-5">
+              <div className="space-y-2 bg-white/[0.03] px-4 py-3 backdrop-blur-md lg:px-5">
                 <DetailRow label="یادداشت" value={note || '—'} />
                 <DetailRow label="تاریخ" value={fullDateText} />
                 <DetailRow label="ساعت" value={timeText} />
                 <DetailRow
                   label="نوع"
                   value={isIncome ? 'درآمد' : 'مصرف'}
-                  valueClass={
-                    isIncome ? 'text-[#4FD1BE]' : 'text-[#E2574C]'
-                  }
+                  valueClass={isIncome ? 'text-[#00D1A7]' : 'text-[#F43F5E]'}
                 />
               </div>
             </motion.div>
@@ -227,28 +221,27 @@ export default function TransactionItem({ transaction, category }) {
         </AnimatePresence>
       </div>
 
-      {/* مودال تایید حذف */}
       {confirmDelete && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-5">
           <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-[3px]"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => !deleting && setConfirmDelete(false)}
           />
           <div
-            className="relative z-10 w-full max-w-[320px] rounded-[22px] border border-white/[0.08] bg-[#0F211E] p-5"
+            className="glass-strong relative z-10 w-full max-w-[320px] rounded-[22px] p-5"
             dir="rtl"
           >
             <div className="flex justify-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E2574C]/[0.14] text-[#E2574C]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#F43F5E]/25 bg-[#F43F5E]/[0.14] text-[#F43F5E]">
                 <Trash2 size={22} strokeWidth={1.9} />
               </div>
             </div>
 
-            <h3 className="mt-3 text-center text-[14px] font-extrabold text-[#F2EFE9]">
+            <h3 className="mt-3 text-center text-[14px] font-extrabold text-[#F8FAFC]">
               حذف تراکنش
             </h3>
 
-            <p className="mt-2 text-center text-[11.5px] leading-relaxed text-[#8FA39D]">
+            <p className="mt-2 text-center text-[11.5px] leading-relaxed text-[#94A3B8]">
               آیا مطمئنی می‌خواهی این تراکنش را حذف کنی؟
               <br />
               این عملیات قابل بازگشت نیست.
@@ -259,7 +252,7 @@ export default function TransactionItem({ transaction, category }) {
                 type="button"
                 disabled={deleting}
                 onClick={() => setConfirmDelete(false)}
-                className="rounded-xl border border-white/[0.08] bg-[#153029] py-2.5 text-[12px] font-semibold text-[#8FA39D] disabled:opacity-50"
+                className="rounded-xl border border-white/[0.10] bg-white/[0.06] py-2.5 text-[12px] font-semibold text-[#94A3B8] disabled:opacity-50"
               >
                 انصراف
               </button>
@@ -267,7 +260,7 @@ export default function TransactionItem({ transaction, category }) {
                 type="button"
                 disabled={deleting}
                 onClick={handleConfirmDelete}
-                className="rounded-xl bg-[linear-gradient(155deg,#E2574C,#B8392F)] py-2.5 text-[12px] font-bold text-white disabled:opacity-50"
+                className="rounded-xl bg-[linear-gradient(155deg,#F43F5E,#BE123C)] py-2.5 text-[12px] font-bold text-white disabled:opacity-50"
               >
                 {deleting ? 'در حال حذف...' : 'حذف کن'}
               </button>
@@ -279,16 +272,12 @@ export default function TransactionItem({ transaction, category }) {
   );
 }
 
-// ============================================================
-// یک ردیف ساده برای نمایش label/value
-// ============================================================
-
 function DetailRow({ label, value, valueClass = '' }) {
   return (
     <div className="flex items-start justify-between gap-3 text-[11.5px]">
-      <span className="shrink-0 text-[#5C736C]">{label}</span>
+      <span className="shrink-0 text-[#64748B]">{label}</span>
       <span
-        className={['text-right font-semibold text-[#F2EFE9]', valueClass].join(
+        className={['text-right font-semibold text-[#F8FAFC]', valueClass].join(
           ' ',
         )}
       >

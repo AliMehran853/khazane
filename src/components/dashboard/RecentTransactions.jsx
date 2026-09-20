@@ -14,9 +14,9 @@ const EXPANDED_LIMIT = 20;
 export default function RecentTransactions({
   transactions = [],
   categoriesMap = {},
-  limit, // اگر داده شد، از این به عنوان initial limit استفاده می‌شه
-  showNavigateButton = true, // آیا دکمه‌ی "نمایش همه" صفحه‌رو باز کنه؟
-  navigateTo = '/expenses',  // مسیر رفتن وقتی دکمه زده شد
+  limit,
+  showNavigateButton = true,
+  navigateTo = '/expenses',
 }) {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
@@ -31,10 +31,8 @@ export default function RecentTransactions({
 
   function handleShowAll() {
     if (showNavigateButton) {
-      // می‌ره به صفحه‌ی اصلی (Income یا Expenses)
       navigate(navigateTo);
     } else {
-      // در همون جا باز می‌شه
       setExpanded(true);
     }
   }
@@ -42,10 +40,10 @@ export default function RecentTransactions({
   return (
     <section className="mt-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-[15px] font-bold text-[#F2EFE9] lg:text-[17px]">
+        <h2 className="text-[15px] font-bold text-[#F8FAFC] lg:text-[17px]">
           تراکنش‌های اخیر
         </h2>
-        <span className="text-[11px] text-[#5C736C] lg:text-[12px]">
+        <span className="text-[11px] text-[#64748B] lg:text-[12px]">
           {formatNumber(total)} تراکنش
         </span>
       </div>
@@ -56,17 +54,14 @@ export default function RecentTransactions({
           categoriesMap={categoriesMap}
         />
 
-        {/* دکمه‌ی نمایش همه */}
         {hasMore && !expanded && (
           <button
             type="button"
             onClick={handleShowAll}
             className="
-              mt-3 flex w-full items-center justify-center gap-2
-              rounded-2xl border border-white/[0.06] bg-[#0F211E]
-              py-3 text-[12.5px] font-semibold text-[#E3B341]
-              transition-all hover:border-[#E3B341]/30 hover:bg-[#153029]
-              active:scale-[0.98]
+              glass mt-3 flex w-full items-center justify-center gap-2
+              rounded-2xl py-3 text-[12.5px] font-semibold text-[#00D1A7]
+              transition-all hover:border-[#00D1A7]/30 active:scale-[0.98]
             "
           >
             <ListChecks size={16} strokeWidth={2} />
@@ -74,24 +69,17 @@ export default function RecentTransactions({
           </button>
         )}
 
-        {/* دکمه‌ی جمع کردن (اگر باز کردیم) */}
         {expanded && total > INITIAL_LIMIT && (
           <button
             type="button"
             onClick={() => setExpanded(false)}
             className="
-              mt-3 flex w-full items-center justify-center gap-2
-              rounded-2xl border border-white/[0.06] bg-[#0F211E]
-              py-3 text-[12.5px] font-semibold text-[#8FA39D]
-              transition-all hover:border-[#E3B341]/30 hover:bg-[#153029]
-              active:scale-[0.98]
+              glass mt-3 flex w-full items-center justify-center gap-2
+              rounded-2xl py-3 text-[12.5px] font-semibold text-[#94A3B8]
+              transition-all hover:border-[#00D1A7]/30 active:scale-[0.98]
             "
           >
-            <ChevronLeft
-              size={16}
-              strokeWidth={2}
-              className="rotate-90"
-            />
+            <ChevronLeft size={16} strokeWidth={2} className="rotate-90" />
             بستن
           </button>
         )}

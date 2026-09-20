@@ -36,14 +36,14 @@ export default function ExpenseCategoryChart({ categories = [], fixedHeight }) {
       horizontalAlign: 'center',
       fontFamily: 'Vazirmatn, sans-serif',
       fontSize: isDesktop ? '13px' : '11px',
-      labels: { colors: '#8FA39D' },
+      labels: { colors: '#94A3B8' },
       markers: { width: 8, height: 8, radius: 10 },
       itemMargin: { horizontal: isDesktop ? 12 : 6, vertical: 2 },
     },
     dataLabels: { enabled: false },
     stroke: {
       width: 2,
-      colors: ['#0F211E'],
+      colors: ['rgba(15,23,42,0.6)'],
     },
     plotOptions: {
       pie: {
@@ -54,14 +54,14 @@ export default function ExpenseCategoryChart({ categories = [], fixedHeight }) {
             name: {
               show: true,
               fontSize: isDesktop ? '14px' : '12px',
-              color: '#8FA39D',
+              color: '#94A3B8',
               fontFamily: 'Vazirmatn, sans-serif',
             },
             value: {
               show: true,
               fontSize: isDesktop ? '24px' : '18px',
               fontWeight: 800,
-              color: '#F2EFE9',
+              color: '#F8FAFC',
               fontFamily: 'Vazirmatn, sans-serif',
               formatter: (val) => formatNumber(val),
             },
@@ -69,7 +69,7 @@ export default function ExpenseCategoryChart({ categories = [], fixedHeight }) {
               show: true,
               label: 'مجموع',
               fontSize: isDesktop ? '14px' : '12px',
-              color: '#8FA39D',
+              color: '#94A3B8',
               fontFamily: 'Vazirmatn, sans-serif',
               formatter: (w) => {
                 const sum = w.globals.seriesTotals.reduce((a, b) => a + b, 0);

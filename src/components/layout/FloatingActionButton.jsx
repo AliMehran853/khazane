@@ -16,9 +16,7 @@ function FloatingActionButton() {
   const period = useAppStore((s) => s.period);
   const periodOffset = useAppStore((s) => s.periodOffset);
 
-  if (location.pathname === '/settings') {
-    return null;
-  }
+  if (location.pathname === '/settings') return null;
 
   const type = location.pathname === '/income' ? 'income' : 'expense';
   const isDisabled = period === 'monthly' || period === 'yearly';
@@ -34,7 +32,7 @@ function FloatingActionButton() {
 
     if (period === 'daily') {
       const date = getPeriodBaseDate('daily', periodOffset);
-      openTransactionSheet(type, null, date);
+      setTimeout(() => openTransactionSheet(type, null, date), 120);
       return;
     }
 
@@ -66,8 +64,8 @@ function FloatingActionButton() {
         'flex h-[58px] w-[58px] -translate-x-1/2 items-center justify-center rounded-full',
         'border transition-all duration-200 lg:hidden',
         isDisabled
-          ? 'cursor-not-allowed border-[#8A7530] bg-[linear-gradient(155deg,#A89047,#8A7530)] text-[#3D3419]'
-          : 'border-[#E3B341]/20 bg-[linear-gradient(155deg,#E3B341,#B9862A)] text-[#0A1614] shadow-[0_8px_30px_rgba(227,179,65,0.22)]',
+          ? 'cursor-not-allowed border-[#00A88A]/30 bg-[#00A88A]/50 text-white/40'
+          : 'border-white/20 bg-[linear-gradient(155deg,#00D1A7,#00A88A)] text-white shadow-[0_8px_32px_rgba(0,209,167,0.35)]',
       ].join(' ')}
     >
       <Plus size={27} strokeWidth={2.4} />

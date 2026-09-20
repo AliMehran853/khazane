@@ -6,7 +6,7 @@ export default function AppLogo({ size = 80, withShadow = true }) {
         width: size,
         height: size,
         filter: withShadow
-          ? 'drop-shadow(0 8px 24px rgba(227,179,65,0.28))'
+          ? 'drop-shadow(0 8px 24px rgba(0,209,167,0.35))'
           : undefined,
       }}
     >
@@ -18,9 +18,9 @@ export default function AppLogo({ size = 80, withShadow = true }) {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <linearGradient id="logoGold" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#E3B341" />
-            <stop offset="100%" stopColor="#B9862A" />
+          <linearGradient id="logoPrimary" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#00D1A7" />
+            <stop offset="100%" stopColor="#00A88A" />
           </linearGradient>
         </defs>
 
@@ -30,7 +30,7 @@ export default function AppLogo({ size = 80, withShadow = true }) {
           width="84"
           height="84"
           rx="24"
-          fill="url(#logoGold)"
+          fill="url(#logoPrimary)"
         />
 
         <text
@@ -40,7 +40,7 @@ export default function AppLogo({ size = 80, withShadow = true }) {
           fontFamily="Vazirmatn, sans-serif"
           fontSize="56"
           fontWeight="800"
-          fill="#0A1614"
+          fill="#0F172A"
         >
           $
         </text>

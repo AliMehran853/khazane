@@ -29,9 +29,9 @@ export default function PeriodNavigator() {
   const resetLabel = RESET_LABELS[period] || 'حالا';
 
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-[#0F211E] px-2 py-2">
+    <div className="glass rounded-2xl px-2 py-2">
       <div className="flex items-center justify-between gap-2">
-        {/* راست (اول در DOM) = آینده — ChevronRight → offset + 1 */}
+        {/* راست = آینده */}
         <button
           type="button"
           disabled={!canGoForward}
@@ -40,31 +40,30 @@ export default function PeriodNavigator() {
           className={[
             'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all',
             canGoForward
-              ? 'text-[#8FA39D] hover:bg-white/[0.05] hover:text-[#E3B341] active:scale-95'
-              : 'cursor-not-allowed text-[#2A3936]',
+              ? 'text-[#94A3B8] hover:bg-white/[0.06] hover:text-[#00D1A7] active:scale-95'
+              : 'cursor-not-allowed text-[#334155]',
           ].join(' ')}
         >
           <ChevronRight size={18} strokeWidth={2.2} />
         </button>
 
-        {/* وسط: برچسب + تاریخ */}
         <div className="min-w-0 flex-1 text-center">
           <p
             className={[
               'truncate text-[12.5px] font-bold transition-colors',
-              isCurrent ? 'text-[#E3B341]' : 'text-[#F2EFE9]',
+              isCurrent ? 'text-[#00D1A7]' : 'text-[#F8FAFC]',
             ].join(' ')}
           >
             {label}
           </p>
           {subLabel && (
-            <p className="mt-0.5 truncate text-[10.5px] font-medium text-[#5C736C]">
+            <p className="mt-0.5 truncate text-[10.5px] font-medium text-[#64748B]">
               {subLabel}
             </p>
           )}
         </div>
 
-        {/* چپ (آخر در DOM) = گذشته — ChevronLeft → offset - 1 */}
+        {/* چپ = گذشته */}
         <button
           type="button"
           disabled={!canGoBack}
@@ -73,8 +72,8 @@ export default function PeriodNavigator() {
           className={[
             'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all',
             canGoBack
-              ? 'text-[#8FA39D] hover:bg-white/[0.05] hover:text-[#E3B341] active:scale-95'
-              : 'cursor-not-allowed text-[#2A3936]',
+              ? 'text-[#94A3B8] hover:bg-white/[0.06] hover:text-[#00D1A7] active:scale-95'
+              : 'cursor-not-allowed text-[#334155]',
           ].join(' ')}
         >
           <ChevronLeft size={18} strokeWidth={2.2} />
@@ -87,9 +86,9 @@ export default function PeriodNavigator() {
           onClick={() => setOffset(0)}
           className="
             mt-2 flex w-full items-center justify-center gap-1.5
-            rounded-xl border border-[#E3B341]/25 bg-[#E3B341]/[0.06]
-            py-1.5 text-[10.5px] font-semibold text-[#E3B341]
-            transition-all hover:bg-[#E3B341]/[0.10] active:scale-[0.98]
+            rounded-xl border border-[#00D1A7]/30 bg-[#00D1A7]/[0.10]
+            py-1.5 text-[10.5px] font-semibold text-[#00D1A7]
+            transition-all hover:bg-[#00D1A7]/[0.16] active:scale-[0.98]
           "
         >
           <RotateCcw size={11} strokeWidth={2.2} />

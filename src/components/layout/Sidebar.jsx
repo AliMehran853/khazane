@@ -29,15 +29,17 @@ function SidebarItem({ label, to, icon: Icon, end = false }) {
         <div
           className={[
             'group flex items-center gap-3 rounded-2xl px-3 py-3 transition-all duration-200',
-            isActive ? 'bg-[#E3B341]/[0.10]' : 'hover:bg-white/[0.03]',
+            isActive
+              ? 'bg-[#00D1A7]/[0.12] border border-[#00D1A7]/20'
+              : 'hover:bg-white/[0.04] border border-transparent',
           ].join(' ')}
         >
           <div
             className={[
               'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all',
               isActive
-                ? 'bg-[#E3B341]/[0.16] text-[#E3B341]'
-                : 'bg-[#153029] text-[#8FA39D] group-hover:bg-[#1B3A32] group-hover:text-[#F2EFE9]',
+                ? 'bg-[#00D1A7]/[0.18] text-[#00D1A7]'
+                : 'bg-white/[0.06] text-[#94A3B8] group-hover:bg-white/[0.10] group-hover:text-[#F8FAFC]',
             ].join(' ')}
           >
             <Icon size={20} strokeWidth={isActive ? 2.2 : 1.9} />
@@ -46,8 +48,8 @@ function SidebarItem({ label, to, icon: Icon, end = false }) {
             className={[
               'text-[14.5px] font-semibold transition-colors',
               isActive
-                ? 'text-[#E3B341]'
-                : 'text-[#8FA39D] group-hover:text-[#F2EFE9]',
+                ? 'text-[#00D1A7]'
+                : 'text-[#94A3B8] group-hover:text-[#F8FAFC]',
             ].join(' ')}
           >
             {label}
@@ -98,9 +100,8 @@ function Sidebar() {
   return (
     <aside
       className="
-        fixed right-0 top-0 z-40 hidden h-dvh w-[260px] flex-col
-        border-l border-white/[0.06] bg-[#0A1614]/95
-        backdrop-blur-xl
+        glass-strong fixed right-0 top-0 z-40 hidden h-dvh w-[260px] flex-col
+        border-l border-white/[0.08]
         lg:flex
       "
     >
@@ -109,12 +110,12 @@ function Sidebar() {
           <AppLogo size={44} withShadow={false} />
         </div>
         <div>
-          <p className="text-[17px] font-extrabold text-[#F2EFE9]">خزانه</p>
-          <p className="mt-0.5 text-[11px] text-[#5C736C]">مدیریت مالی شخصی</p>
+          <p className="text-[17px] font-extrabold text-[#F8FAFC]">خزانه</p>
+          <p className="mt-0.5 text-[11px] text-[#64748B]">مدیریت مالی شخصی</p>
         </div>
       </div>
 
-      <div className="mx-4 h-px bg-white/[0.06]" />
+      <div className="mx-4 h-px bg-white/[0.08]" />
 
       <nav className="mt-4 flex-1 space-y-1.5 px-3">
         {items.map((item) => (
@@ -122,7 +123,7 @@ function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-white/[0.06] px-4 py-4">
+      <div className="border-t border-white/[0.08] px-4 py-4">
         <button
           type="button"
           onClick={handleClick}
@@ -131,8 +132,8 @@ function Sidebar() {
             'flex w-full items-center justify-center gap-2 rounded-2xl',
             'py-3 text-[13.5px] font-bold transition-all',
             isDisabled
-              ? 'cursor-not-allowed bg-[linear-gradient(155deg,#A89047,#8A7530)] text-[#3D3419]'
-              : 'bg-[linear-gradient(155deg,#E3B341,#B9862A)] text-[#0A1614] active:scale-[0.98]',
+              ? 'cursor-not-allowed border border-[#00A88A]/30 bg-[#00A88A]/50 text-white/40'
+              : 'bg-[linear-gradient(155deg,#00D1A7,#00A88A)] text-white shadow-[0_6px_24px_rgba(0,209,167,0.30)] active:scale-[0.98]',
           ].join(' ')}
         >
           <Plus size={18} strokeWidth={2.4} />
@@ -141,7 +142,7 @@ function Sidebar() {
       </div>
 
       <div className="px-5 pb-5 pt-1">
-        <p className="text-center text-[10.5px] leading-relaxed text-[#5C736C]">
+        <p className="text-center text-[10.5px] leading-relaxed text-[#64748B]">
           خزانه • نسخه {APP_VERSION} • کاملاً آفلاین
         </p>
       </div>

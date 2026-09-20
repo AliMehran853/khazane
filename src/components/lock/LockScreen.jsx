@@ -31,7 +31,6 @@ function LockScreen() {
   const biometricAvailable = useSecurityStore((s) => s.biometricAvailable);
   const reset = useSecurityStore((s) => s.reset);
 
-  // ⭐ state داخلی برای انیمیشن
   const [shake, setShake] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
 
@@ -41,7 +40,6 @@ function LockScreen() {
   function handleUnlocked() {
     setUnlocking(true);
     sessionStorage.setItem(SESSION_UNLOCK_KEY, '1');
-    // تاخیر برای نمایش انیمیشن ورود
     setTimeout(() => {
       setLocked(false);
     }, 380);
@@ -52,7 +50,6 @@ function LockScreen() {
     setTimeout(() => setShake(false), 500);
   }
 
-  // فقط موبایل: تلاش خودکار اثر انگشت
   useEffect(() => {
     if (isDesktop) return;
     if (method !== 'biometric') return;
@@ -78,7 +75,6 @@ function LockScreen() {
     };
   }, [method, biometricEnabled, biometricAvailable, isDesktop]);
 
-  // بررسی خودکار PIN
   useEffect(() => {
     if (method !== 'pin' && !isDesktop) return;
     if (pinBuffer.length !== PIN_LENGTH) return;
@@ -89,7 +85,6 @@ function LockScreen() {
     let cancelled = false;
     (async () => {
       try {
-        // تاخیر کوتاه برای کامل شدن لمس آخرین عدد
         await new Promise((r) => setTimeout(r, 130));
         if (cancelled) return;
 
@@ -138,18 +133,21 @@ function LockScreen() {
   }
 
   const showBiometric =
-    !isDesktop && method === 'biometric' && biometricEnabled && biometricAvailable;
+    !isDesktop &&
+    method === 'biometric' &&
+    biometricEnabled &&
+    biometricAvailable;
   const showPin = !showBiometric && pinEnabled;
   const showNothing = !showBiometric && !showPin;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0A1614] px-6 lg:px-8">
-      {/* هاله طلایی */}
+    <div className="fixed inset-0 z-[100] flex items-center justify-center px-6 lg:px-8">
+      {/* هاله‌ی فیروزه‌ای */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(circle at 50% 35%, rgba(227,179,65,0.14), transparent 55%)',
+            'radial-gradient(circle at 50% 35%, rgba(0,209,167,0.20), transparent 55%)',
         }}
       />
 
@@ -166,42 +164,42 @@ function LockScreen() {
         className="
           relative z-10 flex w-full max-w-[340px] flex-col items-center
           lg:max-w-[400px]
-          lg:rounded-[28px] lg:border lg:border-white/[0.08]
-          lg:bg-[#0F211E]/80 lg:px-7 lg:py-8 lg:shadow-2xl lg:backdrop-blur-xl
+          lg:glass-strong lg:rounded-[28px]
+          lg:px-7 lg:py-8
         "
       >
-        {/* لوگو */}
         <motion.div
           initial={{ scale: 0.75, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.05, duration: 0.45, ease: [0.34, 1.56, 0.64, 1] }}
+          transition={{
+            delay: 0.05,
+            duration: 0.45,
+            ease: [0.34, 1.56, 0.64, 1],
+          }}
         >
           <AppLogo size={isDesktop ? 64 : 84} />
         </motion.div>
 
-        {/* عنوان */}
         <motion.h1
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.12, duration: 0.4 }}
-          className="mt-5 text-[26px] font-extrabold text-[#F2EFE9] lg:mt-4 lg:text-[24px]"
+          className="mt-5 text-[26px] font-extrabold text-[#F8FAFC] lg:mt-4 lg:text-[24px]"
         >
           خزانه
         </motion.h1>
 
-        {/* توضیحات */}
         <motion.p
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.18, duration: 0.4 }}
-          className="mt-2 max-w-[260px] text-center text-[12px] leading-relaxed text-[#8FA39D] lg:mt-2 lg:max-w-[300px] lg:text-[12.5px]"
+          className="mt-2 max-w-[260px] text-center text-[12px] leading-relaxed text-[#94A3B8] lg:mt-2 lg:max-w-[300px] lg:text-[12.5px]"
         >
           مدیریت درآمد و مصارف روزانه‌ات
           <br />
           ساده، دقیق و کاملاً آفلاین
         </motion.p>
 
-        {/* ناحیه‌ی ورود */}
         <div className="mt-10 w-full max-w-[320px] lg:mt-7">
           <AnimatePresence mode="wait">
             {showBiometric && (
@@ -215,10 +213,10 @@ function LockScreen() {
               >
                 <BiometricButton onPress={handleBiometric} />
 
-                <p className="mt-5 text-[13px] font-semibold text-[#F2EFE9]">
+                <p className="mt-5 text-[13px] font-semibold text-[#F8FAFC]">
                   ورود با اثر انگشت
                 </p>
-                <p className="mt-1.5 text-center text-[11px] leading-relaxed text-[#5C736C]">
+                <p className="mt-1.5 text-center text-[11px] leading-relaxed text-[#64748B]">
                   برای باز کردن، دستت را روی سنسور نگهدار
                 </p>
 
@@ -230,7 +228,7 @@ function LockScreen() {
                       setPinError('');
                       clearPinBuffer();
                     }}
-                    className="mt-10 text-[12px] font-semibold text-[#E3B341]"
+                    className="mt-10 text-[12px] font-semibold text-[#00D1A7]"
                   >
                     ورود با رمز عبور
                   </button>
@@ -247,13 +245,14 @@ function LockScreen() {
                 transition={{ duration: 0.32, ease: 'easeOut' }}
                 className="flex flex-col items-center"
               >
-                <p className="text-[13px] font-semibold text-[#F2EFE9] lg:text-[13.5px]">
+                <p className="text-[13px] font-semibold text-[#F8FAFC] lg:text-[13.5px]">
                   رمز عبور را وارد کنید
                 </p>
 
-                {/* PIN Dots با انیمیشن shake در صورت خطا */}
                 <motion.div
-                  animate={shake ? { x: [0, -10, 10, -8, 8, -4, 4, 0] } : { x: 0 }}
+                  animate={
+                    shake ? { x: [0, -10, 10, -8, 8, -4, 4, 0] } : { x: 0 }
+                  }
                   transition={{ duration: 0.45, ease: 'easeInOut' }}
                   className="mt-4 flex items-center gap-3"
                   dir="ltr"
@@ -266,8 +265,8 @@ function LockScreen() {
                         animate={{
                           scale: filled ? 1 : 0.9,
                           backgroundColor: filled
-                            ? '#E3B341'
-                            : 'rgba(255,255,255,0.12)',
+                            ? '#00D1A7'
+                            : 'rgba(255,255,255,0.15)',
                         }}
                         transition={{ duration: 0.18, ease: 'easeOut' }}
                         className="h-3.5 w-3.5 rounded-full"
@@ -276,7 +275,6 @@ function LockScreen() {
                   })}
                 </motion.div>
 
-                {/* خطا با انیمیشن */}
                 <div className="h-5">
                   <AnimatePresence>
                     {pinError && (
@@ -285,7 +283,7 @@ function LockScreen() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -4 }}
                         transition={{ duration: 0.2 }}
-                        className="mt-2 text-[11px] text-[#E2574C]"
+                        className="mt-2 text-[11px] text-[#F43F5E]"
                       >
                         {pinError}
                       </motion.p>
@@ -310,7 +308,7 @@ function LockScreen() {
                       clearPinBuffer();
                       autoTriedRef.current = false;
                     }}
-                    className="mt-6 text-[12px] font-semibold text-[#E3B341]"
+                    className="mt-6 text-[12px] font-semibold text-[#00D1A7]"
                   >
                     ورود با اثر انگشت
                   </button>
@@ -324,7 +322,7 @@ function LockScreen() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.35, delay: 0.25 }}
-                className="text-center text-[12px] text-[#5C736C]"
+                className="text-center text-[12px] text-[#64748B]"
               >
                 در حال آماده‌سازی...
               </motion.p>

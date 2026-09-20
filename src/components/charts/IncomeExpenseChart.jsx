@@ -21,10 +21,10 @@ function getChartLayout(period, dataLength) {
   };
 }
 
-const INCOME_COLOR = '#4FD1BE';
-const INCOME_DIM = 'rgba(79, 209, 190, 0.28)';
-const EXPENSE_COLOR = '#E2574C';
-const EXPENSE_DIM = 'rgba(226, 87, 76, 0.28)';
+const INCOME_COLOR = '#00D1A7';
+const INCOME_DIM = 'rgba(0, 209, 167, 0.30)';
+const EXPENSE_COLOR = '#F43F5E';
+const EXPENSE_DIM = 'rgba(244, 63, 94, 0.30)';
 
 export default function IncomeExpenseChart({
   data = [],
@@ -43,7 +43,6 @@ export default function IncomeExpenseChart({
   const { shouldScroll, chartWidth } = getChartLayout(period, data.length);
   const scrollRef = useChartAutoScroll(data, period, shouldScroll);
 
-  // ⭐ سری‌ها: در حالت روزانه، هر ستون رنگ خودش رو داره
   let series;
   if (isDaily) {
     series = [
@@ -96,7 +95,7 @@ export default function IncomeExpenseChart({
         type: 'gradient',
         gradient: {
           shadeIntensity: 1,
-          opacityFrom: 0.26,
+          opacityFrom: 0.28,
           opacityTo: 0.02,
           stops: [0, 90, 100],
         },
@@ -115,7 +114,6 @@ export default function IncomeExpenseChart({
 
     dataLabels: { enabled: false },
     xaxis: {
-      // ⭐ در حالت daily، x از داخل data نقطه‌ها میاد
       ...(isDaily ? { type: 'category' } : { categories }),
       tickAmount: data.length > 1 ? data.length - 1 : 1,
       labels: {
@@ -124,7 +122,7 @@ export default function IncomeExpenseChart({
         hideOverlappingLabels: false,
         trim: false,
         style: {
-          colors: '#5C736C',
+          colors: '#64748B',
           fontSize: isMonthly
             ? isDesktop
               ? '10px'
@@ -145,7 +143,7 @@ export default function IncomeExpenseChart({
     yaxis: {
       labels: {
         style: {
-          colors: '#5C736C',
+          colors: '#64748B',
           fontSize: isDesktop ? '11px' : '9px',
           fontFamily: 'Vazirmatn, sans-serif',
         },
@@ -153,7 +151,7 @@ export default function IncomeExpenseChart({
       },
     },
     grid: {
-      borderColor: 'rgba(242,239,233,0.06)',
+      borderColor: 'rgba(248,250,252,0.08)',
       strokeDashArray: 4,
       xaxis: { lines: { show: false } },
       padding: { left: 2, right: 2 },
@@ -169,7 +167,7 @@ export default function IncomeExpenseChart({
       horizontalAlign: 'right',
       fontFamily: 'Vazirmatn, sans-serif',
       fontSize: isDesktop ? '13px' : '11px',
-      labels: { colors: '#8FA39D' },
+      labels: { colors: '#94A3B8' },
       markers: { width: 7, height: 7, radius: 10 },
       itemMargin: { horizontal: 8 },
     },

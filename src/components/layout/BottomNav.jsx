@@ -27,14 +27,14 @@ function NavItem({ label, to, icon: Icon, end = false }) {
           className={[
             'flex min-h-[48px] min-w-[48px] flex-col items-center justify-center rounded-2xl px-1',
             'transition-all duration-200 active:scale-[0.94]',
-            isActive ? 'text-[#E3B341]' : 'text-[#5C736C]',
+            isActive ? 'text-[#00D1A7]' : 'text-[#94A3B8]',
           ].join(' ')}
         >
-          <Icon size={19} strokeWidth={isActive ? 2.2 : 1.8} />
+          <Icon size={19} strokeWidth={isActive ? 2.4 : 1.8} />
           <span
             className={[
               'mt-1 text-[10px] font-semibold leading-none',
-              isActive ? 'text-[#E3B341]' : 'text-[#5C736C]',
+              isActive ? 'text-[#00D1A7]' : 'text-[#94A3B8]',
             ].join(' ')}
           >
             {label}
@@ -48,7 +48,7 @@ function NavItem({ label, to, icon: Icon, end = false }) {
 function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-1/2 z-40 w-full max-w-[420px] -translate-x-1/2 px-3 pb-[env(safe-area-inset-bottom)] lg:hidden">
-      <div className="relative mb-2 flex h-[64px] items-center justify-between rounded-[23px] border border-white/[0.07] bg-[#0F211E]/95 px-2 shadow-[0_-8px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl">
+      <div className="glass-strong relative mb-2 flex h-[64px] items-center justify-between rounded-[23px] px-2">
         <div className="flex h-full flex-1 items-center justify-between pl-3">
           {leftItems.map((item) => (
             <NavItem key={item.to} {...item} />

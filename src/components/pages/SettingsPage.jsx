@@ -63,10 +63,6 @@ import { CURRENCY_OPTIONS, APP_VERSION } from '../utils/constants';
 import { getTodayShort } from '../utils/dates';
 import { formatTime12, parseTime24, toTime24 } from '../utils/timeFormat';
 
-// ============================================================
-// Body Lock
-// ============================================================
-
 function lockBody() {
   const body = document.body;
   const scrollbarWidth =
@@ -84,10 +80,6 @@ function lockBody() {
     body.style.paddingRight = prevPaddingRight;
   };
 }
-
-// ============================================================
-// Time Picker
-// ============================================================
 
 function TimePicker({ value, onChange }) {
   const { hour, minute, period } = parseTime24(value);
@@ -107,7 +99,7 @@ function TimePicker({ value, onChange }) {
   return (
     <div className="space-y-5">
       <div>
-        <p className="mb-2 text-[11px] font-medium text-[#8FA39D]">ساعت</p>
+        <p className="mb-2 text-[11px] font-medium text-[#94A3B8]">ساعت</p>
         <div className="grid grid-cols-4 gap-2">
           {hours.map((h) => {
             const active = h === hour;
@@ -117,10 +109,10 @@ function TimePicker({ value, onChange }) {
                 type="button"
                 onClick={() => setHour(h)}
                 className={[
-                  'flex h-11 items-center justify-center rounded-xl border text-[14px] font-bold transition-all active:scale-95',
+                  'flex h-11 items-center justify-center rounded-xl border text-[14px] font-bold transition-all active:scale-95 backdrop-blur-md',
                   active
-                    ? 'border-[#E3B341]/50 bg-[#E3B341]/[0.14] text-[#E3B341]'
-                    : 'border-white/[0.06] bg-[#153029] text-[#8FA39D]',
+                    ? 'border-[#00D1A7]/50 bg-[#00D1A7]/[0.14] text-[#00D1A7]'
+                    : 'border-white/[0.08] bg-white/[0.04] text-[#94A3B8]',
                 ].join(' ')}
               >
                 {h}
@@ -131,7 +123,7 @@ function TimePicker({ value, onChange }) {
       </div>
 
       <div>
-        <p className="mb-2 text-[11px] font-medium text-[#8FA39D]">دقیقه</p>
+        <p className="mb-2 text-[11px] font-medium text-[#94A3B8]">دقیقه</p>
         <div className="grid grid-cols-4 gap-2">
           {minutes.map((m) => {
             const active = m === minute;
@@ -141,10 +133,10 @@ function TimePicker({ value, onChange }) {
                 type="button"
                 onClick={() => setMinute(m)}
                 className={[
-                  'flex h-11 items-center justify-center rounded-xl border text-[14px] font-bold transition-all active:scale-95',
+                  'flex h-11 items-center justify-center rounded-xl border text-[14px] font-bold transition-all active:scale-95 backdrop-blur-md',
                   active
-                    ? 'border-[#E3B341]/50 bg-[#E3B341]/[0.14] text-[#E3B341]'
-                    : 'border-white/[0.06] bg-[#153029] text-[#8FA39D]',
+                    ? 'border-[#00D1A7]/50 bg-[#00D1A7]/[0.14] text-[#00D1A7]'
+                    : 'border-white/[0.08] bg-white/[0.04] text-[#94A3B8]',
                 ].join(' ')}
               >
                 {String(m).padStart(2, '0')}
@@ -155,7 +147,7 @@ function TimePicker({ value, onChange }) {
       </div>
 
       <div>
-        <p className="mb-2 text-[11px] font-medium text-[#8FA39D]">نوبت</p>
+        <p className="mb-2 text-[11px] font-medium text-[#94A3B8]">نوبت</p>
         <div className="grid grid-cols-2 gap-2">
           {['صبح', 'شب'].map((p) => {
             const active = p === period;
@@ -165,10 +157,10 @@ function TimePicker({ value, onChange }) {
                 type="button"
                 onClick={() => setPeriod(p)}
                 className={[
-                  'flex h-11 items-center justify-center rounded-xl border text-[13px] font-bold transition-all active:scale-95',
+                  'flex h-11 items-center justify-center rounded-xl border text-[13px] font-bold transition-all active:scale-95 backdrop-blur-md',
                   active
-                    ? 'border-[#E3B341]/50 bg-[#E3B341]/[0.14] text-[#E3B341]'
-                    : 'border-white/[0.06] bg-[#153029] text-[#8FA39D]',
+                    ? 'border-[#00D1A7]/50 bg-[#00D1A7]/[0.14] text-[#00D1A7]'
+                    : 'border-white/[0.08] bg-white/[0.04] text-[#94A3B8]',
                 ].join(' ')}
               >
                 {p}
@@ -178,19 +170,15 @@ function TimePicker({ value, onChange }) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#E3B341]/20 bg-[#E3B341]/[0.06] p-4 text-center">
-        <p className="text-[11px] text-[#8FA39D]">زمان یادآوری</p>
-        <p className="mt-1 text-[20px] font-extrabold text-[#E3B341]">
+      <div className="rounded-2xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.08] p-4 text-center backdrop-blur-md">
+        <p className="text-[11px] text-[#94A3B8]">زمان یادآوری</p>
+        <p className="mt-1 text-[20px] font-extrabold text-[#00D1A7]">
           {formatTime12(value)}
         </p>
       </div>
     </div>
   );
 }
-
-// ============================================================
-// PIN Setup Flow
-// ============================================================
 
 function PinSetupFlow({ onDone, onCancel }) {
   const [step, setStep] = useState('enter');
@@ -239,10 +227,10 @@ function PinSetupFlow({ onDone, onCancel }) {
 
   return (
     <div className="flex flex-col items-center">
-      <p className="text-[14px] font-bold text-[#F2EFE9]">
+      <p className="text-[14px] font-bold text-[#F8FAFC]">
         {step === 'enter' ? 'رمز جدید را وارد کنید' : 'رمز را دوباره وارد کنید'}
       </p>
-      <p className="mt-1.5 text-[11px] text-[#5C736C]">
+      <p className="mt-1.5 text-[11px] text-[#64748B]">
         {step === 'enter' ? '۴ رقم دلخواه' : 'برای اطمینان، تکرار کنید'}
       </p>
 
@@ -253,7 +241,7 @@ function PinSetupFlow({ onDone, onCancel }) {
             className={[
               'h-3.5 w-3.5 rounded-full transition-all duration-200',
               i < pinValue.length
-                ? 'scale-100 bg-[#E3B341]'
+                ? 'scale-100 bg-[#00D1A7]'
                 : 'scale-90 bg-white/[0.12]',
             ].join(' ')}
           />
@@ -261,7 +249,7 @@ function PinSetupFlow({ onDone, onCancel }) {
       </div>
 
       <div className="h-6">
-        {error && <p className="mt-2 text-[11px] text-[#E2574C]">{error}</p>}
+        {error && <p className="mt-2 text-[11px] text-[#F43F5E]">{error}</p>}
       </div>
 
       <div className="mt-3 w-full">
@@ -275,17 +263,13 @@ function PinSetupFlow({ onDone, onCancel }) {
       <button
         type="button"
         onClick={onCancel}
-        className="mt-5 text-[12px] font-semibold text-[#8FA39D]"
+        className="mt-5 text-[12px] font-semibold text-[#94A3B8]"
       >
         انصراف
       </button>
     </div>
   );
 }
-
-// ============================================================
-// Sheet
-// ============================================================
 
 function Sheet({ open, onClose, title, subtitle, children }) {
   useEffect(() => {
@@ -303,7 +287,7 @@ function Sheet({ open, onClose, title, subtitle, children }) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
             onClick={onClose}
-            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-[2px]"
+            className="fixed inset-0 z-[100] bg-black/65 backdrop-blur-sm"
           />
 
           <motion.div
@@ -312,9 +296,9 @@ function Sheet({ open, onClose, title, subtitle, children }) {
             exit={{ y: '100%' }}
             transition={{ duration: 0.34, ease: [0.32, 0.72, 0, 1] }}
             className="
-              fixed inset-x-3 bottom-3 z-[110] mx-auto
+              glass-strong fixed inset-x-3 bottom-3 z-[110] mx-auto
               flex max-h-[88svh] w-auto max-w-[420px] flex-col
-              overflow-hidden rounded-[24px] border border-white/[0.07] bg-[#0F211E]
+              overflow-hidden rounded-[24px]
               outline-none
               lg:inset-x-auto lg:bottom-auto lg:left-1/2 lg:top-1/2
               lg:max-h-[85vh] lg:w-full lg:max-w-[520px]
@@ -323,22 +307,22 @@ function Sheet({ open, onClose, title, subtitle, children }) {
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <div className="shrink-0 px-4 pt-3 pb-3 lg:px-6 lg:pt-4 lg:pb-4">
-              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/[0.12] lg:hidden" />
+              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/[0.18] lg:hidden" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   {subtitle && (
-                    <p className="text-[11px] text-[#5C736C] lg:text-[12px]">
+                    <p className="text-[11px] text-[#64748B] lg:text-[12px]">
                       {subtitle}
                     </p>
                   )}
-                  <h2 className="mt-0.5 text-[18px] font-bold text-[#F2EFE9] lg:text-[20px]">
+                  <h2 className="mt-0.5 text-[18px] font-bold text-[#F8FAFC] lg:text-[20px]">
                     {title}
                   </h2>
                 </div>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#153029] text-[#8FA39D] active:scale-95 lg:h-10 lg:w-10"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.06] text-[#94A3B8] backdrop-blur-md active:scale-95 lg:h-10 lg:w-10"
                   aria-label="بستن"
                 >
                   <X size={18} />
@@ -357,15 +341,11 @@ function Sheet({ open, onClose, title, subtitle, children }) {
 
 function SectionTitle({ children }) {
   return (
-    <h2 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[#5C736C]">
+    <h2 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[#64748B]">
       {children}
     </h2>
   );
 }
-
-// ============================================================
-// Main Page
-// ============================================================
 
 function SettingsPage() {
   const dataVersion = useAppStore((s) => s.dataVersion);
@@ -600,7 +580,6 @@ function SettingsPage() {
     event.target.value = '';
   }
 
-  // ⭐ حالا این دکمه همه‌چیز رو پاک می‌کنه و اپ از صفر شروع می‌شه
   async function handleResetApp() {
     setResetting(true);
     haptic.warning();
@@ -646,10 +625,10 @@ function SettingsPage() {
     <>
       <div className="px-4 pb-6 pt-6 lg:mx-auto lg:max-w-[1100px] lg:px-8 lg:pb-12 lg:pt-8">
         <header>
-          <p className="text-[11px] text-[#5C736C] lg:text-[12px]">
+          <p className="text-[11px] text-[#64748B] lg:text-[12px]">
             شخصی‌سازی برنامه
           </p>
-          <h1 className="mt-1 text-[21px] font-bold text-[#F2EFE9] lg:text-[26px]">
+          <h1 className="mt-1 text-[21px] font-bold text-[#F8FAFC] lg:text-[26px]">
             تنظیمات
           </h1>
         </header>
@@ -732,14 +711,14 @@ function SettingsPage() {
             <button
               type="button"
               onClick={() => setConfirmLogout(true)}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-[#E2574C]/20 bg-[#E2574C]/[0.08] py-3.5 text-[13px] font-semibold text-[#E2574C] active:scale-[0.98]"
+              className="glass mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-[#F43F5E]/25 py-3.5 text-[13px] font-semibold text-[#F43F5E] active:scale-[0.98]"
             >
               <LogOut size={17} strokeWidth={2} />
               خروج از حساب
             </button>
           )}
 
-          <p className="mt-6 text-center text-[10.5px] text-[#5C736C]">
+          <p className="mt-6 text-center text-[10.5px] text-[#64748B]">
             خزانه • نسخه {APP_VERSION} • {getTodayShort()}
           </p>
         </div>
@@ -852,7 +831,7 @@ function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setConfirmLogout(true)}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#E2574C]/20 bg-[#E2574C]/[0.08] py-3.5 text-[13px] font-semibold text-[#E2574C] transition-all hover:bg-[#E2574C]/[0.12] active:scale-[0.98]"
+                  className="glass flex w-full items-center justify-center gap-2 rounded-2xl border-[#F43F5E]/25 py-3.5 text-[13px] font-semibold text-[#F43F5E] transition-all hover:border-[#F43F5E]/40 active:scale-[0.98]"
                 >
                   <LogOut size={17} strokeWidth={2} />
                   خروج از حساب
@@ -862,12 +841,10 @@ function SettingsPage() {
           </div>
         </div>
 
-        <p className="mt-10 hidden text-center text-[10.5px] text-[#5C736C] lg:block">
+        <p className="mt-10 hidden text-center text-[10.5px] text-[#64748B] lg:block">
           خزانه • نسخه {APP_VERSION} • {getTodayShort()}
         </p>
       </div>
-
-      {/* Sheets */}
 
       <Sheet
         open={sheet === 'profile'}
@@ -875,24 +852,24 @@ function SettingsPage() {
         title="پروفایل"
         subtitle="اطلاعات شخصی"
       >
-        <label className="mb-2 block text-[11px] font-medium text-[#8FA39D]">
+        <label className="mb-2 block text-[11px] font-medium text-[#94A3B8]">
           نام نمایشی
         </label>
         <input
           value={nameInput}
           onChange={(e) => setNameInput(e.target.value)}
           placeholder="مثلاً احمد"
-          className="w-full rounded-2xl border border-white/[0.07] bg-[#153029] px-4 py-3 text-[13px] text-[#F2EFE9] outline-none placeholder:text-[#5C736C] focus:border-[#E3B341]/40"
+          className="glass-inner w-full rounded-2xl px-4 py-3 text-[13px] text-[#F8FAFC] outline-none placeholder:text-[#64748B] focus:border-[#00D1A7]/50"
         />
 
-        <p className="mt-2 text-[10.5px] leading-relaxed text-[#5C736C]">
+        <p className="mt-2 text-[10.5px] leading-relaxed text-[#64748B]">
           نام نمایشی برای پیام‌های خوش‌آمدگویی و پروفایل استفاده می‌شود.
         </p>
 
         <button
           type="button"
           onClick={saveName}
-          className="mt-4 w-full rounded-2xl bg-[linear-gradient(155deg,#E3B341,#B9862A)] py-3.5 text-[13px] font-bold text-[#0A1614] active:scale-[0.98]"
+          className="mt-4 w-full rounded-2xl bg-[linear-gradient(155deg,#00D1A7,#00A88A)] py-3.5 text-[13px] font-bold text-[#0F172A] shadow-[0_6px_24px_rgba(0,209,167,0.30)] active:scale-[0.98]"
         >
           ذخیره
         </button>
@@ -909,7 +886,7 @@ function SettingsPage() {
         <button
           type="button"
           onClick={handleTestReminder}
-          className="mt-5 w-full rounded-2xl border border-[#4FD1BE]/30 bg-[#4FD1BE]/[0.08] py-3 text-[12px] font-semibold text-[#4FD1BE] active:scale-[0.98]"
+          className="mt-5 w-full rounded-2xl border border-[#00D1A7]/30 bg-[#00D1A7]/[0.10] py-3 text-[12px] font-semibold text-[#00D1A7] backdrop-blur-md active:scale-[0.98]"
         >
           نمایش آزمایشی یادآوری
         </button>
@@ -917,7 +894,7 @@ function SettingsPage() {
         <button
           type="button"
           onClick={() => setSheet(null)}
-          className="mt-3 w-full rounded-2xl bg-[linear-gradient(155deg,#E3B341,#B9862A)] py-3.5 text-[13px] font-bold text-[#0A1614] active:scale-[0.98]"
+          className="mt-3 w-full rounded-2xl bg-[linear-gradient(155deg,#00D1A7,#00A88A)] py-3.5 text-[13px] font-bold text-[#0F172A] shadow-[0_6px_24px_rgba(0,209,167,0.30)] active:scale-[0.98]"
         >
           ذخیره
         </button>
@@ -939,12 +916,12 @@ function SettingsPage() {
           <PinSetupFlow onDone={afterPinSet} onCancel={cancelPinSetup} />
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-[#0A1614] p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#153029] text-[#8FA39D]">
+            <div className="glass-inner flex items-center gap-3 rounded-2xl p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.04] text-[#94A3B8]">
                 <ShieldCheck size={19} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-semibold text-[#F2EFE9]">
+                <p className="text-[13px] font-semibold text-[#F8FAFC]">
                   رمز عبور
                 </p>
                 <div className="mt-1">
@@ -955,7 +932,7 @@ function SettingsPage() {
                 <button
                   type="button"
                   onClick={handleClearPin}
-                  className="shrink-0 rounded-xl bg-[#E2574C]/[0.10] px-3 py-2 text-[11px] font-semibold text-[#E2574C]"
+                  className="shrink-0 rounded-xl bg-[#F43F5E]/[0.12] px-3 py-2 text-[11px] font-semibold text-[#F43F5E]"
                 >
                   حذف
                 </button>
@@ -966,24 +943,24 @@ function SettingsPage() {
                     setPinSetupFromToggle(false);
                     setPinSetupOpen(true);
                   }}
-                  className="shrink-0 rounded-xl bg-[#E3B341]/[0.14] px-3 py-2 text-[11px] font-semibold text-[#E3B341]"
+                  className="shrink-0 rounded-xl bg-[#00D1A7]/[0.16] px-3 py-2 text-[11px] font-semibold text-[#00D1A7]"
                 >
                   تنظیم
                 </button>
               )}
             </div>
 
-            <div className="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-[#0A1614] p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#153029] text-[#8FA39D]">
+            <div className="glass-inner flex items-center gap-3 rounded-2xl p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.04] text-[#94A3B8]">
                 <Fingerprint size={19} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-semibold text-[#F2EFE9]">
+                <p className="text-[13px] font-semibold text-[#F8FAFC]">
                   اثر انگشت / Face ID
                 </p>
                 <div className="mt-1">
                   {bioChecking ? (
-                    <span className="text-[10px] text-[#5C736C]">
+                    <span className="text-[10px] text-[#64748B]">
                       در حال بررسی...
                     </span>
                   ) : (
@@ -1000,7 +977,7 @@ function SettingsPage() {
                 <button
                   type="button"
                   onClick={handleClearBiometric}
-                  className="shrink-0 rounded-xl bg-[#E2574C]/[0.10] px-3 py-2 text-[11px] font-semibold text-[#E2574C]"
+                  className="shrink-0 rounded-xl bg-[#F43F5E]/[0.12] px-3 py-2 text-[11px] font-semibold text-[#F43F5E]"
                 >
                   حذف
                 </button>
@@ -1009,14 +986,14 @@ function SettingsPage() {
                   type="button"
                   disabled={busy || bioChecking}
                   onClick={handleRegisterBiometric}
-                  className="shrink-0 rounded-xl bg-[#E3B341]/[0.14] px-3 py-2 text-[11px] font-semibold text-[#E3B341] disabled:opacity-40"
+                  className="shrink-0 rounded-xl bg-[#00D1A7]/[0.16] px-3 py-2 text-[11px] font-semibold text-[#00D1A7] disabled:opacity-40"
                 >
                   {busy ? '...' : bioChecking ? '...' : 'فعال‌سازی'}
                 </button>
               )}
             </div>
 
-            <p className="pt-1 text-center text-[10.5px] leading-relaxed text-[#5C736C]">
+            <p className="pt-1 text-center text-[10.5px] leading-relaxed text-[#64748B]">
               همه‌ی اطلاعات فقط روی همین دستگاه ذخیره می‌شود و هیچ‌گاه به سرور
               فرستاده نمی‌شود.
             </p>
@@ -1039,27 +1016,27 @@ function SettingsPage() {
                 type="button"
                 onClick={() => changeCurrency(opt.label)}
                 className={[
-                  'flex w-full items-center justify-between rounded-2xl border px-4 py-3.5 text-right transition-all',
+                  'flex w-full items-center justify-between rounded-2xl border px-4 py-3.5 text-right backdrop-blur-md transition-all',
                   isActive
-                    ? 'border-[#E3B341]/40 bg-[#E3B341]/[0.10]'
-                    : 'border-white/[0.06] bg-[#153029] active:scale-[0.99]',
+                    ? 'border-[#00D1A7]/40 bg-[#00D1A7]/[0.12]'
+                    : 'border-white/[0.08] bg-white/[0.04] active:scale-[0.99]',
                 ].join(' ')}
               >
                 <div className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0F211E] text-[16px] font-bold text-[#E3B341]">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.04] text-[16px] font-bold text-[#00D1A7]">
                     {opt.symbol}
                   </span>
                   <div>
-                    <p className="text-[13px] font-semibold text-[#F2EFE9]">
+                    <p className="text-[13px] font-semibold text-[#F8FAFC]">
                       {opt.label}
                     </p>
-                    <p className="mt-0.5 text-[10.5px] text-[#5C736C]">
+                    <p className="mt-0.5 text-[10.5px] text-[#64748B]">
                       {opt.code}
                     </p>
                   </div>
                 </div>
                 {isActive && (
-                  <span className="text-[11px] font-bold text-[#E3B341]">
+                  <span className="text-[11px] font-bold text-[#00D1A7]">
                     ✓
                   </span>
                 )}
@@ -1079,30 +1056,30 @@ function SettingsPage() {
           <button
             type="button"
             onClick={handleExport}
-            className="flex w-full items-center gap-3 rounded-2xl border border-white/[0.06] bg-[#153029] p-4 text-right active:scale-[0.99]"
+            className="glass-inner flex w-full items-center gap-3 rounded-2xl p-4 text-right active:scale-[0.99]"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#4FD1BE]/10 text-[#4FD1BE]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.14] text-[#00D1A7]">
               <Database size={19} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-semibold text-[#F2EFE9]">
+              <p className="text-[13px] font-semibold text-[#F8FAFC]">
                 خروجی گرفتن
               </p>
-              <p className="mt-1 text-[11px] text-[#5C736C]">
+              <p className="mt-1 text-[11px] text-[#64748B]">
                 ذخیره‌ی همه‌ی تراکنش‌ها در یک فایل JSON
               </p>
             </div>
           </button>
 
-          <label className="flex w-full cursor-pointer items-center gap-3 rounded-2xl border border-white/[0.06] bg-[#153029] p-4 active:scale-[0.99]">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E3B341]/10 text-[#E3B341]">
+          <label className="glass-inner flex w-full cursor-pointer items-center gap-3 rounded-2xl p-4 active:scale-[0.99]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.14] text-[#00D1A7]">
               <Database size={19} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-semibold text-[#F2EFE9]">
+              <p className="text-[13px] font-semibold text-[#F8FAFC]">
                 بازیابی از فایل
               </p>
-              <p className="mt-1 text-[11px] text-[#5C736C]">
+              <p className="mt-1 text-[11px] text-[#64748B]">
                 ⚠ همه‌ی داده‌های فعلی جایگزین می‌شوند
               </p>
             </div>
@@ -1116,14 +1093,13 @@ function SettingsPage() {
         </div>
       </Sheet>
 
-      {/* ⭐ مودال پاک‌سازی و شروع مجدد */}
       <Sheet
         open={confirmReset}
         onClose={() => (resetting ? null : setConfirmReset(false))}
         title="پاک‌سازی و شروع مجدد"
         subtitle="همه‌چیز مثل اولین نصب"
       >
-        <p className="rounded-2xl border border-[#E2574C]/20 bg-[#E2574C]/[0.08] p-4 text-[12px] leading-relaxed text-[#E2574C]">
+        <p className="rounded-2xl border border-[#F43F5E]/25 bg-[#F43F5E]/[0.10] p-4 text-[12px] leading-relaxed text-[#F43F5E] backdrop-blur-md">
           با این کار{' '}
           <span className="font-bold">
             همه‌ی تراکنش‌ها، دسته‌بندی‌ها، تنظیمات، پروفایل، قفل،
@@ -1132,8 +1108,8 @@ function SettingsPage() {
           پاک می‌شود و برنامه کاملاً از نو شروع می‌شود.
         </p>
 
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-[#0A1614]/60 p-4">
-          <p className="text-[11.5px] leading-relaxed text-[#8FA39D]">
+        <div className="glass-inner mt-4 rounded-2xl p-4">
+          <p className="text-[11.5px] leading-relaxed text-[#94A3B8]">
             بعد از این کار دوباره سؤال‌های اولیه پرسیده می‌شود — دقیقاً انگار
             همین حالا اپ رو نصب کرده‌ای.
           </p>
@@ -1144,7 +1120,7 @@ function SettingsPage() {
             type="button"
             disabled={resetting}
             onClick={() => setConfirmReset(false)}
-            className="rounded-2xl border border-white/[0.08] bg-[#153029] py-3.5 text-[12.5px] font-semibold text-[#8FA39D] disabled:opacity-50"
+            className="rounded-2xl border border-white/[0.10] bg-white/[0.06] py-3.5 text-[12.5px] font-semibold text-[#94A3B8] backdrop-blur-md disabled:opacity-50"
           >
             انصراف
           </button>
@@ -1152,7 +1128,7 @@ function SettingsPage() {
             type="button"
             disabled={resetting}
             onClick={handleResetApp}
-            className="flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(155deg,#E2574C,#B8392F)] py-3.5 text-[12.5px] font-bold text-white disabled:opacity-60"
+            className="flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(155deg,#F43F5E,#BE123C)] py-3.5 text-[12.5px] font-bold text-white disabled:opacity-60"
           >
             {resetting ? (
               '...'
@@ -1172,7 +1148,7 @@ function SettingsPage() {
         title="خروج از حساب"
         subtitle="بعد از خروج باید دوباره وارد شوید"
       >
-        <p className="rounded-2xl border border-white/[0.06] bg-[#153029] p-4 text-[12px] leading-relaxed text-[#8FA39D]">
+        <p className="glass-inner rounded-2xl p-4 text-[12px] leading-relaxed text-[#94A3B8]">
           با خروج از حساب، برنامه بلافاصله قفل می‌شود و برای ورود دوباره به{' '}
           {pinOn ? 'رمز عبور' : ''}
           {pinOn && bioOn ? ' یا ' : ''}
@@ -1182,14 +1158,14 @@ function SettingsPage() {
           <button
             type="button"
             onClick={() => setConfirmLogout(false)}
-            className="rounded-2xl border border-white/[0.08] bg-[#153029] py-3.5 text-[12.5px] font-semibold text-[#8FA39D]"
+            className="rounded-2xl border border-white/[0.10] bg-white/[0.06] py-3.5 text-[12.5px] font-semibold text-[#94A3B8] backdrop-blur-md"
           >
             انصراف
           </button>
           <button
             type="button"
             onClick={handleLogout}
-            className="flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(155deg,#E2574C,#B8392F)] py-3.5 text-[12.5px] font-bold text-white"
+            className="flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(155deg,#F43F5E,#BE123C)] py-3.5 text-[12.5px] font-bold text-white"
           >
             <LogOut size={16} />
             خروج
@@ -1201,7 +1177,7 @@ function SettingsPage() {
 
       {toast && (
         <div className="pointer-events-none fixed bottom-[100px] left-1/2 z-[200] max-w-[90vw] -translate-x-1/2">
-          <div className="rounded-2xl border border-white/[0.08] bg-[#153029] px-4 py-2.5 text-center text-[12px] font-medium text-[#F2EFE9] shadow-lg">
+          <div className="glass-strong rounded-2xl px-4 py-2.5 text-center text-[12px] font-medium text-[#F8FAFC] shadow-lg">
             {toast}
           </div>
         </div>

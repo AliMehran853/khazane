@@ -11,7 +11,17 @@ function App() {
     });
   }, []);
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      {/* ⭐ لایه‌ی پس‌زمینه‌ی عکس — fixed برای همه‌ی صفحات */}
+      <div className="kh-bg-layer" aria-hidden="true">
+        <img src="/background.png" alt="" className="kh-bg-img" />
+        <div className="kh-bg-overlay" />
+      </div>
+
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
 export default App;

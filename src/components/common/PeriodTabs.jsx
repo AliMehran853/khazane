@@ -16,7 +16,7 @@ function MobileTabs() {
   const setPeriod = useAppStore((s) => s.setPeriod);
 
   return (
-    <div className="flex w-full rounded-2xl border border-white/[0.06] bg-[#0F211E] p-1">
+    <div className="glass-inner flex w-full rounded-2xl p-1">
       {periods.map((item) => {
         const isActive = period === item.id;
         return (
@@ -30,8 +30,8 @@ function MobileTabs() {
               'transition-all duration-200',
               'active:scale-[0.97]',
               isActive
-                ? 'bg-[#1B3A32] text-[#E3B341] shadow-[0_2px_10px_rgba(0,0,0,0.12)]'
-                : 'text-[#5C736C]',
+                ? 'bg-[#00D1A7]/[0.18] text-[#00D1A7] shadow-[0_2px_10px_rgba(0,209,167,0.15)] border border-[#00D1A7]/25'
+                : 'text-[#94A3B8] border border-transparent',
             ].join(' ')}
           >
             {item.label}
@@ -75,19 +75,17 @@ function DesktopDropdown() {
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         className="
-          flex h-full w-full items-center justify-between gap-3
-          rounded-[22px] border border-white/[0.06] bg-[#0F211E]
-          px-5 py-4
+          glass flex h-full w-full items-center justify-between gap-3
+          rounded-[22px] px-5 py-4
           transition-all duration-200
-          hover:border-[#E3B341]/25
-          active:scale-[0.98]
+          hover:border-[#00D1A7]/30 active:scale-[0.98]
         "
       >
         <span className="flex min-w-0 flex-col items-start">
-          <span className="text-[10.5px] font-medium text-[#5C736C]">
+          <span className="text-[10.5px] font-medium text-[#64748B]">
             دوره‌ی نمایش
           </span>
-          <span className="mt-1 text-[15px] font-extrabold text-[#E3B341]">
+          <span className="mt-1 text-[15px] font-extrabold text-[#00D1A7]">
             {current.label}
           </span>
         </span>
@@ -96,7 +94,7 @@ function DesktopDropdown() {
           size={18}
           strokeWidth={2}
           className={[
-            'shrink-0 text-[#E3B341] transition-transform duration-200',
+            'shrink-0 text-[#00D1A7] transition-transform duration-200',
             open ? 'rotate-180' : '',
           ].join(' ')}
         />
@@ -105,9 +103,8 @@ function DesktopDropdown() {
       {open && (
         <div
           className="
-            absolute right-0 top-[calc(100%+8px)] z-50 w-full
-            overflow-hidden rounded-2xl border border-white/[0.08]
-            bg-[#0F211E] shadow-2xl backdrop-blur-xl
+            glass-strong absolute right-0 top-[calc(100%+8px)] z-50 w-full
+            overflow-hidden rounded-2xl
           "
           style={{ minWidth: '180px' }}
         >
@@ -125,8 +122,8 @@ function DesktopDropdown() {
                   'flex w-full items-center justify-between gap-3 px-4 py-3 text-right',
                   'text-[13.5px] font-semibold transition-colors',
                   isActive
-                    ? 'bg-[#E3B341]/[0.10] text-[#E3B341]'
-                    : 'text-[#8FA39D] hover:bg-white/[0.03] hover:text-[#F2EFE9]',
+                    ? 'bg-[#00D1A7]/[0.12] text-[#00D1A7]'
+                    : 'text-[#94A3B8] hover:bg-white/[0.04] hover:text-[#F8FAFC]',
                 ].join(' ')}
               >
                 <span>{item.label}</span>

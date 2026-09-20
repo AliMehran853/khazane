@@ -27,10 +27,7 @@ export function SkeletonChart({ height = 230 }) {
 
 export function SkeletonDonut({ height = 260 }) {
   return (
-    <div
-      className="flex items-center justify-center"
-      style={{ height }}
-    >
+    <div className="flex items-center justify-center" style={{ height }}>
       <div
         className="kh-skeleton rounded-full"
         style={{
@@ -44,7 +41,7 @@ export function SkeletonDonut({ height = 260 }) {
 
 export function SkeletonStatCard() {
   return (
-    <div className="rounded-[22px] border border-white/[0.06] bg-[#0F211E] p-4 lg:p-5">
+    <div className="glass rounded-[22px] p-4 lg:p-5">
       <div className="kh-skeleton h-3 w-16 rounded" />
       <div className="kh-skeleton mt-3 h-6 w-24 rounded" />
     </div>
@@ -53,7 +50,7 @@ export function SkeletonStatCard() {
 
 export function SkeletonListRow() {
   return (
-    <div className="flex items-center gap-3 border-b border-white/[0.05] px-4 py-3 last:border-b-0">
+    <div className="flex items-center gap-3 border-b border-white/[0.06] px-4 py-3 last:border-b-0">
       <div className="kh-skeleton h-10 w-10 shrink-0 rounded-xl" />
       <div className="min-w-0 flex-1">
         <div className="kh-skeleton h-3 w-24 rounded" />
@@ -66,7 +63,7 @@ export function SkeletonListRow() {
 
 export function SkeletonList({ rows = 5 }) {
   return (
-    <div className="overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E]">
+    <div className="glass overflow-hidden rounded-[24px]">
       {Array.from({ length: rows }).map((_, i) => (
         <SkeletonListRow key={i} />
       ))}

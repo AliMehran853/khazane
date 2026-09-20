@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* =========================================================
-   Vazirmatn — از public/fonts (برای PWA cache + دسترسی سریع)
+   Vazirmatn
    ========================================================= */
 
 @font-face {
@@ -11,7 +11,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Vazirmatn";
   src: url("/fonts/Vazirmatn-ExtraLight.ttf") format("truetype");
@@ -19,7 +18,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Vazirmatn";
   src: url("/fonts/Vazirmatn-Light.ttf") format("truetype");
@@ -27,7 +25,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Vazirmatn";
   src: url("/fonts/Vazirmatn-Regular.ttf") format("truetype");
@@ -35,7 +32,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Vazirmatn";
   src: url("/fonts/Vazirmatn-Medium.ttf") format("truetype");
@@ -43,7 +39,6 @@
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
   font-family: "Vazirmatn";
   src: url("/fonts/Vazirmatn-SemiBold.ttf") format("truetype");
@@ -59,22 +54,28 @@
 @theme {
   --font-family-sans: "Vazirmatn", sans-serif;
 
-  --color-kh-base: #0a1614;
-  --color-kh-surface: #0f211e;
-  --color-kh-surface-2: #153029;
-  --color-kh-surface-3: #1b3a32;
+  --color-kh-base: #08171b;
+  --color-kh-surface: #0c2328;
+  --color-kh-surface-2: #113035;
+  --color-kh-surface-3: #184045;
 
-  --color-kh-text: #f2efe9;
-  --color-kh-text-secondary: #8fa39d;
-  --color-kh-text-muted: #5c736c;
+  --color-kh-text: #f1f5f9;
+  --color-kh-text-secondary: #9caeb8;
+  --color-kh-text-muted: #6e828b;
 
-  --color-kh-gold: #e3b341;
-  --color-kh-income: #4fd1be;
-  --color-kh-expense: #e2574c;
+  --color-kh-primary: #00d1a7;
+  --color-kh-primary-dark: #00a88a;
+  --color-kh-income: #00d1a7;
+  --color-kh-expense: #f43f5e;
+
+  --color-kh-gold: #00d1a7;
+  --color-kh-blue: #3b82f6;
+  --color-kh-purple: #8b5cf6;
+  --color-kh-orange: #f59e0b;
 }
 
 /* =========================================================
-   Root variables
+   Root
    ========================================================= */
 
 :root {
@@ -82,28 +83,34 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color: #f2efe9;
-  background: #0a1614;
+  color: #f1f5f9;
+  background: #08171b;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --kh-bg: #0a1614;
-  --kh-surface: #0f211e;
-  --kh-surface-2: #153029;
-  --kh-surface-3: #1b3a32;
+  --kh-bg: #08171b;
+  --kh-surface: #0c2328;
+  --kh-surface-2: #113035;
+  --kh-surface-3: #184045;
 
-  --kh-text: #f2efe9;
-  --kh-text-secondary: #8fa39d;
-  --kh-text-muted: #5c736c;
+  --kh-text: #f1f5f9;
+  --kh-text-secondary: #9caeb8;
+  --kh-text-muted: #6e828b;
 
-  --kh-gold: #e3b341;
-  --kh-income: #4fd1be;
-  --kh-expense: #e2574c;
+  --kh-primary: #00d1a7;
+  --kh-primary-dark: #00a88a;
+  --kh-income: #00d1a7;
+  --kh-expense: #f43f5e;
 
-  --kh-border: rgba(242, 239, 233, 0.08);
+  --kh-gold: #00d1a7;
+  --kh-blue: #3b82f6;
+  --kh-purple: #8b5cf6;
+  --kh-orange: #f59e0b;
+
+  --kh-border: rgba(0, 209, 167, 0.10);
 }
 
 /* =========================================================
@@ -127,7 +134,7 @@ body {
   width: 100%;
   overflow-x: clip;
   overscroll-behavior-x: none;
-  background: var(--kh-bg);
+  background: transparent;
   color: var(--kh-text);
   font-family: "Vazirmatn", sans-serif;
   position: relative;
@@ -137,6 +144,8 @@ body {
   min-height: 100dvh;
   width: 100%;
   overflow-x: clip;
+  position: relative;
+  z-index: 0;
 }
 
 *,
@@ -173,16 +182,85 @@ select {
 }
 
 /* =========================================================
+   ⭐ Background Layer — عکس روشن‌تر و رنگ‌دارتر
+   ========================================================= */
+
+.kh-bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.kh-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  /* ⭐ عکس روشن‌تر، اشباع‌رنگ بالاتر → غروب و کوه‌ها دیده بشن */
+  filter: brightness(0.85) saturate(1.35) contrast(1.05);
+  transform: translateZ(0);
+}
+
+.kh-bg-overlay {
+  position: absolute;
+  inset: 0;
+  /* ⭐ overlay گرم با ته‌مایه‌ی فیروزه‌ای، به‌جای خاکستری سرد */
+  background: linear-gradient(
+    180deg,
+    rgba(4, 25, 28, 0.28) 0%,
+    rgba(6, 30, 34, 0.52) 50%,
+    rgba(6, 30, 34, 0.78) 100%
+  );
+}
+
+/* =========================================================
+   ⭐ Glass Effects — بلور بیشتر، ته‌مایه‌ی فیروزه‌ای گرم
+   ========================================================= */
+
+.glass {
+  background: rgba(11, 34, 38, 0.48);
+  backdrop-filter: blur(40px) saturate(170%);
+  -webkit-backdrop-filter: blur(40px) saturate(170%);
+  border: 1px solid rgba(0, 209, 167, 0.10);
+  box-shadow:
+    inset 0 1px 0 0 rgba(0, 209, 167, 0.08),
+    0 10px 44px rgba(0, 0, 0, 0.28);
+}
+
+.glass-strong {
+  background: rgba(9, 28, 32, 0.65);
+  backdrop-filter: blur(52px) saturate(180%);
+  -webkit-backdrop-filter: blur(52px) saturate(180%);
+  border: 1px solid rgba(0, 209, 167, 0.14);
+  box-shadow:
+    inset 0 1px 0 0 rgba(0, 209, 167, 0.10),
+    0 12px 48px rgba(0, 0, 0, 0.38);
+}
+
+.glass-light {
+  background: rgba(13, 40, 44, 0.32);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(0, 209, 167, 0.08);
+}
+
+.glass-inner {
+  background: rgba(11, 34, 38, 0.38);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(0, 209, 167, 0.08);
+}
+
+/* =========================================================
    FPS Optimizations
    ========================================================= */
 
-.will-transform {
-  will-change: transform;
-}
-
-.will-opacity {
-  will-change: opacity;
-}
+.will-transform { will-change: transform; }
+.will-opacity { will-change: opacity; }
 
 .gpu-layer {
   transform: translateZ(0);
@@ -200,13 +278,8 @@ select {
   contain-intrinsic-size: 0 100px;
 }
 
-.scroll-ios {
-  -webkit-overflow-scrolling: touch;
-}
-
-.contain-paint {
-  contain: paint;
-}
+.scroll-ios { -webkit-overflow-scrolling: touch; }
+.contain-paint { contain: paint; }
 
 /* =========================================================
    Reduced Motion
@@ -229,7 +302,7 @@ select {
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(242, 239, 233, 0.12) transparent;
+  scrollbar-color: rgba(0, 209, 167, 0.22) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -237,12 +310,10 @@ select {
   height: 4px;
 }
 
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
+*::-webkit-scrollbar-track { background: transparent; }
 
 *::-webkit-scrollbar-thumb {
-  background: rgba(242, 239, 233, 0.12);
+  background: rgba(0, 209, 167, 0.22);
   border-radius: 999px;
 }
 
@@ -251,30 +322,26 @@ select {
    ========================================================= */
 
 ::selection {
-  background: rgba(227, 179, 65, 0.24);
-  color: #f2efe9;
+  background: rgba(0, 209, 167, 0.32);
+  color: #f1f5f9;
 }
 
 /* =========================================================
-   Skeleton Shimmer — انیمیشن لودینگ
+   Skeleton Shimmer
    ========================================================= */
 
 @keyframes kh-shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .kh-skeleton {
   background: linear-gradient(
     90deg,
-    rgba(242, 239, 233, 0.05) 0%,
-    rgba(242, 239, 233, 0.11) 50%,
-    rgba(242, 239, 233, 0.05) 100%
+    rgba(0, 209, 167, 0.06) 0%,
+    rgba(0, 209, 167, 0.14) 50%,
+    rgba(0, 209, 167, 0.06) 100%
   );
   background-size: 200% 100%;
-  animation: kh-shimmer 1.6s ease-in-out infinite;
+  animation: kh-shimmer 1.8s ease-in-out infinite;
 }

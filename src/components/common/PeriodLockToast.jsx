@@ -10,7 +10,6 @@ export default function PeriodLockToast() {
   const open = useAppStore((s) => s.periodLockToastOpen);
   const hideToast = useAppStore((s) => s.hidePeriodLockToast);
 
-  // ⭐ بستن خودکار بعد از چند ثانیه
   useEffect(() => {
     if (!open) return;
     const t = setTimeout(hideToast, AUTO_DISMISS_MS);
@@ -34,25 +33,23 @@ export default function PeriodLockToast() {
         >
           <div
             className="
-              pointer-events-auto flex w-full max-w-[420px] items-start gap-3
-              rounded-3xl border border-[#E3B341]/25
-              bg-[linear-gradient(155deg,#1B3A32,#0F211E)]
-              p-4 shadow-[0_12px_40px_rgba(0,0,0,0.4)]
-              backdrop-blur-xl
+              glass-strong pointer-events-auto flex w-full max-w-[420px] items-start gap-3
+              rounded-3xl border-[#00D1A7]/25 p-4
+              shadow-[0_12px_40px_rgba(0,0,0,0.45)]
             "
           >
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#E3B341]/[0.14] text-[#E3B341]">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.16] text-[#00D1A7]">
               <Info size={22} strokeWidth={2} />
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="text-[13.5px] font-extrabold text-[#E3B341]">
+              <p className="text-[13.5px] font-extrabold text-[#00D1A7]">
                 امکان ثبت در این دوره نیست
               </p>
-              <p className="mt-1 text-[12px] leading-relaxed text-[#F2EFE9]">
+              <p className="mt-1 text-[12px] leading-relaxed text-[#F8FAFC]">
                 برای ثبت تراکنش، از حالت{' '}
-                <span className="font-bold text-[#E3B341]">روزانه</span> یا{' '}
-                <span className="font-bold text-[#E3B341]">هفتگی</span>{' '}
+                <span className="font-bold text-[#00D1A7]">روزانه</span> یا{' '}
+                <span className="font-bold text-[#00D1A7]">هفتگی</span>{' '}
                 استفاده کن.
               </p>
             </div>
@@ -63,8 +60,8 @@ export default function PeriodLockToast() {
               aria-label="بستن"
               className="
                 flex h-7 w-7 shrink-0 items-center justify-center rounded-full
-                text-[#8FA39D] transition-colors
-                hover:bg-white/[0.06] hover:text-[#F2EFE9]
+                text-[#94A3B8] transition-colors
+                hover:bg-white/[0.08] hover:text-[#F8FAFC]
                 active:scale-90
               "
             >

@@ -87,10 +87,10 @@ function TransactionForm({
   const noteLength = noteValue.length;
   const counterColor =
     noteLength >= NOTE_DANGER_THRESHOLD
-      ? 'text-[#E2574C]'
+      ? 'text-[#F43F5E]'
       : noteLength >= NOTE_WARN_THRESHOLD
-        ? 'text-[#E3B341]'
-        : 'text-[#5C736C]';
+        ? 'text-[#00D1A7]'
+        : 'text-[#64748B]';
 
   useEffect(() => {
     let cancelled = false;
@@ -190,7 +190,6 @@ function TransactionForm({
           date: editingTransaction.date,
         });
       } else {
-        // ⭐ تاریخ پیش‌فرض اگر داده شده، استفاده کن
         const dateToUse = prefilledDate
           ? new Date(prefilledDate)
           : new Date();
@@ -231,7 +230,7 @@ function TransactionForm({
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-4">
           {/* مبلغ */}
           <div>
-            <label className="mb-1.5 block text-[11px] font-medium text-[#8FA39D]">
+            <label className="mb-1.5 block text-[11px] font-medium text-[#94A3B8]">
               مبلغ ({isIncome ? 'درآمد' : 'مصرف'})
             </label>
             <input
@@ -240,14 +239,14 @@ function TransactionForm({
               placeholder="0"
               autoFocus
               className="
-                w-full rounded-2xl border border-white/[0.07] bg-[#153029]
+                glass-inner w-full rounded-2xl
                 px-4 py-3 text-center text-[28px] font-extrabold tracking-tight
-                text-[#F2EFE9] outline-none placeholder:text-[#5C736C]
-                focus:border-[#E3B341]/40
+                text-[#F8FAFC] outline-none placeholder:text-[#64748B]
+                focus:border-[#00D1A7]/50
               "
             />
             {errors.amount && (
-              <p className="mt-1 text-[11px] text-[#E2574C]">
+              <p className="mt-1 text-[11px] text-[#F43F5E]">
                 {errors.amount.message}
               </p>
             )}
@@ -256,7 +255,7 @@ function TransactionForm({
           {/* دسته‌بندی */}
           <div>
             <div className="mb-1.5 flex items-center justify-between">
-              <label className="text-[11px] font-medium text-[#8FA39D]">
+              <label className="text-[11px] font-medium text-[#94A3B8]">
                 دسته‌بندی
               </label>
               <button
@@ -267,7 +266,8 @@ function TransactionForm({
                 }}
                 className="
                   flex min-h-[28px] items-center gap-1 rounded-lg
-                  bg-[#E3B341]/[0.10] px-2.5 text-[10.5px] font-semibold text-[#E3B341]
+                  border border-[#00D1A7]/30 bg-[#00D1A7]/[0.12]
+                  px-2.5 text-[10.5px] font-semibold text-[#00D1A7]
                   active:scale-95
                 "
               >
@@ -293,13 +293,13 @@ function TransactionForm({
                       }
                       disabled={isDeleting}
                       className={[
-                        'flex min-h-[48px] w-full items-center justify-center rounded-xl border px-2 py-2 transition-all active:scale-95',
+                        'flex min-h-[48px] w-full items-center justify-center rounded-xl border px-2 py-2 backdrop-blur-md transition-all active:scale-95',
                         canDelete ? 'pr-7' : '',
                         active
                           ? isIncome
-                            ? 'border-[#4FD1BE]/40 bg-[#4FD1BE]/10 text-[#4FD1BE]'
-                            : 'border-[#E2574C]/40 bg-[#E2574C]/10 text-[#E2574C]'
-                          : 'border-white/[0.06] bg-[#0F211E] text-[#8FA39D]',
+                            ? 'border-[#00D1A7]/50 bg-[#00D1A7]/[0.14] text-[#00D1A7]'
+                            : 'border-[#F43F5E]/50 bg-[#F43F5E]/[0.14] text-[#F43F5E]'
+                          : 'border-white/[0.08] bg-white/[0.04] text-[#94A3B8]',
                         isDeleting ? 'opacity-40' : '',
                       ].join(' ')}
                     >
@@ -319,9 +319,9 @@ function TransactionForm({
                         aria-label="حذف دسته"
                         className="
                           absolute left-1 top-1 z-10 flex items-center justify-center
-                          rounded-full bg-[#0A1614]/80
-                          text-[#E2574C]/70
-                          transition-all hover:bg-[#E2574C]/20 hover:text-[#E2574C]
+                          rounded-full bg-black/40 backdrop-blur-md
+                          text-[#F43F5E]/70
+                          transition-all hover:bg-[#F43F5E]/25 hover:text-[#F43F5E]
                           active:scale-90
                         "
                         style={{ width: '22px', height: '22px' }}
@@ -335,20 +335,20 @@ function TransactionForm({
             </div>
 
             {errors.categoryId && (
-              <p className="mt-1 text-[11px] text-[#E2574C]">
+              <p className="mt-1 text-[11px] text-[#F43F5E]">
                 {errors.categoryId.message}
               </p>
             )}
 
             {categoryError && (
-              <p className="mt-1.5 text-[11px] text-[#E2574C]">
+              <p className="mt-1.5 text-[11px] text-[#F43F5E]">
                 {categoryError}
               </p>
             )}
 
             {showNewCategory && (
-              <div className="mt-2.5 rounded-xl border border-[#E3B341]/20 bg-[#E3B341]/[0.04] p-2.5">
-                <p className="mb-1.5 text-[10.5px] font-semibold text-[#E3B341]">
+              <div className="mt-2.5 rounded-xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.06] p-2.5 backdrop-blur-md">
+                <p className="mb-1.5 text-[10.5px] font-semibold text-[#00D1A7]">
                   نام دسته جدید
                 </p>
 
@@ -363,9 +363,9 @@ function TransactionForm({
                   placeholder="مثلاً اینترنت"
                   enterKeyHint="done"
                   className="
-                    w-full rounded-lg border border-white/[0.07] bg-[#153029]
-                    px-3 py-2.5 text-[12.5px] text-[#F2EFE9] outline-none
-                    placeholder:text-[#5C736C] focus:border-[#E3B341]/40
+                    glass-inner w-full rounded-lg
+                    px-3 py-2.5 text-[12.5px] text-[#F8FAFC] outline-none
+                    placeholder:text-[#64748B] focus:border-[#00D1A7]/50
                   "
                 />
 
@@ -375,8 +375,9 @@ function TransactionForm({
                   disabled={saving || !newCategoryName.trim()}
                   className="
                     mt-2 w-full rounded-lg
-                    bg-[linear-gradient(155deg,#E3B341,#B9862A)]
-                    py-2.5 text-[12px] font-bold text-[#0A1614]
+                    bg-[linear-gradient(155deg,#00D1A7,#00A88A)]
+                    py-2.5 text-[12px] font-bold text-[#0F172A]
+                    shadow-[0_4px_16px_rgba(0,209,167,0.28)]
                     active:scale-[0.98]
                     disabled:cursor-not-allowed disabled:opacity-40
                   "
@@ -390,7 +391,7 @@ function TransactionForm({
           {selectedCategory && (
             <div className="animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="mb-1.5 flex items-center justify-between">
-                <label className="text-[11px] font-medium text-[#8FA39D]">
+                <label className="text-[11px] font-medium text-[#94A3B8]">
                   توضیحات (اختیاری)
                 </label>
                 <span
@@ -407,13 +408,13 @@ function TransactionForm({
                 maxLength={NOTE_MAX_LENGTH}
                 placeholder={notePlaceholder}
                 className="
-                  w-full rounded-xl border border-white/[0.07] bg-[#153029]
-                  px-3.5 py-2.5 text-[12.5px] text-[#F2EFE9] outline-none
-                  placeholder:text-[#5C736C] focus:border-[#E3B341]/40
+                  glass-inner w-full rounded-xl
+                  px-3.5 py-2.5 text-[12.5px] text-[#F8FAFC] outline-none
+                  placeholder:text-[#64748B] focus:border-[#00D1A7]/50
                 "
               />
               {errors.note && (
-                <p className="mt-1 text-[11px] text-[#E2574C]">
+                <p className="mt-1 text-[11px] text-[#F43F5E]">
                   {errors.note.message}
                 </p>
               )}
@@ -423,7 +424,7 @@ function TransactionForm({
 
         <div className="shrink-0 px-4 pb-5 pt-4">
           {submitError && (
-            <div className="mb-2 rounded-xl border border-[#E2574C]/20 bg-[#E2574C]/[0.08] px-3 py-2 text-[11px] text-[#E2574C]">
+            <div className="mb-2 rounded-xl border border-[#F43F5E]/25 bg-[#F43F5E]/[0.10] px-3 py-2 text-[11px] text-[#F43F5E] backdrop-blur-md">
               {submitError}
             </div>
           )}
@@ -434,8 +435,8 @@ function TransactionForm({
             className={[
               'w-full rounded-xl py-3.5 text-[13px] font-bold transition-all active:scale-[0.98]',
               isIncome
-                ? 'bg-[linear-gradient(155deg,#4FD1BE,#2FAF9D)] text-[#0A1614]'
-                : 'bg-[linear-gradient(155deg,#E2574C,#B8392F)] text-white',
+                ? 'bg-[linear-gradient(155deg,#00D1A7,#00A88A)] text-[#0F172A] shadow-[0_6px_24px_rgba(0,209,167,0.30)]'
+                : 'bg-[linear-gradient(155deg,#F43F5E,#BE123C)] text-white shadow-[0_6px_24px_rgba(244,63,94,0.30)]',
               saving ? 'cursor-not-allowed opacity-60' : '',
             ].join(' ')}
           >
@@ -447,26 +448,26 @@ function TransactionForm({
       {confirmDelete && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-5">
           <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-[3px]"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setConfirmDelete(null)}
           />
           <div
-            className="relative z-10 w-full max-w-[300px] rounded-[22px] border border-white/[0.08] bg-[#0F211E] p-5"
+            className="glass-strong relative z-10 w-full max-w-[300px] rounded-[22px] p-5"
             dir="rtl"
           >
             <div className="flex justify-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E2574C]/[0.14] text-[#E2574C]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#F43F5E]/25 bg-[#F43F5E]/[0.14] text-[#F43F5E]">
                 <Trash2 size={22} strokeWidth={1.9} />
               </div>
             </div>
 
-            <h3 className="mt-3 text-center text-[14px] font-extrabold text-[#F2EFE9]">
+            <h3 className="mt-3 text-center text-[14px] font-extrabold text-[#F8FAFC]">
               حذف دسته‌بندی
             </h3>
 
-            <p className="mt-2 text-center text-[11.5px] leading-relaxed text-[#8FA39D]">
+            <p className="mt-2 text-center text-[11.5px] leading-relaxed text-[#94A3B8]">
               آیا مطمئنی می‌خواهی دسته‌ی
-              <span className="mx-1 font-bold text-[#E3B341]">
+              <span className="mx-1 font-bold text-[#00D1A7]">
                 «{confirmDelete.name}»
               </span>
               را حذف کنی؟
@@ -476,14 +477,14 @@ function TransactionForm({
               <button
                 type="button"
                 onClick={() => setConfirmDelete(null)}
-                className="rounded-xl border border-white/[0.08] bg-[#153029] py-2.5 text-[12px] font-semibold text-[#8FA39D]"
+                className="rounded-xl border border-white/[0.10] bg-white/[0.06] py-2.5 text-[12px] font-semibold text-[#94A3B8]"
               >
                 انصراف
               </button>
               <button
                 type="button"
                 onClick={() => handleDeleteCategory(confirmDelete)}
-                className="rounded-xl bg-[linear-gradient(155deg,#E2574C,#B8392F)] py-2.5 text-[12px] font-bold text-white"
+                className="rounded-xl bg-[linear-gradient(155deg,#F43F5E,#BE123C)] py-2.5 text-[12px] font-bold text-white"
               >
                 حذف کن
               </button>

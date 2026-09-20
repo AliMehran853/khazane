@@ -51,35 +51,35 @@ const SECTIONS = [
     key: 'daily',
     period: 'daily',
     icon: Sun,
-    accent: 'text-[#E3B341]',
+    accent: 'text-[#00D1A7]',
     resetLabel: 'امروز',
   },
   {
     key: 'weekly',
     period: 'weekly',
     icon: CalendarDays,
-    accent: 'text-[#4FD1BE]',
+    accent: 'text-[#3B82F6]',
     resetLabel: 'این هفته',
   },
   {
     key: 'monthly',
     period: 'monthly',
     icon: CalendarRange,
-    accent: 'text-[#9B7BE0]',
+    accent: 'text-[#8B5CF6]',
     resetLabel: 'این ماه',
   },
   {
     key: 'yearly',
     period: 'yearly',
     icon: Calendar,
-    accent: 'text-[#5B9BD5]',
+    accent: 'text-[#F59E0B]',
     resetLabel: 'امسال',
   },
   {
     key: 'allTime',
     period: 'allTime',
     icon: History,
-    accent: 'text-[#8FA39D]',
+    accent: 'text-[#94A3B8]',
     resetLabel: null,
   },
 ];
@@ -108,7 +108,7 @@ export default function SummaryModal({ open, onClose, mode = 'both' }) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/70 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
           />
 
           <motion.div
@@ -118,10 +118,8 @@ export default function SummaryModal({ open, onClose, mode = 'both' }) {
             transition={{ duration: 0.34, ease: [0.32, 0.72, 0, 1] }}
             dir="rtl"
             className="
-              relative z-10 flex max-h-[90vh] w-full flex-col
-              overflow-hidden rounded-t-[28px] border border-white/[0.08]
-              bg-[linear-gradient(160deg,#1B3A32_0%,#0F211E_75%)]
-              shadow-2xl
+              glass-strong relative z-10 flex max-h-[90vh] w-full flex-col
+              overflow-hidden rounded-t-[28px] shadow-2xl
               lg:max-h-[88vh] lg:max-w-[480px] lg:rounded-[28px]
             "
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
@@ -130,19 +128,19 @@ export default function SummaryModal({ open, onClose, mode = 'both' }) {
               className="pointer-events-none absolute inset-x-0 top-0 h-32"
               style={{
                 background:
-                  'radial-gradient(circle at 50% 0%, rgba(227,179,65,0.20), transparent 70%)',
+                  'radial-gradient(circle at 50% 0%, rgba(0,209,167,0.20), transparent 70%)',
               }}
             />
 
             <div className="relative shrink-0 px-5 pt-3 pb-4 lg:px-6 lg:pt-5">
-              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/[0.12] lg:hidden" />
+              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/[0.18] lg:hidden" />
 
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] text-[#5C736C]">
+                  <p className="text-[11px] text-[#64748B]">
                     {titles.subtitle}
                   </p>
-                  <h2 className="mt-0.5 text-[18px] font-extrabold text-[#F2EFE9] lg:text-[20px]">
+                  <h2 className="mt-0.5 text-[18px] font-extrabold text-[#F8FAFC] lg:text-[20px]">
                     {titles.title}
                   </h2>
                 </div>
@@ -151,7 +149,7 @@ export default function SummaryModal({ open, onClose, mode = 'both' }) {
                   type="button"
                   onClick={onClose}
                   aria-label="بستن"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#153029] text-[#8FA39D] active:scale-95"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.06] text-[#94A3B8] backdrop-blur-md active:scale-95"
                 >
                   <X size={18} />
                 </button>
@@ -175,10 +173,6 @@ export default function SummaryModal({ open, onClose, mode = 'both' }) {
     </AnimatePresence>
   );
 }
-
-// ============================================================
-// یک بخش (با ناوبری)
-// ============================================================
 
 function SummarySection({ section, mode }) {
   const { period, icon: Icon, accent, resetLabel } = section;
@@ -238,10 +232,8 @@ function SummarySection({ section, mode }) {
   const singleColumn = mode !== 'both';
 
   return (
-    <div className="rounded-2xl border border-white/[0.06] bg-[#0F211E]/80 p-4">
-      {/* هدر با ناوبری */}
+    <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 backdrop-blur-md">
       <div className="mb-3 flex items-center justify-between gap-2">
-        {/* راست (اول در DOM) = آینده — ChevronRight → offset + 1 */}
         <button
           type="button"
           disabled={!canGoForward}
@@ -250,32 +242,30 @@ function SummarySection({ section, mode }) {
           className={[
             'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all',
             canGoForward
-              ? 'text-[#8FA39D] hover:bg-white/[0.05] hover:text-[#E3B341] active:scale-90'
-              : 'cursor-not-allowed text-[#2A3936]',
+              ? 'text-[#94A3B8] hover:bg-white/[0.06] hover:text-[#00D1A7] active:scale-90'
+              : 'cursor-not-allowed text-[#334155]',
           ].join(' ')}
         >
           <ChevronRight size={16} strokeWidth={2.2} />
         </button>
 
-        {/* وسط: آیکون + برچسب‌ها */}
         <div className="flex min-w-0 flex-1 items-center justify-center gap-2">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.04]">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.04]">
             <Icon size={14} strokeWidth={2} className={accent} />
           </div>
 
           <div className="flex min-w-0 flex-col items-center gap-0">
-            <p className="truncate text-[12.5px] font-bold leading-tight text-[#F2EFE9]">
+            <p className="truncate text-[12.5px] font-bold leading-tight text-[#F8FAFC]">
               {currentLabel}
             </p>
             {subLabel && (
-              <p className="mt-0.5 truncate text-[10px] font-medium leading-tight text-[#5C736C]">
+              <p className="mt-0.5 truncate text-[10px] font-medium leading-tight text-[#64748B]">
                 {subLabel}
               </p>
             )}
           </div>
         </div>
 
-        {/* چپ (آخر در DOM) = گذشته — ChevronLeft → offset - 1 */}
         <button
           type="button"
           disabled={!canGoBack}
@@ -284,15 +274,14 @@ function SummarySection({ section, mode }) {
           className={[
             'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all',
             canGoBack
-              ? 'text-[#8FA39D] hover:bg-white/[0.05] hover:text-[#E3B341] active:scale-90'
-              : 'cursor-not-allowed text-[#2A3936]',
+              ? 'text-[#94A3B8] hover:bg-white/[0.06] hover:text-[#00D1A7] active:scale-90'
+              : 'cursor-not-allowed text-[#334155]',
           ].join(' ')}
         >
           <ChevronLeft size={16} strokeWidth={2.2} />
         </button>
       </div>
 
-      {/* داده‌ها */}
       {loading || !summary ? (
         <div className="grid grid-cols-2 gap-2.5">
           <div className="kh-skeleton h-[58px] rounded-xl" />
@@ -307,18 +296,18 @@ function SummarySection({ section, mode }) {
             ].join(' ')}
           >
             {showIncome && (
-              <div className="rounded-xl bg-[#4FD1BE]/[0.07] px-3 py-2.5">
-                <p className="text-[10px] font-medium text-[#8FA39D]">درآمد</p>
-                <p className="mt-1 text-[15px] font-extrabold tabular-nums text-[#4FD1BE]">
+              <div className="rounded-xl border border-[#00D1A7]/20 bg-[#00D1A7]/[0.08] px-3 py-2.5 backdrop-blur-md">
+                <p className="text-[10px] font-medium text-[#94A3B8]">درآمد</p>
+                <p className="mt-1 text-[15px] font-extrabold tabular-nums text-[#00D1A7]">
                   <AnimatedNumber value={summary.income} duration={550} />
                 </p>
               </div>
             )}
 
             {showExpense && (
-              <div className="rounded-xl bg-[#E2574C]/[0.07] px-3 py-2.5">
-                <p className="text-[10px] font-medium text-[#8FA39D]">مصرف</p>
-                <p className="mt-1 text-[15px] font-extrabold tabular-nums text-[#E2574C]">
+              <div className="rounded-xl border border-[#F43F5E]/20 bg-[#F43F5E]/[0.08] px-3 py-2.5 backdrop-blur-md">
+                <p className="text-[10px] font-medium text-[#94A3B8]">مصرف</p>
+                <p className="mt-1 text-[15px] font-extrabold tabular-nums text-[#F43F5E]">
                   <AnimatedNumber value={summary.expense} duration={550} />
                 </p>
               </div>
@@ -326,12 +315,12 @@ function SummarySection({ section, mode }) {
           </div>
 
           {hasData && mode === 'both' && (
-            <div className="mt-2.5 flex items-center justify-between border-t border-white/[0.05] pt-2.5">
-              <span className="text-[10.5px] text-[#5C736C]">موجودی</span>
+            <div className="mt-2.5 flex items-center justify-between border-t border-white/[0.08] pt-2.5">
+              <span className="text-[10.5px] text-[#64748B]">موجودی</span>
               <span
                 className={[
                   'text-[12.5px] font-bold tabular-nums',
-                  summary.balance >= 0 ? 'text-[#F2EFE9]' : 'text-[#E2574C]',
+                  summary.balance >= 0 ? 'text-[#F8FAFC]' : 'text-[#F43F5E]',
                 ].join(' ')}
               >
                 {FA_NUM.format(Math.round(summary.balance))} افغانی
@@ -345,9 +334,9 @@ function SummarySection({ section, mode }) {
               onClick={() => setOffset(0)}
               className="
                 mt-2.5 flex w-full items-center justify-center gap-1.5
-                rounded-xl border border-[#E3B341]/25 bg-[#E3B341]/[0.06]
-                py-1.5 text-[10.5px] font-semibold text-[#E3B341]
-                transition-all hover:bg-[#E3B341]/[0.10] active:scale-[0.98]
+                rounded-xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.08]
+                py-1.5 text-[10.5px] font-semibold text-[#00D1A7]
+                backdrop-blur-md transition-all hover:bg-[#00D1A7]/[0.14] active:scale-[0.98]
               "
             >
               <RotateCcw size={11} strokeWidth={2.2} />

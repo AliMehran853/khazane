@@ -16,10 +16,7 @@ import { useAnalytics } from '../hooks/useAnalytics';
 import { getCategories } from '../services/categoryService';
 import { getTransactions } from '../services/transactionService';
 import { exportTransactionsToPDF } from '../services/exportService';
-import {
-  getPeriodRange,
-  getPeriodOffsetLabel,
-} from '../utils/dates';
+import { getPeriodRange, getPeriodOffsetLabel } from '../utils/dates';
 
 function formatNumber(value) {
   return new Intl.NumberFormat('fa-AF').format(Math.round(value || 0));
@@ -94,10 +91,10 @@ function HomePage() {
   const Header = (
     <header className="flex items-start justify-between gap-3">
       <div>
-        <p className="text-[11px] font-medium text-[#5C736C] lg:text-[12px]">
+        <p className="text-[11px] font-medium text-[#64748B] lg:text-[12px]">
           مدیریت مالی شخصی
         </p>
-        <h1 className="mt-1 text-[21px] font-bold text-[#F2EFE9] lg:text-[26px]">
+        <h1 className="mt-1 text-[21px] font-bold text-[#F8FAFC] lg:text-[26px]">
           خزانه
         </h1>
       </div>
@@ -108,9 +105,9 @@ function HomePage() {
           onClick={() => navigate('/search')}
           aria-label="جستجو"
           className="
-            flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl
-            border border-white/[0.06] bg-[#0F211E] text-[#8FA39D]
-            transition-colors hover:text-[#E3B341]
+            glass flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl
+            text-[#94A3B8] transition-colors
+            hover:border-[#00D1A7]/30 hover:text-[#00D1A7]
             active:scale-95
             lg:h-10 lg:w-10
           "
@@ -123,9 +120,9 @@ function HomePage() {
           onClick={handleExportPDF}
           disabled={exporting}
           className="
-            flex h-11 shrink-0 items-center gap-2 rounded-2xl
-            border border-white/[0.06] bg-[#0F211E] px-3.5
-            text-[11.5px] font-semibold text-[#E3B341]
+            glass flex h-11 shrink-0 items-center gap-2 rounded-2xl px-3.5
+            text-[11.5px] font-semibold text-[#00D1A7]
+            transition-all hover:border-[#00D1A7]/30
             active:scale-95 disabled:opacity-40
             lg:h-10 lg:text-[12px]
           "
@@ -135,7 +132,7 @@ function HomePage() {
           {exporting ? '...' : 'PDF'}
         </button>
 
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.06] bg-[#0F211E] text-[#E3B341] lg:h-10 lg:w-10">
+        <div className="glass flex h-11 w-11 items-center justify-center rounded-2xl text-[#00D1A7] lg:h-10 lg:w-10">
           <WalletCards size={20} strokeWidth={1.9} />
         </div>
       </div>
@@ -146,15 +143,12 @@ function HomePage() {
     <div className="px-4 pb-6 pt-6 lg:px-0 lg:pt-8">
       {Header}
 
-      {/* ============================================ */}
-      {/* موبایل                                        */}
-      {/* ============================================ */}
+      {/* موبایل */}
       <div className="lg:hidden">
         <section className="mt-6">
           <PeriodTabs />
         </section>
 
-        {/* ⭐ ناوبری بالای گراف */}
         <section className="mt-3">
           <PeriodNavigator />
         </section>
@@ -169,12 +163,12 @@ function HomePage() {
 
         <section className="mt-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-[15px] font-bold text-[#F2EFE9]">روند مالی</h2>
-            <span className="text-[10.5px] text-[#5C736C]">
+            <h2 className="text-[15px] font-bold text-[#F8FAFC]">روند مالی</h2>
+            <span className="text-[10.5px] text-[#64748B]">
               {getPeriodOffsetLabel(period, periodOffset)}
             </span>
           </div>
-          <div className="mt-3 overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E] py-3">
+          <div className="glass mt-3 overflow-hidden rounded-[24px] py-3">
             {loading ? (
               <SkeletonChart height={250} />
             ) : (
@@ -189,7 +183,7 @@ function HomePage() {
 
         {loading ? (
           <section className="mt-6">
-            <h2 className="mb-3 text-[15px] font-bold text-[#F2EFE9]">
+            <h2 className="mb-3 text-[15px] font-bold text-[#F8FAFC]">
               تراکنش‌های اخیر
             </h2>
             <SkeletonList rows={4} />
@@ -204,9 +198,7 @@ function HomePage() {
         )}
       </div>
 
-      {/* ============================================ */}
-      {/* دسکتاپ                                        */}
-      {/* ============================================ */}
+      {/* دسکتاپ */}
       <div className="hidden lg:mt-6 lg:block lg:space-y-4">
         <div className="grid grid-cols-12 items-stretch gap-4">
           <div className="col-span-4 flex flex-col gap-3">
@@ -219,19 +211,18 @@ function HomePage() {
               type="button"
               onClick={() => setSummaryOpen(true)}
               className="
-                flex h-full w-full flex-col justify-center rounded-[22px]
-                border border-white/[0.06] bg-[#0F211E] p-5 text-right
-                transition-all hover:border-[#E3B341]/25 active:scale-[0.99]
-                lg:p-6
+                glass flex h-full w-full flex-col justify-center rounded-[22px]
+                p-5 text-right transition-all
+                hover:border-[#00D1A7]/30 active:scale-[0.99] lg:p-6
               "
             >
-              <p className="text-[11px] font-medium text-[#5C736C] lg:text-[12px]">
+              <p className="text-[11px] font-medium text-[#64748B] lg:text-[12px]">
                 خلاصه‌ی همه‌ی دوره‌ها
               </p>
-              <p className="mt-2 text-[15px] font-extrabold text-[#E3B341] lg:text-[16px]">
+              <p className="mt-2 text-[15px] font-extrabold text-[#00D1A7] lg:text-[16px]">
                 امروز، هفته، ماه، سال، همه
               </p>
-              <p className="mt-1 text-[10.5px] text-[#5C736C]">
+              <p className="mt-1 text-[10.5px] text-[#64748B]">
                 برای مشاهده کلیک کنید
               </p>
             </button>
@@ -242,18 +233,18 @@ function HomePage() {
               type="button"
               onClick={() => setSummaryOpen(true)}
               className="
-                flex h-full w-full flex-col justify-center rounded-[22px]
-                border border-[#E3B341]/20 bg-[linear-gradient(155deg,#1B3A32,#0F211E)]
-                p-5 text-right transition-all active:scale-[0.99] lg:p-6
+                glass-strong flex h-full w-full flex-col justify-center rounded-[22px]
+                border-[#00D1A7]/20 p-5 text-right transition-all
+                active:scale-[0.99] lg:p-6
               "
             >
-              <p className="text-[11px] font-medium text-[#8FA39D] lg:text-[12px]">
+              <p className="text-[11px] font-medium text-[#94A3B8] lg:text-[12px]">
                 موجودی از ابتدا
               </p>
-              <p className="mt-2 text-[22px] font-extrabold tabular-nums text-[#F2EFE9] lg:text-[24px]">
+              <p className="mt-2 text-[22px] font-extrabold tabular-nums text-[#F8FAFC] lg:text-[24px]">
                 {formatNumber(summary.balance)}
               </p>
-              <p className="mt-1 text-[10.5px] text-[#5C736C]">افغانی</p>
+              <p className="mt-1 text-[10.5px] text-[#64748B]">افغانی</p>
             </button>
           </div>
         </div>
@@ -268,12 +259,12 @@ function HomePage() {
 
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-8">
-            <div className="flex h-[480px] flex-col overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E]">
+            <div className="glass flex h-[480px] flex-col overflow-hidden rounded-[24px]">
               <div className="flex shrink-0 items-center justify-between px-5 pt-4 pb-2">
-                <h2 className="text-[16px] font-bold text-[#F2EFE9]">
+                <h2 className="text-[16px] font-bold text-[#F8FAFC]">
                   روند مالی
                 </h2>
-                <span className="text-[12px] text-[#5C736C]">
+                <span className="text-[12px] text-[#64748B]">
                   {getPeriodOffsetLabel(period, periodOffset)}
                 </span>
               </div>
@@ -294,17 +285,17 @@ function HomePage() {
           </div>
 
           <div className="col-span-4">
-            <div className="flex h-[480px] flex-col overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E]">
+            <div className="glass flex h-[480px] flex-col overflow-hidden rounded-[24px]">
               <div className="flex shrink-0 items-center justify-between px-5 pt-4 pb-3">
-                <h2 className="text-[15px] font-bold text-[#F2EFE9]">
+                <h2 className="text-[15px] font-bold text-[#F8FAFC]">
                   تراکنش‌های اخیر
                 </h2>
-                <span className="text-[11px] text-[#5C736C]">
+                <span className="text-[11px] text-[#64748B]">
                   {formatNumber(recentTransactions.length)} تراکنش
                 </span>
               </div>
 
-              <div className="mx-5 h-px shrink-0 bg-white/[0.06]" />
+              <div className="mx-5 h-px shrink-0 bg-white/[0.08]" />
 
               <div className="min-h-0 flex-1 overflow-y-auto">
                 {loading ? (
@@ -312,10 +303,10 @@ function HomePage() {
                 ) : recentTransactions.length === 0 ? (
                   <div className="flex h-full items-center justify-center px-4 text-center">
                     <div>
-                      <p className="text-[13px] font-semibold text-[#8FA39D]">
+                      <p className="text-[13px] font-semibold text-[#94A3B8]">
                         هنوز تراکنشی ثبت نشده است
                       </p>
-                      <p className="mt-1 text-[11px] text-[#5C736C]">
+                      <p className="mt-1 text-[11px] text-[#64748B]">
                         از دکمه‌ی + در سایدبار استفاده کن.
                       </p>
                     </div>

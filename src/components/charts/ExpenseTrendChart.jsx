@@ -21,8 +21,8 @@ function getChartLayout(period, dataLength) {
   };
 }
 
-const EXPENSE_COLOR = '#E2574C';
-const EXPENSE_DIM = 'rgba(226, 87, 76, 0.28)';
+const EXPENSE_COLOR = '#F43F5E';
+const EXPENSE_DIM = 'rgba(244, 63, 94, 0.30)';
 
 export default function ExpenseTrendChart({
   data = [],
@@ -79,7 +79,7 @@ export default function ExpenseTrendChart({
         type: 'gradient',
         gradient: {
           shadeIntensity: 1,
-          opacityFrom: 0.32,
+          opacityFrom: 0.35,
           opacityTo: 0.02,
           stops: [0, 90, 100],
         },
@@ -108,7 +108,7 @@ export default function ExpenseTrendChart({
         hideOverlappingLabels: false,
         trim: false,
         style: {
-          colors: '#5C736C',
+          colors: '#64748B',
           fontSize: isMonthly
             ? isDesktop
               ? '10px'
@@ -129,7 +129,7 @@ export default function ExpenseTrendChart({
     yaxis: {
       labels: {
         style: {
-          colors: '#5C736C',
+          colors: '#64748B',
           fontSize: isDesktop ? '11px' : '9px',
           fontFamily: 'Vazirmatn, sans-serif',
         },
@@ -137,7 +137,7 @@ export default function ExpenseTrendChart({
       },
     },
     grid: {
-      borderColor: 'rgba(242,239,233,0.06)',
+      borderColor: 'rgba(248,250,252,0.08)',
       strokeDashArray: 4,
       xaxis: { lines: { show: false } },
       padding: { left: 2, right: 2 },

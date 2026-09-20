@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight,
@@ -35,23 +35,19 @@ export default function OnboardingFlow({ onComplete }) {
   const openTransactionSheet = useAppStore((s) => s.openTransactionSheet);
   const transactionSheetOpen = useAppStore((s) => s.transactionSheetOpen);
 
-  // ⭐ بارگذاری مرحله‌ی ذخیره‌شده
   useEffect(() => {
     getOnboardingStep().then((s) => {
       if (s > 0 && s < TOTAL_STEPS) setStep(s);
     });
   }, []);
 
-  // ⭐ ذخیره‌ی مرحله در هر تغییر
   useEffect(() => {
     setOnboardingStep(step);
   }, [step]);
 
-  // ⭐ وقتی کاربر تراکنشی ثبت کرد و شیت بسته شد، خودکار برو مرحله بعد
   useEffect(() => {
     if (!waitingForSheet) return;
     if (transactionSheetOpen) return;
-    // شیت بسته شد — برو مرحله بعد
     setWaitingForSheet(false);
     setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
   }, [transactionSheetOpen, waitingForSheet]);
@@ -107,27 +103,24 @@ export default function OnboardingFlow({ onComplete }) {
   const showBack = step > 0 && step < TOTAL_STEPS - 1 && !waitingForSheet;
 
   return (
-    <div className="fixed inset-0 z-[60] overflow-y-auto bg-[#0A1614]">
-      {/* هاله‌ی طلایی */}
+    <div className="fixed inset-0 z-[60] overflow-y-auto">
+      {/* هاله‌ی فیروزه‌ای */}
       <div
         className="pointer-events-none fixed inset-0"
         style={{
           background:
-            'radial-gradient(circle at 50% 25%, rgba(227,179,65,0.16), transparent 60%)',
+            'radial-gradient(circle at 50% 25%, rgba(0,209,167,0.20), transparent 60%)',
         }}
       />
 
-      {/* ⭐ wrapper: روی موبایل تمام صفحه، روی دسکتاپ کارت مرکز */}
       <div className="relative flex min-h-dvh w-full items-center justify-center lg:p-8">
         <div
           className="
             flex w-full flex-col
             px-6 pt-8 pb-6
             lg:max-w-[540px] lg:rounded-[32px]
-            lg:border lg:border-white/[0.08]
-            lg:bg-[#0F211E]/70
+            lg:glass-strong
             lg:px-10 lg:py-10
-            lg:shadow-2xl lg:backdrop-blur-xl
           "
         >
           {/* Progress */}
@@ -137,7 +130,9 @@ export default function OnboardingFlow({ onComplete }) {
                 key={i}
                 className={[
                   'h-1 flex-1 rounded-full transition-colors duration-300',
-                  i <= step ? 'bg-[#E3B341]' : 'bg-white/[0.08]',
+                  i <= step
+                    ? 'bg-[#00D1A7] shadow-[0_0_8px_rgba(0,209,167,0.45)]'
+                    : 'bg-white/[0.10]',
                 ].join(' ')}
               />
             ))}
@@ -155,9 +150,9 @@ export default function OnboardingFlow({ onComplete }) {
                 exit={{ opacity: 0, x: 8 }}
                 transition={{ duration: 0.2 }}
                 className="
-                  absolute right-6 top-16 z-10 flex h-10 w-10
-                  items-center justify-center rounded-xl bg-[#153029]
-                  text-[#8FA39D] active:scale-95
+                  glass-inner absolute right-6 top-16 z-10 flex h-10 w-10
+                  items-center justify-center rounded-xl
+                  text-[#94A3B8] active:scale-95
                   lg:right-12 lg:top-20
                 "
               >
@@ -221,10 +216,6 @@ export default function OnboardingFlow({ onComplete }) {
   );
 }
 
-// ============================================================
-// Step Wrapper
-// ============================================================
-
 function StepWrap({ children }) {
   return (
     <motion.div
@@ -252,17 +243,17 @@ function WelcomeStep({ onNext }) {
         transition={{ delay: 0.1, duration: 0.5, ease: 'backOut' }}
         className="relative"
       >
-        <div className="absolute inset-0 rounded-3xl bg-[#E3B341]/30 blur-3xl" />
+        <div className="absolute inset-0 rounded-3xl bg-[#00D1A7]/35 blur-3xl" />
         <div className="relative">
           <AppLogo size={110} />
         </div>
       </motion.div>
 
-      <h1 className="mt-8 text-[26px] font-extrabold leading-tight text-[#F2EFE9] lg:text-[30px]">
+      <h1 className="mt-8 text-[26px] font-extrabold leading-tight text-[#F8FAFC] lg:text-[30px]">
         به خزانه خوش آمدی
       </h1>
 
-      <p className="mt-3 max-w-[320px] text-[13px] leading-relaxed text-[#8FA39D] lg:text-[14px]">
+      <p className="mt-3 max-w-[320px] text-[13px] leading-relaxed text-[#94A3B8] lg:text-[14px]">
         یه همراه ساده برای مدیریت درآمد و مصارف روزانه‌ات. کاملاً آفلاین، امن و
         بدون تبلیغ.
       </p>
@@ -278,8 +269,9 @@ function WelcomeStep({ onNext }) {
         onClick={onNext}
         className="
           mt-10 w-full max-w-[320px] rounded-2xl
-          bg-[linear-gradient(155deg,#E3B341,#B9862A)]
-          py-3.5 text-[14px] font-bold text-[#0A1614]
+          bg-[linear-gradient(155deg,#00D1A7,#00A88A)]
+          py-3.5 text-[14px] font-bold text-[#0F172A]
+          shadow-[0_8px_24px_rgba(0,209,167,0.35)]
           active:scale-[0.98]
         "
       >
@@ -291,9 +283,9 @@ function WelcomeStep({ onNext }) {
 
 function FeatureRow({ emoji, text }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-[#0F211E] p-3 text-right">
+    <div className="glass-inner flex items-center gap-3 rounded-2xl p-3 text-right">
       <span className="text-[20px]">{emoji}</span>
-      <span className="text-[12.5px] text-[#F2EFE9]">{text}</span>
+      <span className="text-[12.5px] text-[#F8FAFC]">{text}</span>
     </div>
   );
 }
@@ -315,20 +307,20 @@ function NameStep({
   return (
     <div className="w-full">
       <div className="flex flex-col items-center text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E3B341]/[0.14] text-[#E3B341]">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.16] text-[#00D1A7]">
           <User size={26} strokeWidth={1.9} />
         </div>
-        <h2 className="mt-5 text-[22px] font-extrabold text-[#F2EFE9] lg:text-[24px]">
+        <h2 className="mt-5 text-[22px] font-extrabold text-[#F8FAFC] lg:text-[24px]">
           اسمت رو بگو
         </h2>
-        <p className="mt-2 max-w-[300px] text-[12.5px] leading-relaxed text-[#8FA39D]">
+        <p className="mt-2 max-w-[300px] text-[12.5px] leading-relaxed text-[#94A3B8]">
           با این اسم، خزانه تو رو صدا می‌زنه و پیام‌های روزانه‌ات شخصی‌تر می‌شه.
         </p>
       </div>
 
       <div className="mt-8 space-y-3">
         <div>
-          <label className="mb-1.5 block text-right text-[11px] font-medium text-[#8FA39D]">
+          <label className="mb-1.5 block text-right text-[11px] font-medium text-[#94A3B8]">
             اسم
           </label>
           <input
@@ -338,18 +330,18 @@ function NameStep({
             placeholder="مثلاً علی"
             autoFocus
             className="
-              w-full rounded-2xl border border-white/[0.07] bg-[#153029]
+              glass-inner w-full rounded-2xl
               px-4 py-3.5 text-center text-[15px] font-semibold
-              text-[#F2EFE9] outline-none placeholder:text-[#5C736C]
-              focus:border-[#E3B341]/40
+              text-[#F8FAFC] outline-none placeholder:text-[#64748B]
+              focus:border-[#00D1A7]/50
             "
           />
         </div>
 
         <div>
-          <label className="mb-1.5 block text-right text-[11px] font-medium text-[#8FA39D]">
+          <label className="mb-1.5 block text-right text-[11px] font-medium text-[#94A3B8]">
             تخلص{' '}
-            <span className="font-normal text-[#5C736C]">(اختیاری)</span>
+            <span className="font-normal text-[#64748B]">(اختیاری)</span>
           </label>
           <input
             type="text"
@@ -357,10 +349,10 @@ function NameStep({
             onChange={(e) => setLastName(e.target.value)}
             placeholder="مثلاً مهران"
             className="
-              w-full rounded-2xl border border-white/[0.07] bg-[#153029]
+              glass-inner w-full rounded-2xl
               px-4 py-3.5 text-center text-[15px] font-semibold
-              text-[#F2EFE9] outline-none placeholder:text-[#5C736C]
-              focus:border-[#E3B341]/40
+              text-[#F8FAFC] outline-none placeholder:text-[#64748B]
+              focus:border-[#00D1A7]/50
             "
           />
         </div>
@@ -372,8 +364,9 @@ function NameStep({
         disabled={!canNext || saving}
         className="
           mt-8 w-full rounded-2xl
-          bg-[linear-gradient(155deg,#E3B341,#B9862A)]
-          py-3.5 text-[14px] font-bold text-[#0A1614]
+          bg-[linear-gradient(155deg,#00D1A7,#00A88A)]
+          py-3.5 text-[14px] font-bold text-[#0F172A]
+          shadow-[0_8px_24px_rgba(0,209,167,0.35)]
           active:scale-[0.98]
           disabled:cursor-not-allowed disabled:opacity-40
         "
@@ -391,15 +384,15 @@ function NameStep({
 function IncomeStep({ onAdd, onSkip, waiting }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-[#4FD1BE]/[0.14] text-[#4FD1BE]">
+      <div className="flex h-16 w-16 items-center justify-center rounded-3xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.16] text-[#00D1A7]">
         <Wallet size={30} strokeWidth={1.8} />
       </div>
 
-      <h2 className="mt-5 text-[22px] font-extrabold text-[#F2EFE9] lg:text-[24px]">
+      <h2 className="mt-5 text-[22px] font-extrabold text-[#F8FAFC] lg:text-[24px]">
         امروز درآمد داشتی؟
       </h2>
 
-      <p className="mt-3 max-w-[300px] text-[12.5px] leading-relaxed text-[#8FA39D]">
+      <p className="mt-3 max-w-[300px] text-[12.5px] leading-relaxed text-[#94A3B8]">
         اگه داشتی، همین الان ثبتش کن — خیلی سریع. اگه نه، می‌تونی Skip کنی و
         بعداً ثبت کنی.
       </p>
@@ -411,8 +404,9 @@ function IncomeStep({ onAdd, onSkip, waiting }) {
           disabled={waiting}
           className="
             flex w-full items-center justify-center gap-2 rounded-2xl
-            bg-[linear-gradient(155deg,#4FD1BE,#2FAF9D)]
-            py-3.5 text-[14px] font-bold text-[#0A1614]
+            bg-[linear-gradient(155deg,#00D1A7,#00A88A)]
+            py-3.5 text-[14px] font-bold text-[#0F172A]
+            shadow-[0_8px_24px_rgba(0,209,167,0.35)]
             active:scale-[0.98] disabled:opacity-60
           "
         >
@@ -425,8 +419,8 @@ function IncomeStep({ onAdd, onSkip, waiting }) {
           onClick={onSkip}
           disabled={waiting}
           className="
-            w-full rounded-2xl border border-white/[0.08] bg-[#153029]
-            py-3.5 text-[13px] font-semibold text-[#8FA39D]
+            glass-inner w-full rounded-2xl
+            py-3.5 text-[13px] font-semibold text-[#94A3B8]
             active:scale-[0.98] disabled:opacity-40
           "
         >
@@ -444,15 +438,15 @@ function IncomeStep({ onAdd, onSkip, waiting }) {
 function ExpenseStep({ onAdd, onSkip, waiting }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-[#E2574C]/[0.14] text-[#E2574C]">
+      <div className="flex h-16 w-16 items-center justify-center rounded-3xl border border-[#F43F5E]/25 bg-[#F43F5E]/[0.16] text-[#F43F5E]">
         <ShoppingBag size={30} strokeWidth={1.8} />
       </div>
 
-      <h2 className="mt-5 text-[22px] font-extrabold text-[#F2EFE9] lg:text-[24px]">
+      <h2 className="mt-5 text-[22px] font-extrabold text-[#F8FAFC] lg:text-[24px]">
         امروز مصرف داشتی؟
       </h2>
 
-      <p className="mt-3 max-w-[300px] text-[12.5px] leading-relaxed text-[#8FA39D]">
+      <p className="mt-3 max-w-[300px] text-[12.5px] leading-relaxed text-[#94A3B8]">
         اگه داشتی، ثبتش کن تا از همون روز اول حس کنترل و آگاهی رو تجربه کنی.
       </p>
 
@@ -463,8 +457,9 @@ function ExpenseStep({ onAdd, onSkip, waiting }) {
           disabled={waiting}
           className="
             flex w-full items-center justify-center gap-2 rounded-2xl
-            bg-[linear-gradient(155deg,#E2574C,#B8392F)]
+            bg-[linear-gradient(155deg,#F43F5E,#BE123C)]
             py-3.5 text-[14px] font-bold text-white
+            shadow-[0_8px_24px_rgba(244,63,94,0.35)]
             active:scale-[0.98] disabled:opacity-60
           "
         >
@@ -477,8 +472,8 @@ function ExpenseStep({ onAdd, onSkip, waiting }) {
           onClick={onSkip}
           disabled={waiting}
           className="
-            w-full rounded-2xl border border-white/[0.08] bg-[#153029]
-            py-3.5 text-[13px] font-semibold text-[#8FA39D]
+            glass-inner w-full rounded-2xl
+            py-3.5 text-[13px] font-semibold text-[#94A3B8]
             active:scale-[0.98] disabled:opacity-40
           "
         >
@@ -502,18 +497,18 @@ function DoneStep({ onFinish, saving }) {
         transition={{ delay: 0.1, duration: 0.5, ease: 'backOut' }}
         className="relative"
       >
-        <div className="absolute inset-0 rounded-3xl bg-[#E3B341]/30 blur-3xl" />
-        <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-[linear-gradient(155deg,#E3B341,#B9862A)] text-[#0A1614]">
+        <div className="absolute inset-0 rounded-3xl bg-[#00D1A7]/35 blur-3xl" />
+        <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-[linear-gradient(155deg,#00D1A7,#00A88A)] text-[#0F172A] shadow-[0_12px_32px_rgba(0,209,167,0.40)]">
           <CheckCircle2 size={48} strokeWidth={2} />
         </div>
       </motion.div>
 
-      <h2 className="mt-8 text-[24px] font-extrabold text-[#F2EFE9] lg:text-[26px]">
+      <h2 className="mt-8 text-[24px] font-extrabold text-[#F8FAFC] lg:text-[26px]">
         همه چیز آماده‌ست
       </h2>
 
-      <p className="mt-3 max-w-[300px] text-[13px] leading-relaxed text-[#8FA39D]">
-        از دکمه‌ی <span className="font-bold text-[#E3B341]">+</span> برای ثبت
+      <p className="mt-3 max-w-[300px] text-[13px] leading-relaxed text-[#94A3B8]">
+        از دکمه‌ی <span className="font-bold text-[#00D1A7]">+</span> برای ثبت
         سریع استفاده کن، و از تنظیمات برای شخصی‌سازی.
       </p>
 
@@ -529,8 +524,9 @@ function DoneStep({ onFinish, saving }) {
         disabled={saving}
         className="
           mt-10 flex w-full max-w-[320px] items-center justify-center gap-2
-          rounded-2xl bg-[linear-gradient(155deg,#E3B341,#B9862A)]
-          py-3.5 text-[14px] font-bold text-[#0A1614]
+          rounded-2xl bg-[linear-gradient(155deg,#00D1A7,#00A88A)]
+          py-3.5 text-[14px] font-bold text-[#0F172A]
+          shadow-[0_8px_24px_rgba(0,209,167,0.35)]
           active:scale-[0.98] disabled:opacity-60
         "
       >
@@ -543,9 +539,9 @@ function DoneStep({ onFinish, saving }) {
 
 function TipRow({ text }) {
   return (
-    <div className="flex items-center gap-2.5 rounded-2xl border border-white/[0.06] bg-[#0F211E] px-4 py-3 text-right">
-      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#E3B341]" />
-      <span className="text-[12px] text-[#8FA39D]">{text}</span>
+    <div className="glass-inner flex items-center gap-2.5 rounded-2xl px-4 py-3 text-right">
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#00D1A7]" />
+      <span className="text-[12px] text-[#94A3B8]">{text}</span>
     </div>
   );
 }

@@ -15,7 +15,6 @@ function TransactionSheet({
   const effectiveType = isEditing ? editingTransaction.type : type;
   const isIncome = effectiveType === 'income';
 
-  // قفل اسکرول پس‌زمینه
   useEffect(() => {
     if (!open) return;
 
@@ -48,7 +47,6 @@ function TransactionSheet({
       ? 'ثبت درآمد'
       : 'ثبت مصرف';
 
-  // ⭐ نمایش تاریخ (پیش‌فرض یا انتخاب‌شده)
   const displayDate = prefilledDate
     ? formatShortDate(prefilledDate)
     : getTodayShort();
@@ -63,7 +61,7 @@ function TransactionSheet({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-[2px]"
+            className="fixed inset-0 z-[60] bg-black/65 backdrop-blur-sm"
           />
 
           <motion.div
@@ -72,9 +70,8 @@ function TransactionSheet({
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 320 }}
             className="
-              fixed z-[70] mx-auto flex flex-col overflow-hidden
-              rounded-[24px] border border-white/[0.07] bg-[#0F211E]
-              outline-none
+              glass-strong fixed z-[70] mx-auto flex flex-col overflow-hidden
+              rounded-[24px] outline-none
 
               inset-x-3 bottom-3 max-h-[88svh] w-auto max-w-[420px]
 
@@ -87,19 +84,19 @@ function TransactionSheet({
             }}
           >
             <div className="shrink-0 px-4 pt-3 pb-3 lg:px-6 lg:pt-4 lg:pb-4">
-              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/[0.12] lg:hidden" />
+              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/[0.18] lg:hidden" />
 
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] text-[#5C736C] lg:text-[12px]">
+                  <p className="text-[11px] text-[#64748B] lg:text-[12px]">
                     {headerSubtitle}
                   </p>
 
-                  <h2 className="mt-0.5 text-[18px] font-bold text-[#F2EFE9] lg:text-[20px]">
+                  <h2 className="mt-0.5 text-[18px] font-bold text-[#F8FAFC] lg:text-[20px]">
                     {headerTitle}
                   </h2>
 
-                  <p className="mt-1 text-[10.5px] font-medium text-[#E3B341] lg:text-[11.5px]">
+                  <p className="mt-1 text-[10.5px] font-medium text-[#00D1A7] lg:text-[11.5px]">
                     📅 {displayDate}
                   </p>
                 </div>
@@ -107,7 +104,7 @@ function TransactionSheet({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#153029] text-[#8FA39D] active:scale-95 lg:h-10 lg:w-10"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.06] text-[#94A3B8] backdrop-blur-md active:scale-95 lg:h-10 lg:w-10"
                   aria-label="بستن"
                 >
                   <X size={18} />

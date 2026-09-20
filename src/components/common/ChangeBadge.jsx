@@ -13,11 +13,6 @@ export function computeChange(current, previous) {
   return { type: diff > 0 ? 'up' : 'down', diff };
 }
 
-/**
- * ChangeBadge
- * tone="income"  → ▲ سبز / ▼ سرخ
- * tone="expense" → ▲ سرخ / ▼ سبز
- */
 export default function ChangeBadge({
   current,
   previous,
@@ -36,10 +31,10 @@ export default function ChangeBadge({
 
   const colorClass =
     change.type === 'flat'
-      ? 'text-[#8FA39D] bg-white/[0.05]'
+      ? 'text-[#94A3B8] bg-white/[0.06] border-white/[0.08]'
       : isGood
-        ? 'text-[#4FD1BE] bg-[#4FD1BE]/[0.12]'
-        : 'text-[#E2574C] bg-[#E2574C]/[0.12]';
+        ? 'text-[#00D1A7] bg-[#00D1A7]/[0.14] border-[#00D1A7]/20'
+        : 'text-[#F43F5E] bg-[#F43F5E]/[0.14] border-[#F43F5E]/20';
 
   let Icon = Minus;
   if (change.type === 'up') Icon = ArrowUp;
@@ -51,7 +46,7 @@ export default function ChangeBadge({
   return (
     <span
       className={[
-        'inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full font-bold tabular-nums',
+        'inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border font-bold tabular-nums backdrop-blur-md',
         isSm ? 'px-2 py-[3px] text-[9.5px]' : 'px-2.5 py-1 text-[10.5px]',
         colorClass,
       ].join(' ')}
