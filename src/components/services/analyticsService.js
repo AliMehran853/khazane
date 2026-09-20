@@ -9,10 +9,6 @@ import {
   getPreviousPeriodDate,
 } from '../utils/dates';
 
-// ============================================================
-// Helpers
-// ============================================================
-
 async function getMemberTransactions(memberId = 'self') {
   return db.transactions.where('memberId').equals(memberId).toArray();
 }
@@ -34,10 +30,6 @@ function countBetween(transactions, start, end) {
   }).length;
 }
 
-// ============================================================
-// خلاصه دوره
-// ============================================================
-
 export async function getPeriodSummary({
   period = 'weekly',
   memberId = 'self',
@@ -56,10 +48,6 @@ export async function getPeriodSummary({
     transactionCount: countBetween(transactions, start, end),
   };
 }
-
-// ============================================================
-// ⭐ خلاصه‌ی کل — مجموع همه‌ی دوره‌ها
-// ============================================================
 
 export async function getAllTimeSummary({ memberId = 'self' } = {}) {
   const transactions = await getMemberTransactions(memberId);
@@ -80,10 +68,6 @@ export async function getAllTimeSummary({ memberId = 'self' } = {}) {
     transactionCount: transactions.length,
   };
 }
-
-// ============================================================
-// خلاصه دسته‌بندی‌ها
-// ============================================================
 
 export async function getCategorySummary({
   period = 'weekly',
@@ -114,7 +98,8 @@ export async function getCategorySummary({
 }
 
 // ============================================================
-// روند درآمد و مصرف
+// ⭐ روند درآمد و مصرف
+//   daily  → ۷ روز هفته با اسم کامل و هایلایت روز انتخابی
 // ============================================================
 
 export async function getIncomeExpenseTrend({
@@ -126,6 +111,23 @@ export async function getIncomeExpenseTrend({
   const today = new Date();
   const todayKey = today.toDateString();
   const refDate = baseDate || today;
+
+  // ⭐ روزانه: ۷ روز هفته، اسم کامل، هایلایت روز انتخابی
+  if (period === 'daily') {
+    const days = getWeekDays(refDate);
+    const selectedKey = startOfDay(refDate).toDateString();
+
+    return days.map((day) => {
+      const s = startOfDay(day.date);
+      const e = endOfDay(day.date);
+      return {
+        label: day.label, // ← اسم کامل (شنبه، یکشنبه، ...)
+        income: sumBetween(transactions, 'income', s, e),
+        expense: sumBetween(transactions, 'expense', s, e),
+        isCurrent: day.date.toDateString() === selectedKey,
+      };
+    });
+  }
 
   if (period === 'weekly') {
     const days = getWeekDays(refDate);
@@ -168,10 +170,6 @@ export async function getIncomeExpenseTrend({
   return [];
 }
 
-// ============================================================
-// تراکنش‌های اخیر (با فیلتر دوره)
-// ============================================================
-
 export async function getRecentTransactions({
   limit = 8,
   memberId = 'self',
@@ -194,29 +192,19 @@ export async function getRecentTransactions({
     .slice(0, limit);
 }
 
-// ============================================================
-// ⭐ مقایسه با دوره‌ی مرجع
-//
-//   این هفته     → مقایسه با هفته‌ی گذشته
-//   هفته‌ی گذشته → مقایسه با این هفته‌ی جاری
-//   ۴ هفته پیش   → مقایسه با این هفته‌ی جاری
-// ============================================================
-
 export async function getPeriodComparison({
   period = 'weekly',
   memberId = 'self',
   baseDate,
-  weekOffset = 0,
+  periodOffset = 0,
 } = {}) {
   const refDate = baseDate || new Date();
 
   let baselineDate;
 
-  if (period === 'weekly' && weekOffset < 0) {
-    // ⭐ کاربر در یک هفته‌ی گذشته → مقایسه با این هفته‌ی جاری
+  if (periodOffset < 0) {
     baselineDate = new Date();
   } else {
-    // این هفته یا ماه/سال → مقایسه با دوره‌ی قبل
     baselineDate = getPreviousPeriodDate(period, refDate);
   }
 
@@ -225,17 +213,10 @@ export async function getPeriodComparison({
     getPeriodSummary({ period, memberId, baseDate: baselineDate }),
   ]);
 
-  function pct(curr, prev) {
-    if (prev === 0) {
-      return curr === 0 ? 0 : null;
-    }
-    return ((curr - prev) / prev) * 100;
-  }
-
   return {
     current,
     previous,
-    incomeChange: pct(current.income, previous.income),
-    expenseChange: pct(current.expense, previous.expense),
+    incomeChange: current.income - previous.income,
+    expenseChange: current.expense - previous.expense,
   };
 }

@@ -7,7 +7,7 @@ function formatNumber(value) {
 }
 
 function getChartLayout(period, dataLength) {
-  if (period === 'monthly' || period === 'weekly') {
+  if (period === 'daily' || period === 'monthly' || period === 'weekly') {
     return { shouldScroll: false, chartWidth: null };
   }
 
@@ -21,24 +21,42 @@ function getChartLayout(period, dataLength) {
   };
 }
 
+const EXPENSE_COLOR = '#E2574C';
+const EXPENSE_DIM = 'rgba(226, 87, 76, 0.28)';
+
 export default function ExpenseTrendChart({
   data = [],
   period = 'weekly',
+  periodOffset = 0,
   fixedHeight,
 }) {
   const isDesktop = useIsDesktop();
 
   const categories = data.map((item) => item.label);
-  const expense = data.map((item) => item.expense || 0);
+
+  const isDaily = period === 'daily';
+  const isMonthly = period === 'monthly';
+  const isBar = isDaily || isMonthly;
 
   const { shouldScroll, chartWidth } = getChartLayout(period, data.length);
   const scrollRef = useChartAutoScroll(data, period, shouldScroll);
 
-  const isMonthly = period === 'monthly';
+  const series = [
+    {
+      name: 'مصرف',
+      data: isDaily
+        ? data.map((item) => ({
+            x: item.label,
+            y: item.expense || 0,
+            fillColor: item.isCurrent ? EXPENSE_COLOR : EXPENSE_DIM,
+          }))
+        : data.map((item) => item.expense || 0),
+    },
+  ];
 
   const options = {
     chart: {
-      type: isMonthly ? 'bar' : 'area',
+      type: isBar ? 'bar' : 'area',
       toolbar: { show: false },
       zoom: { enabled: false },
       background: 'transparent',
@@ -53,9 +71,9 @@ export default function ExpenseTrendChart({
         dynamicAnimation: { enabled: true, speed: 350 },
       },
     },
-    colors: ['#E2574C'],
+    colors: [EXPENSE_COLOR],
 
-    ...(!isMonthly && {
+    ...(!isBar && {
       stroke: { curve: 'smooth', width: 2.2 },
       fill: {
         type: 'gradient',
@@ -68,19 +86,21 @@ export default function ExpenseTrendChart({
       },
     }),
 
-    ...(isMonthly && {
+    ...(isBar && {
       plotOptions: {
         bar: {
-          borderRadius: 2,
-          columnWidth: '80%',
+          borderRadius: 3,
+          columnWidth: isDaily ? '55%' : '80%',
           borderRadiusApplication: 'end',
         },
       },
     }),
 
+    legend: { show: false },
+
     dataLabels: { enabled: false },
     xaxis: {
-      categories,
+      ...(isDaily ? { type: 'category' } : { categories }),
       tickAmount: data.length > 1 ? data.length - 1 : 1,
       labels: {
         rotate: isMonthly ? -60 : 0,
@@ -93,9 +113,13 @@ export default function ExpenseTrendChart({
             ? isDesktop
               ? '10px'
               : '7px'
-            : isDesktop
-              ? '12px'
-              : '10px',
+            : isDaily
+              ? isDesktop
+                ? '11px'
+                : '9px'
+              : isDesktop
+                ? '12px'
+                : '10px',
           fontFamily: 'Vazirmatn, sans-serif',
         },
       },
@@ -125,16 +149,14 @@ export default function ExpenseTrendChart({
     },
   };
 
-  const series = [{ name: 'مصرف', data: expense }];
-
   const height =
     fixedHeight ||
     (isDesktop
-      ? isMonthly
+      ? isBar
         ? 400
         : 320
-      : isMonthly
-        ? 300
+      : isBar
+        ? 280
         : 230);
 
   return (
@@ -152,10 +174,10 @@ export default function ExpenseTrendChart({
           }
         >
           <Chart
-            key={`${period}-${data.length}-${shouldScroll}-${isDesktop}-${fixedHeight || 'auto'}`}
+            key={`${period}-${periodOffset}-${data.length}-${shouldScroll}-${isDesktop}-${fixedHeight || 'auto'}`}
             options={options}
             series={series}
-            type={isMonthly ? 'bar' : 'area'}
+            type={isBar ? 'bar' : 'area'}
             height={height}
             width="100%"
           />

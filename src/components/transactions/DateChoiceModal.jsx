@@ -2,58 +2,35 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CalendarDays, CalendarCheck2, X } from 'lucide-react';
 
 import { useAppStore } from '../store/appStore';
-import {
-  getWeekRangeFromOffset,
-  getWeekDays,
-  formatFullDate,
-} from '../utils/dates';
-
-function lockBody() {
-  const body = document.body;
-  const scrollbarWidth =
-    window.innerWidth - document.documentElement.clientWidth;
-  const prevOverflow = body.style.overflow;
-  const prevPaddingRight = body.style.paddingRight;
-
-  body.style.overflow = 'hidden';
-  if (scrollbarWidth > 0) {
-    body.style.paddingRight = `${scrollbarWidth}px`;
-  }
-
-  return () => {
-    body.style.overflow = prevOverflow;
-    body.style.paddingRight = prevPaddingRight;
-  };
-}
+import { getPeriodBaseDate, getWeekDays, formatFullDate } from '../utils/dates';
 
 const FA_NUM = new Intl.NumberFormat('fa-AF');
 
 export default function DateChoiceModal() {
   const open = useAppStore((s) => s.dateChoiceOpen);
   const type = useAppStore((s) => s.dateChoiceType);
-  const weekOffset = useAppStore((s) => s.weekOffset);
+  const periodOffset = useAppStore((s) => s.periodOffset);
 
   const closeDateChoice = useAppStore((s) => s.closeDateChoice);
   const openTransactionSheet = useAppStore((s) => s.openTransactionSheet);
 
-  // days of the currently viewed (past) week
-  const { baseDate } = getWeekRangeFromOffset(weekOffset);
+  const baseDate = getPeriodBaseDate('weekly', periodOffset);
   const days = getWeekDays(baseDate);
   const today = new Date();
 
   function pickToday() {
     closeDateChoice();
-    // کمی تاخیر تا انیمیشن بسته شدن مودال تموم بشه
+    // ⭐ تأخیر هم‌سطح با انیمیشن خروج (۲۲۰ms)
     setTimeout(() => {
       openTransactionSheet(type, null, today);
-    }, 120);
+    }, 220);
   }
 
   function pickDay(date) {
     closeDateChoice();
     setTimeout(() => {
       openTransactionSheet(type, null, date);
-    }, 120);
+    }, 220);
   }
 
   return (
@@ -64,17 +41,18 @@ export default function DateChoiceModal() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
             onClick={closeDateChoice}
-            className="absolute inset-0 bg-black/70 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-black/70"
           />
 
           <motion.div
-            initial={{ y: 24 }}
-            animate={{ y: 0 }}
-            exit={{ y: 24 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, scale: 0.96, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: 8 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
             dir="rtl"
+            style={{ willChange: 'transform, opacity' }}
             className="
               relative z-10 w-full max-w-[420px] overflow-hidden
               rounded-[26px] border border-white/[0.08]
@@ -82,7 +60,6 @@ export default function DateChoiceModal() {
               shadow-2xl
             "
           >
-            {/* دکور هاله */}
             <div
               className="pointer-events-none absolute inset-x-0 top-0 h-32"
               style={{
@@ -91,7 +68,6 @@ export default function DateChoiceModal() {
               }}
             />
 
-            {/* هدر */}
             <div className="relative flex items-start justify-between gap-3 px-5 pt-5 pb-4">
               <div className="min-w-0 flex-1">
                 <p className="text-[11px] text-[#5C736C]">
@@ -113,7 +89,6 @@ export default function DateChoiceModal() {
             </div>
 
             <div className="relative px-5 pb-5">
-              {/* ثبت در امروز */}
               <button
                 type="button"
                 onClick={pickToday}
@@ -137,7 +112,6 @@ export default function DateChoiceModal() {
                 </div>
               </button>
 
-              {/* یا روزی از این هفته */}
               <div className="mt-5">
                 <div className="mb-2.5 flex items-center gap-2">
                   <div className="h-px flex-1 bg-white/[0.06]" />
@@ -149,9 +123,7 @@ export default function DateChoiceModal() {
 
                 <div className="grid grid-cols-4 gap-2">
                   {days.map((day) => {
-                    const dayNum = new Intl.NumberFormat('fa-AF').format(
-                      day.date.getDate(),
-                    );
+                    const dayNum = FA_NUM.format(day.date.getDate());
                     const isToday =
                       day.date.toDateString() === today.toDateString();
 

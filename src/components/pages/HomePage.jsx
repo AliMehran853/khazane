@@ -1,53 +1,43 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  FileText,
-  Search,
-  WalletCards,
-} from 'lucide-react';
+import { FileText, Search, WalletCards } from 'lucide-react';
 
 import PeriodTabs from '../common/PeriodTabs';
-import StatCard from '../common/StatCard';
+import PeriodNavigator from '../common/PeriodNavigator';
 import IncomeExpenseChart from '../charts/IncomeExpenseChart';
 import BalanceHero from '../dashboard/BalanceHero';
 import RecentTransactions from '../dashboard/RecentTransactions';
+import SummaryModal from '../dashboard/SummaryModal';
 import TransactionItem from '../transactions/TransactionItem';
 import { SkeletonChart, SkeletonList } from '../common/Skeleton';
 
 import { useAppStore } from '../store/appStore';
 import { useAnalytics } from '../hooks/useAnalytics';
-import { useAllTimeSummary } from '../hooks/useAllTimeSummary';
 import { getCategories } from '../services/categoryService';
 import { getTransactions } from '../services/transactionService';
 import { exportTransactionsToPDF } from '../services/exportService';
-import { getRange, getWeekRangeFromOffset } from '../utils/dates';
+import {
+  getPeriodRange,
+  getPeriodOffsetLabel,
+} from '../utils/dates';
 
 function formatNumber(value) {
   return new Intl.NumberFormat('fa-AF').format(Math.round(value || 0));
 }
 
-const periodLabels = {
-  weekly: 'این هفته',
-  monthly: 'این ماه',
-  yearly: 'امسال',
-};
-
 function HomePage() {
   const navigate = useNavigate();
 
   const period = useAppStore((s) => s.period);
-  const weekOffset = useAppStore((s) => s.weekOffset);
+  const periodOffset = useAppStore((s) => s.periodOffset);
   const dataVersion = useAppStore((s) => s.dataVersion);
 
   const { summary, trend, recentTransactions, comparison, loading } =
-    useAnalytics({ period, weekOffset });
-
-  const { summary: allTime } = useAllTimeSummary();
+    useAnalytics({ period, periodOffset });
 
   const [categoriesMap, setCategoriesMap] = useState({});
   const [exporting, setExporting] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -69,10 +59,7 @@ function HomePage() {
   async function handleExportPDF() {
     setExporting(true);
     try {
-      const { start, end } =
-        period === 'weekly'
-          ? getWeekRangeFromOffset(weekOffset)
-          : getRange(period);
+      const { start, end } = getPeriodRange(period, periodOffset);
       const all = await getTransactions();
 
       const inPeriod = all.filter((t) => {
@@ -89,7 +76,7 @@ function HomePage() {
         transactions: inPeriod,
         categoriesMap,
         title: 'گزارش کامل مالی',
-        periodLabel: periodLabels[period],
+        periodLabel: getPeriodOffsetLabel(period, periodOffset),
         totalIncome: summary.income,
         totalExpense: summary.expense,
         currency: 'افغانی',
@@ -160,54 +147,31 @@ function HomePage() {
       {Header}
 
       {/* ============================================ */}
-      {/* موبایل — چیدمان جدید                          */}
+      {/* موبایل                                        */}
       {/* ============================================ */}
       <div className="lg:hidden">
-        {/* ۱. انتخاب بازه (اول!) */}
         <section className="mt-6">
           <PeriodTabs />
         </section>
 
-        {/* ۲. BalanceHero برای بازه‌ی انتخاب‌شده */}
+        {/* ⭐ ناوبری بالای گراف */}
+        <section className="mt-3">
+          <PeriodNavigator />
+        </section>
+
         <BalanceHero
           summary={summary}
           period={period}
-          weekOffset={weekOffset}
+          periodOffset={periodOffset}
           comparison={comparison}
+          onOpenSummary={() => setSummaryOpen(true)}
         />
 
-        {/* ۳. مجموع کل با برچسب واضح */}
-        <section className="mt-6">
-          <div className="mb-3 flex items-center gap-2">
-            <span className="h-px flex-1 bg-white/[0.06]" />
-            <span className="text-[10.5px] font-semibold text-[#5C736C]">
-              مجموع از ابتدا تا کنون
-            </span>
-            <span className="h-px flex-1 bg-white/[0.06]" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <StatCard
-              title="کل درآمد"
-              value={formatNumber(allTime.income)}
-              icon={ArrowDownLeft}
-              tone="income"
-            />
-            <StatCard
-              title="کل مصرف"
-              value={formatNumber(allTime.expense)}
-              icon={ArrowUpRight}
-              tone="expense"
-            />
-          </div>
-        </section>
-
-        {/* ۴. نمودار روند */}
         <section className="mt-6">
           <div className="flex items-center justify-between">
             <h2 className="text-[15px] font-bold text-[#F2EFE9]">روند مالی</h2>
             <span className="text-[10.5px] text-[#5C736C]">
-              {periodLabels[period]}
+              {getPeriodOffsetLabel(period, periodOffset)}
             </span>
           </div>
           <div className="mt-3 overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E] py-3">
@@ -217,13 +181,12 @@ function HomePage() {
               <IncomeExpenseChart
                 data={trend}
                 period={period}
-                weekOffset={weekOffset}
+                periodOffset={periodOffset}
               />
             )}
           </div>
         </section>
 
-        {/* ۵. تراکنش‌های اخیر */}
         {loading ? (
           <section className="mt-6">
             <h2 className="mb-3 text-[15px] font-bold text-[#F2EFE9]">
@@ -248,35 +211,57 @@ function HomePage() {
         <div className="grid grid-cols-12 items-stretch gap-4">
           <div className="col-span-4 flex flex-col gap-3">
             <PeriodTabs forceTabs />
+            <PeriodNavigator />
           </div>
 
           <div className="col-span-4">
-            <StatCard
-              title="کل درآمد"
-              value={formatNumber(allTime.income)}
-              icon={ArrowDownLeft}
-              tone="income"
-              featured
-              fillHeight
-            />
+            <button
+              type="button"
+              onClick={() => setSummaryOpen(true)}
+              className="
+                flex h-full w-full flex-col justify-center rounded-[22px]
+                border border-white/[0.06] bg-[#0F211E] p-5 text-right
+                transition-all hover:border-[#E3B341]/25 active:scale-[0.99]
+                lg:p-6
+              "
+            >
+              <p className="text-[11px] font-medium text-[#5C736C] lg:text-[12px]">
+                خلاصه‌ی همه‌ی دوره‌ها
+              </p>
+              <p className="mt-2 text-[15px] font-extrabold text-[#E3B341] lg:text-[16px]">
+                امروز، هفته، ماه، سال، همه
+              </p>
+              <p className="mt-1 text-[10.5px] text-[#5C736C]">
+                برای مشاهده کلیک کنید
+              </p>
+            </button>
           </div>
 
           <div className="col-span-4">
-            <StatCard
-              title="کل مصرف"
-              value={formatNumber(allTime.expense)}
-              icon={ArrowUpRight}
-              tone="expense"
-              featured
-              fillHeight
-            />
+            <button
+              type="button"
+              onClick={() => setSummaryOpen(true)}
+              className="
+                flex h-full w-full flex-col justify-center rounded-[22px]
+                border border-[#E3B341]/20 bg-[linear-gradient(155deg,#1B3A32,#0F211E)]
+                p-5 text-right transition-all active:scale-[0.99] lg:p-6
+              "
+            >
+              <p className="text-[11px] font-medium text-[#8FA39D] lg:text-[12px]">
+                موجودی از ابتدا
+              </p>
+              <p className="mt-2 text-[22px] font-extrabold tabular-nums text-[#F2EFE9] lg:text-[24px]">
+                {formatNumber(summary.balance)}
+              </p>
+              <p className="mt-1 text-[10.5px] text-[#5C736C]">افغانی</p>
+            </button>
           </div>
         </div>
 
         <BalanceHero
           summary={summary}
           period={period}
-          weekOffset={weekOffset}
+          periodOffset={periodOffset}
           comparison={comparison}
           variant="desktop"
         />
@@ -289,7 +274,7 @@ function HomePage() {
                   روند مالی
                 </h2>
                 <span className="text-[12px] text-[#5C736C]">
-                  {periodLabels[period]}
+                  {getPeriodOffsetLabel(period, periodOffset)}
                 </span>
               </div>
 
@@ -300,7 +285,7 @@ function HomePage() {
                   <IncomeExpenseChart
                     data={trend}
                     period={period}
-                    weekOffset={weekOffset}
+                    periodOffset={periodOffset}
                     fixedHeight={400}
                   />
                 )}
@@ -359,6 +344,11 @@ function HomePage() {
           </div>
         </div>
       </div>
+
+      <SummaryModal
+        open={summaryOpen}
+        onClose={() => setSummaryOpen(false)}
+      />
     </div>
   );
 }

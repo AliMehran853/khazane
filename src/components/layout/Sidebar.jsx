@@ -10,6 +10,7 @@ import {
 import AppLogo from '../common/AppLogo';
 import { useAppStore } from '../store/appStore';
 import { useHaptic } from '../hooks/useHaptic';
+import { getPeriodBaseDate } from '../utils/dates';
 import { APP_VERSION } from '../utils/constants';
 
 const items = [
@@ -23,12 +24,7 @@ function SidebarItem({ label, to, icon: Icon, end = false }) {
   const haptic = useHaptic();
 
   return (
-    <NavLink
-      to={to}
-      end={end}
-      className="block"
-      onClick={() => haptic.tap()}
-    >
+    <NavLink to={to} end={end} className="block" onClick={() => haptic.tap()}>
       {({ isActive }) => (
         <div
           className={[
@@ -68,19 +64,35 @@ function Sidebar() {
 
   const openTransactionSheet = useAppStore((s) => s.openTransactionSheet);
   const openDateChoice = useAppStore((s) => s.openDateChoice);
-  const weekOffset = useAppStore((s) => s.weekOffset);
+  const showPeriodLockToast = useAppStore((s) => s.showPeriodLockToast);
+  const period = useAppStore((s) => s.period);
+  const periodOffset = useAppStore((s) => s.periodOffset);
 
   const type = location.pathname === '/income' ? 'income' : 'expense';
   const buttonLabel = type === 'income' ? 'ثبت درآمد' : 'ثبت مصرف';
+  const isDisabled = period === 'monthly' || period === 'yearly';
 
   function handleClick() {
+    if (isDisabled) {
+      haptic.warning();
+      showPeriodLockToast();
+      return;
+    }
+
     haptic.medium();
 
-    if (weekOffset === 0) {
-      openTransactionSheet(type);
-    } else {
-      openDateChoice(type);
+    if (period === 'daily') {
+      const date = getPeriodBaseDate('daily', periodOffset);
+      openTransactionSheet(type, null, date);
+      return;
     }
+
+    if (period === 'weekly') {
+      openDateChoice(type);
+      return;
+    }
+
+    openTransactionSheet(type);
   }
 
   return (
@@ -98,9 +110,7 @@ function Sidebar() {
         </div>
         <div>
           <p className="text-[17px] font-extrabold text-[#F2EFE9]">خزانه</p>
-          <p className="mt-0.5 text-[11px] text-[#5C736C]">
-            مدیریت مالی شخصی
-          </p>
+          <p className="mt-0.5 text-[11px] text-[#5C736C]">مدیریت مالی شخصی</p>
         </div>
       </div>
 
@@ -116,12 +126,14 @@ function Sidebar() {
         <button
           type="button"
           onClick={handleClick}
-          className="
-            flex w-full items-center justify-center gap-2 rounded-2xl
-            bg-[linear-gradient(155deg,#E3B341,#B9862A)]
-            py-3 text-[13.5px] font-bold text-[#0A1614]
-            transition-all active:scale-[0.98]
-          "
+          aria-disabled={isDisabled}
+          className={[
+            'flex w-full items-center justify-center gap-2 rounded-2xl',
+            'py-3 text-[13.5px] font-bold transition-all',
+            isDisabled
+              ? 'cursor-not-allowed bg-[linear-gradient(155deg,#A89047,#8A7530)] text-[#3D3419]'
+              : 'bg-[linear-gradient(155deg,#E3B341,#B9862A)] text-[#0A1614] active:scale-[0.98]',
+          ].join(' ')}
         >
           <Plus size={18} strokeWidth={2.4} />
           {buttonLabel}

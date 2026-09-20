@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowDownLeft, FileText, Search } from 'lucide-react';
 
 import PeriodTabs from '../common/PeriodTabs';
+import PeriodNavigator from '../common/PeriodNavigator';
 import StatCard from '../common/StatCard';
 import IncomeTrendChart from '../charts/IncomeTrendChart';
+import SummaryModal from '../dashboard/SummaryModal';
 import TransactionItem from '../transactions/TransactionItem';
 import TransactionList from '../transactions/TransactionList';
 
@@ -13,43 +15,35 @@ import { useAnalytics } from '../hooks/useAnalytics';
 import { getTransactions } from '../services/transactionService';
 import { getCategories } from '../services/categoryService';
 import { exportTransactionsToPDF } from '../services/exportService';
-import { getRange, getWeekRangeFromOffset } from '../utils/dates';
+import { getPeriodRange, getPeriodOffsetLabel } from '../utils/dates';
 
 function formatNumber(value) {
   return new Intl.NumberFormat('fa-AF').format(Math.round(value || 0));
 }
 
-const periodLabels = {
-  weekly: 'این هفته',
-  monthly: 'این ماه',
-  yearly: 'امسال',
-};
-
 function IncomePage() {
   const navigate = useNavigate();
 
   const period = useAppStore((s) => s.period);
-  const weekOffset = useAppStore((s) => s.weekOffset);
+  const periodOffset = useAppStore((s) => s.periodOffset);
   const dataVersion = useAppStore((s) => s.dataVersion);
 
   const { summary, trend, comparison, loading } = useAnalytics({
     period,
     type: 'income',
-    weekOffset,
+    periodOffset,
   });
 
   const [transactions, setTransactions] = useState([]);
   const [categoriesMap, setCategoriesMap] = useState({});
   const [exporting, setExporting] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
-      const range =
-        period === 'weekly'
-          ? getWeekRangeFromOffset(weekOffset)
-          : getRange(period);
+      const range = getPeriodRange(period, periodOffset);
 
       const [txs, cats] = await Promise.all([
         getTransactions({
@@ -73,7 +67,7 @@ function IncomePage() {
     return () => {
       cancelled = true;
     };
-  }, [dataVersion, period, weekOffset]);
+  }, [dataVersion, period, periodOffset]);
 
   async function handleExportPDF() {
     if (transactions.length === 0) return;
@@ -84,7 +78,7 @@ function IncomePage() {
         transactions,
         categoriesMap,
         title: 'گزارش درآمدها',
-        periodLabel: periodLabels[period],
+        periodLabel: getPeriodOffsetLabel(period, periodOffset),
         totalIncome: summary.income,
         totalExpense: 0,
         currency: 'افغانی',
@@ -162,14 +156,20 @@ function IncomePage() {
           <PeriodTabs />
         </div>
 
+        <div className="mt-3">
+          <PeriodNavigator />
+        </div>
+
         <section className="mt-4">
           <StatCard
-            title={`کل درآمد ${periodLabels[period]}`}
+            title={`کل درآمد ${getPeriodOffsetLabel(period, periodOffset)}`}
             value={formatNumber(summary.income)}
             icon={ArrowDownLeft}
             tone="income"
             featured
             change={incomeChange}
+            onClick={() => setSummaryOpen(true)}
+            clickHint="برای خلاصه‌ی همه‌ی دوره‌ها کلیک کن"
           />
         </section>
 
@@ -177,7 +177,7 @@ function IncomePage() {
           <div className="flex items-center justify-between">
             <h2 className="text-[15px] font-bold text-[#F2EFE9]">روند درآمد</h2>
             <span className="text-[11px] text-[#5C736C]">
-              {periodLabels[period]}
+              {getPeriodOffsetLabel(period, periodOffset)}
             </span>
           </div>
 
@@ -190,7 +190,7 @@ function IncomePage() {
               <IncomeTrendChart
                 data={trend}
                 period={period}
-                weekOffset={weekOffset}
+                periodOffset={periodOffset}
               />
             )}
           </div>
@@ -212,18 +212,22 @@ function IncomePage() {
       {/* دسکتاپ */}
       <div className="hidden lg:mt-6 lg:block lg:space-y-4">
         <div className="flex items-stretch gap-4">
-          <div className="w-[230px] shrink-0">
+          <div className="w-[230px] shrink-0 flex flex-col gap-3">
             <PeriodTabs />
+            <PeriodNavigator />
           </div>
 
           <div className="flex-1">
             <StatCard
-              title={`کل درآمد ${periodLabels[period]}`}
+              title={`کل درآمد ${getPeriodOffsetLabel(period, periodOffset)}`}
               value={formatNumber(summary.income)}
               icon={ArrowDownLeft}
               tone="income"
               featured
+              fillHeight
               change={incomeChange}
+              onClick={() => setSummaryOpen(true)}
+              clickHint="برای خلاصه‌ی همه‌ی دوره‌ها کلیک کن"
             />
           </div>
         </div>
@@ -236,7 +240,7 @@ function IncomePage() {
                   روند درآمد
                 </h2>
                 <span className="text-[12px] text-[#5C736C]">
-                  {periodLabels[period]}
+                  {getPeriodOffsetLabel(period, periodOffset)}
                 </span>
               </div>
 
@@ -249,7 +253,7 @@ function IncomePage() {
                   <IncomeTrendChart
                     data={trend}
                     period={period}
-                    weekOffset={weekOffset}
+                    periodOffset={periodOffset}
                     fixedHeight={400}
                   />
                 )}
@@ -306,6 +310,12 @@ function IncomePage() {
           </div>
         </div>
       </div>
+
+      <SummaryModal
+        open={summaryOpen}
+        onClose={() => setSummaryOpen(false)}
+        mode="income"
+      />
     </div>
   );
 }

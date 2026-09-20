@@ -9,6 +9,7 @@ import DateChoiceModal from '../transactions/DateChoiceModal';
 import LockScreen from '../lock/LockScreen';
 import DailyReminderModal from '../dashboard/DailyReminderModal';
 import GreetingToast from '../common/GreetingToast';
+import PeriodLockToast from '../common/PeriodLockToast';
 import OnboardingFlow from '../onboarding/OnboardingFlow';
 
 import { useAppStore } from '../store/appStore';
@@ -18,7 +19,6 @@ import { useGreeting } from '../hooks/useGreeting';
 
 import { isOnboardingCompleted } from '../services/settingsService';
 
-// ⭐ فقط بعد از unlock رندر می‌شه
 function GreetingHost() {
   const { visible, greeting, dismiss } = useGreeting({ enabled: true });
   return (
@@ -38,11 +38,10 @@ function AppShell() {
   const prefilledDate = useAppStore((s) => s.prefilledDate);
   const closeTransactionSheet = useAppStore((s) => s.closeTransactionSheet);
 
-  const resetWeekOffset = useAppStore((s) => s.resetWeekOffset);
+  const resetPeriodOffset = useAppStore((s) => s.resetPeriodOffset);
   const refreshData = useAppStore((s) => s.refreshData);
   const dataVersion = useAppStore((s) => s.dataVersion);
 
-  // ⭐ چک onboarding
   const [onboardingLoading, setOnboardingLoading] = useState(true);
   const [onboardingCompleted, setLocalOnboardingCompleted] = useState(true);
 
@@ -62,12 +61,10 @@ function AppShell() {
     };
   }, [dataVersion]);
 
-  // ⭐ با هر تغییر صفحه، هفته برگرده به «این هفته»
   useEffect(() => {
-    resetWeekOffset();
-  }, [location.pathname, resetWeekOffset]);
+    resetPeriodOffset();
+  }, [location.pathname, resetPeriodOffset]);
 
-  // در حال بررسی قفل یا onboarding
   if (checking || onboardingLoading) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-[#0A1614]">
@@ -80,7 +77,6 @@ function AppShell() {
     return <LockScreen />;
   }
 
-  // ⭐ اگه onboarding تکمیل نشده → فقط OnboardingFlow + Sheet
   if (!onboardingCompleted) {
     return (
       <>
@@ -91,7 +87,6 @@ function AppShell() {
           }}
         />
 
-        {/* برای اینکه کاربر بتونه در مرحله‌ی درآمد/مصرف ثبت کنه */}
         <TransactionSheet
           open={transactionSheetOpen}
           type={transactionSheetType}
@@ -139,6 +134,9 @@ function AppShell() {
       />
 
       <GreetingHost />
+
+      {/* ⭐ Toast قفل دوره */}
+      <PeriodLockToast />
     </div>
   );
 }

@@ -9,10 +9,6 @@ import {
   addMonths,
 } from 'date-fns-jalali';
 
-// ============================================================
-// ثابت‌ها
-// ============================================================
-
 const WEEK_OPTIONS = { weekStartsOn: 6 };
 
 const PERSIAN_DAYS = [
@@ -66,10 +62,111 @@ export function endOfWeek(date = new Date()) {
   return dfEndOfWeek(date, WEEK_OPTIONS);
 }
 
-function addWeeksLocal(date, n) {
-  const d = new Date(date);
-  d.setDate(d.getDate() + n * 7);
+// ============================================================
+// ⭐ ناوبری عمومی دوره‌ها (daily / weekly / monthly / yearly)
+// ============================================================
+
+export function getPeriodBaseDate(period, offset = 0) {
+  const d = new Date();
+
+  if (period === 'daily') {
+    d.setDate(d.getDate() + offset);
+    return d;
+  }
+
+  if (period === 'weekly') {
+    d.setDate(d.getDate() + offset * 7);
+    return d;
+  }
+
+  if (period === 'monthly') {
+    return addMonths(d, offset);
+  }
+
+  if (period === 'yearly') {
+    d.setFullYear(d.getFullYear() + offset);
+    return d;
+  }
+
   return d;
+}
+
+export function getMaxOffset(period) {
+  if (period === 'daily') return -365;
+  if (period === 'weekly') return -52;
+  if (period === 'monthly') return -24;
+  if (period === 'yearly') return -10;
+  return 0;
+}
+
+// ============================================================
+// برچسب‌های دوره
+// ============================================================
+
+export function getPeriodOffsetLabel(period, offset = 0) {
+  if (offset === 0) {
+    if (period === 'daily') return 'امروز';
+    if (period === 'weekly') return 'این هفته';
+    if (period === 'monthly') return 'این ماه';
+    if (period === 'yearly') return 'امسال';
+  }
+
+  if (period === 'daily') {
+    if (offset === -1) return 'دیروز';
+    if (offset === 1) return 'فردا';
+    const n = Math.abs(offset);
+    return offset < 0
+      ? `${FA_NUM.format(n)} روز پیش`
+      : `${FA_NUM.format(n)} روز بعد`;
+  }
+
+  if (period === 'weekly') {
+    if (offset === -1) return 'هفته‌ی گذشته';
+    if (offset === 1) return 'هفته‌ی بعد';
+    const n = Math.abs(offset);
+    return offset < 0
+      ? `${FA_NUM.format(n)} هفته پیش`
+      : `${FA_NUM.format(n)} هفته بعد`;
+  }
+
+  if (period === 'monthly') {
+    const d = getPeriodBaseDate('monthly', offset);
+    const monthIdx = Number(format(d, 'M')) - 1;
+    const year = format(d, 'yyyy');
+    const monthName = AFGHAN_MONTHS[monthIdx] || '';
+    return `${monthName} ${year}`;
+  }
+
+  if (period === 'yearly') {
+    const d = getPeriodBaseDate('yearly', offset);
+    return format(d, 'yyyy');
+  }
+
+  return '';
+}
+
+export function getPeriodSubLabel(period, offset = 0) {
+  const baseDate = getPeriodBaseDate(period, offset);
+
+  if (period === 'daily') {
+    return formatShortDate(baseDate);
+  }
+
+  if (period === 'weekly') {
+    const start = startOfWeek(baseDate);
+    const end = endOfWeek(baseDate);
+    return formatWeekRange(start, end);
+  }
+
+  if (period === 'monthly') {
+    const start = dfStartOfMonth(baseDate);
+    const nextMonth = addMonths(start, 1);
+    const end = new Date(nextMonth.getTime() - 1);
+    return formatWeekRange(start, end);
+  }
+
+  // yearly — خود برچسب سال کافیه
+  return null;
 }
 
 // ============================================================
@@ -77,6 +174,10 @@ function addWeeksLocal(date, n) {
 // ============================================================
 
 export function getRange(period = 'weekly', date = new Date()) {
+  if (period === 'daily') {
+    return { start: startOfDay(date), end: endOfDay(date) };
+  }
+
   if (period === 'weekly') {
     return { start: startOfWeek(date), end: endOfWeek(date) };
   }
@@ -95,73 +196,58 @@ export function getRange(period = 'weekly', date = new Date()) {
   return { start: startOfDay(date), end: endOfDay(date) };
 }
 
-// ============================================================
-// ناوبری هفته
-// ============================================================
-
-export function getWeekBaseDate(offset = 0) {
-  return addWeeksLocal(new Date(), offset);
-}
-
-export function getWeekRangeFromOffset(offset = 0) {
-  const baseDate = getWeekBaseDate(offset);
-  return { ...getRange('weekly', baseDate), baseDate };
-}
-
-export function getWeekOffsetLabel(offset) {
-  if (offset === 0) return 'این هفته';
-  if (offset === -1) return 'هفته‌ی گذشته';
-  return `${FA_NUM.format(Math.abs(offset))} هفته پیش`;
-}
-
-export function formatWeekRange(start, end) {
-  const sDay = Number(format(start, 'd'));
-  const eDay = Number(format(end, 'd'));
-  const sMonthIdx = Number(format(start, 'M')) - 1;
-  const eMonthIdx = Number(format(end, 'M')) - 1;
-  const sMonth = AFGHAN_MONTHS[sMonthIdx] || '';
-  const eMonth = AFGHAN_MONTHS[eMonthIdx] || '';
-
-  if (sMonthIdx === eMonthIdx) {
-    return `${FA_NUM.format(sDay)} - ${FA_NUM.format(eDay)} ${sMonth}`;
-  }
-  return `${FA_NUM.format(sDay)} ${sMonth} - ${FA_NUM.format(eDay)} ${eMonth}`;
+export function getPeriodRange(period, offset = 0) {
+  const baseDate = getPeriodBaseDate(period, offset);
+  return { ...getRange(period, baseDate), baseDate };
 }
 
 // ============================================================
 // ⭐ متن توصیفی مقایسه
-//
-//   این هفته      → «این هفته نسبت به هفته‌ی گذشته»
-//   هفته‌ی گذشته  → «هفته‌ی گذشته نسبت به این هفته»
-//   ۴ هفته پیش    → «۴ هفته پیش نسبت به این هفته»
 // ============================================================
 
-export function getComparisonLabel(period, weekOffset) {
-  if (period === 'weekly') {
-    if (weekOffset === 0) return 'این هفته نسبت به هفته‌ی گذشته';
-    if (weekOffset === -1) return 'هفته‌ی گذشته نسبت به این هفته';
+export function getComparisonLabel(period, offset = 0) {
+  if (period === 'daily') {
+    if (offset === 0) return 'امروز نسبت به دیروز';
+    if (offset === -1) return 'دیروز نسبت به امروز';
+    const n = Math.abs(offset);
+    return `${FA_NUM.format(n)} روز پیش نسبت به امروز`;
+  }
 
-    const n = Math.abs(weekOffset);
+  if (period === 'weekly') {
+    if (offset === 0) return 'این هفته نسبت به هفته‌ی گذشته';
+    if (offset === -1) return 'هفته‌ی گذشته نسبت به این هفته';
+    const n = Math.abs(offset);
     return `${FA_NUM.format(n)} هفته پیش نسبت به این هفته`;
   }
 
   if (period === 'monthly') {
-    return 'این ماه نسبت به ماه گذشته';
+    if (offset === 0) return 'این ماه نسبت به ماه گذشته';
+    if (offset === -1) return 'ماه گذشته نسبت به این ماه';
+    const n = Math.abs(offset);
+    return `${FA_NUM.format(n)} ماه پیش نسبت به این ماه`;
   }
 
   if (period === 'yearly') {
-    return 'امسال نسبت به سال گذشته';
+    if (offset === 0) return 'امسال نسبت به سال گذشته';
+    if (offset === -1) return 'سال گذشته نسبت به امسال';
+    const n = Math.abs(offset);
+    return `${FA_NUM.format(n)} سال پیش نسبت به امسال`;
   }
 
   return '';
 }
 
 // ============================================================
-// دوره‌ی قبل (برای حالت این هفته / ماه / سال)
+// ⭐ دوره‌ی قبل (برای حالت این دوره / دوره‌ی گذشته)
 // ============================================================
 
 export function getPreviousPeriodDate(period, baseDate) {
   const d = new Date(baseDate || new Date());
+
+  if (period === 'daily') {
+    d.setDate(d.getDate() - 1);
+    return d;
+  }
 
   if (period === 'weekly') {
     d.setDate(d.getDate() - 7);
@@ -181,7 +267,7 @@ export function getPreviousPeriodDate(period, baseDate) {
 }
 
 // ============================================================
-// روزهای هفته
+// روزهای هفته / ماه / سال
 // ============================================================
 
 export function getWeekDays(date = new Date()) {
@@ -200,10 +286,6 @@ export function getWeekDays(date = new Date()) {
   }
   return days;
 }
-
-// ============================================================
-// روزهای ماه
-// ============================================================
 
 export function getDaysInJalaliMonth(date = new Date()) {
   const start = dfStartOfMonth(date);
@@ -228,10 +310,6 @@ export function getMonthDays(date = new Date()) {
   }
   return days;
 }
-
-// ============================================================
-// ماه‌های سال
-// ============================================================
 
 export function getYearMonths(date = new Date()) {
   const startYear = dfStartOfYear(date);
@@ -291,6 +369,20 @@ export function formatFullDate(dateInput) {
   return `${dayName} ${dayNum} ${monthName} ${year}`;
 }
 
+export function formatWeekRange(start, end) {
+  const sDay = Number(format(start, 'd'));
+  const eDay = Number(format(end, 'd'));
+  const sMonthIdx = Number(format(start, 'M')) - 1;
+  const eMonthIdx = Number(format(end, 'M')) - 1;
+  const sMonth = AFGHAN_MONTHS[sMonthIdx] || '';
+  const eMonth = AFGHAN_MONTHS[eMonthIdx] || '';
+
+  if (sMonthIdx === eMonthIdx) {
+    return `${FA_NUM.format(sDay)} - ${FA_NUM.format(eDay)} ${sMonth}`;
+  }
+  return `${FA_NUM.format(sDay)} ${sMonth} - ${FA_NUM.format(eDay)} ${eMonth}`;
+}
+
 // ============================================================
 // ساعت
 // ============================================================
@@ -339,4 +431,14 @@ export function formatTransactionDate(dateInput) {
   }
 
   return `${dayName} ${dayNum} ${monthName} ${year}`;
+}
+
+/**
+ * برچسب دوره‌ی مبنا (baseline)
+ *   offset = 0  → مبنا: دوره‌ی قبل («دیروز» / «هفته‌ی گذشته» / ...)
+ *   offset < 0  → مبنا: این دوره («امروز» / «این هفته» / ...)
+ */
+export function getBaselineLabel(period, offset = 0) {
+  const baselineOffset = offset < 0 ? 0 : -1;
+  return getPeriodOffsetLabel(period, baselineOffset);
 }

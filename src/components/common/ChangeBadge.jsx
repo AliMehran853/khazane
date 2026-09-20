@@ -1,31 +1,29 @@
-import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
+import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 
 const FA_NUM = new Intl.NumberFormat('fa-AF');
 
 export function computeChange(current, previous) {
   const c = Number(current) || 0;
   const p = Number(previous) || 0;
+  const diff = c - p;
 
-  if (p === 0) {
-    if (c === 0) return { type: 'none', pct: 0 };
-    return { type: 'new', pct: 0 };
-  }
+  if (c === 0 && p === 0) return { type: 'none', diff: 0 };
+  if (diff === 0) return { type: 'flat', diff: 0 };
 
-  const pct = ((c - p) / p) * 100;
-  if (Math.abs(pct) < 0.5) return { type: 'flat', pct: 0 };
-  return { type: pct > 0 ? 'up' : 'down', pct };
+  return { type: diff > 0 ? 'up' : 'down', diff };
 }
 
 /**
  * ChangeBadge
- * - tone="income"  : افزایش = خوب (سبز) | کاهش = بد (سرخ)
- * - tone="expense" : افزایش = بد (سرخ) | کاهش = خوب (سبز)
+ * tone="income"  → ▲ سبز / ▼ سرخ
+ * tone="expense" → ▲ سرخ / ▼ سبز
  */
 export default function ChangeBadge({
   current,
   previous,
   tone = 'income',
   size = 'sm',
+  currency = 'افغانی',
 }) {
   const change = computeChange(current, previous);
   if (change.type === 'none') return null;
@@ -37,35 +35,40 @@ export default function ChangeBadge({
   else if (change.type === 'down') isGood = !isIncome;
 
   const colorClass =
-    change.type === 'flat' || change.type === 'new'
-      ? 'text-[#8FA39D] bg-white/[0.04]'
+    change.type === 'flat'
+      ? 'text-[#8FA39D] bg-white/[0.05]'
       : isGood
         ? 'text-[#4FD1BE] bg-[#4FD1BE]/[0.12]'
         : 'text-[#E2574C] bg-[#E2574C]/[0.12]';
 
   let Icon = Minus;
-  if (change.type === 'up') Icon = ArrowUpRight;
-  else if (change.type === 'down') Icon = ArrowDownRight;
-
-  let text = '';
-  if (change.type === 'new') text = 'جدید';
-  else if (change.type === 'flat') text = 'ثابت';
-  else text = `${FA_NUM.format(Math.round(Math.abs(change.pct)))}٪`;
+  if (change.type === 'up') Icon = ArrowUp;
+  else if (change.type === 'down') Icon = ArrowDown;
 
   const isSm = size === 'sm';
+  const amount = FA_NUM.format(Math.abs(Math.round(change.diff)));
 
   return (
     <span
       className={[
-        'inline-flex shrink-0 items-center gap-0.5 rounded-full font-bold tabular-nums',
-        isSm ? 'px-1.5 py-0.5 text-[9.5px]' : 'px-2 py-0.5 text-[10.5px]',
+        'inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full font-bold tabular-nums',
+        isSm ? 'px-2 py-[3px] text-[9.5px]' : 'px-2.5 py-1 text-[10.5px]',
         colorClass,
       ].join(' ')}
     >
-      {change.type !== 'new' && (
-        <Icon size={isSm ? 9 : 11} strokeWidth={2.6} />
+      <Icon size={isSm ? 10 : 12} strokeWidth={2.6} />
+
+      {change.type === 'flat' ? (
+        <span>ثابت</span>
+      ) : (
+        <>
+          <span>{amount}</span>
+          <span className="opacity-70">{currency}</span>
+          <span className="opacity-70">
+            {change.type === 'up' ? 'بیشتر' : 'کمتر'}
+          </span>
+        </>
       )}
-      <span>{text}</span>
     </span>
   );
 }

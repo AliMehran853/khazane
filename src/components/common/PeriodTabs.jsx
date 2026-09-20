@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Check } from 'lucide-react';
+import { Check, ChevronDown } from 'lucide-react';
 
 import { useAppStore } from '../store/appStore';
 import { useIsDesktop } from '../hooks/useIsDesktop';
-import WeekNavigator from './WeekNavigator';
 
 const periods = [
+  { id: 'daily', label: 'روزانه' },
   { id: 'weekly', label: 'هفتگی' },
   { id: 'monthly', label: 'ماهانه' },
   { id: 'yearly', label: 'سالانه' },
@@ -26,7 +26,7 @@ function MobileTabs() {
             onClick={() => setPeriod(item.id)}
             className={[
               'flex min-h-11 flex-1 items-center justify-center rounded-xl',
-              'text-[12px] font-semibold',
+              'text-[11.5px] font-semibold',
               'transition-all duration-200',
               'active:scale-[0.97]',
               isActive
@@ -142,20 +142,6 @@ function DesktopDropdown() {
 
 export default function PeriodTabs({ forceTabs = false }) {
   const isDesktop = useIsDesktop();
-  const period = useAppStore((s) => s.period);
-
-  const tabs = forceTabs
-    ? <MobileTabs />
-    : isDesktop
-      ? <DesktopDropdown />
-      : <MobileTabs />;
-
-  if (period !== 'weekly') return tabs;
-
-  return (
-    <div className="w-full">
-      {tabs}
-      <WeekNavigator />
-    </div>
-  );
+  if (forceTabs) return <MobileTabs />;
+  return isDesktop ? <DesktopDropdown /> : <MobileTabs />;
 }

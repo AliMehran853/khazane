@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight, FileText, Search } from 'lucide-react';
 
 import PeriodTabs from '../common/PeriodTabs';
+import PeriodNavigator from '../common/PeriodNavigator';
 import StatCard from '../common/StatCard';
 import ExpenseTrendChart from '../charts/ExpenseTrendChart';
 import ExpenseCategoryChart from '../charts/ExpenseCategoryChart';
+import SummaryModal from '../dashboard/SummaryModal';
 import TransactionItem from '../transactions/TransactionItem';
 import TransactionList from '../transactions/TransactionList';
 
@@ -15,23 +17,17 @@ import { getTransactions } from '../services/transactionService';
 import { getCategories } from '../services/categoryService';
 import { prepareCategoryChartData } from '../utils/categoryPalette';
 import { exportTransactionsToPDF } from '../services/exportService';
-import { getRange, getWeekRangeFromOffset } from '../utils/dates';
+import { getPeriodRange, getPeriodOffsetLabel } from '../utils/dates';
 
 function formatNumber(value) {
   return new Intl.NumberFormat('fa-AF').format(Math.round(value || 0));
 }
 
-const periodLabels = {
-  weekly: 'این هفته',
-  monthly: 'این ماه',
-  yearly: 'امسال',
-};
-
 function ExpensesPage() {
   const navigate = useNavigate();
 
   const period = useAppStore((s) => s.period);
-  const weekOffset = useAppStore((s) => s.weekOffset);
+  const periodOffset = useAppStore((s) => s.periodOffset);
   const dataVersion = useAppStore((s) => s.dataVersion);
 
   const {
@@ -40,20 +36,18 @@ function ExpensesPage() {
     categories: categorySummary,
     comparison,
     loading,
-  } = useAnalytics({ period, type: 'expense', weekOffset });
+  } = useAnalytics({ period, type: 'expense', periodOffset });
 
   const [transactions, setTransactions] = useState([]);
   const [categoriesMap, setCategoriesMap] = useState({});
   const [exporting, setExporting] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
-      const range =
-        period === 'weekly'
-          ? getWeekRangeFromOffset(weekOffset)
-          : getRange(period);
+      const range = getPeriodRange(period, periodOffset);
 
       const [txs, cats] = await Promise.all([
         getTransactions({
@@ -77,7 +71,7 @@ function ExpensesPage() {
     return () => {
       cancelled = true;
     };
-  }, [dataVersion, period, weekOffset]);
+  }, [dataVersion, period, periodOffset]);
 
   const preparedCategories = prepareCategoryChartData(categorySummary);
   const maxTotal = Math.max(...preparedCategories.map((c) => c.total || 0), 1);
@@ -98,7 +92,7 @@ function ExpensesPage() {
         transactions,
         categoriesMap,
         title: 'گزارش مصارف',
-        periodLabel: periodLabels[period],
+        periodLabel: getPeriodOffsetLabel(period, periodOffset),
         totalIncome: 0,
         totalExpense: summary.expense,
         currency: 'افغانی',
@@ -169,14 +163,20 @@ function ExpensesPage() {
           <PeriodTabs />
         </div>
 
+        <div className="mt-3">
+          <PeriodNavigator />
+        </div>
+
         <section className="mt-4">
           <StatCard
-            title={`کل مصارف ${periodLabels[period]}`}
+            title={`کل مصارف ${getPeriodOffsetLabel(period, periodOffset)}`}
             value={formatNumber(summary.expense)}
             icon={ArrowUpRight}
             tone="expense"
             featured
             change={expenseChange}
+            onClick={() => setSummaryOpen(true)}
+            clickHint="برای خلاصه‌ی همه‌ی دوره‌ها کلیک کن"
           />
         </section>
 
@@ -184,7 +184,7 @@ function ExpensesPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-[15px] font-bold text-[#F2EFE9]">روند مصارف</h2>
             <span className="text-[11px] text-[#5C736C]">
-              {periodLabels[period]}
+              {getPeriodOffsetLabel(period, periodOffset)}
             </span>
           </div>
           <div className="mt-3 overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E] py-3">
@@ -196,7 +196,7 @@ function ExpensesPage() {
               <ExpenseTrendChart
                 data={trend}
                 period={period}
-                weekOffset={weekOffset}
+                periodOffset={periodOffset}
               />
             )}
           </div>
@@ -208,7 +208,7 @@ function ExpensesPage() {
               دسته‌بندی مصارف
             </h2>
             <span className="text-[11px] text-[#5C736C]">
-              {periodLabels[period]}
+              {getPeriodOffsetLabel(period, periodOffset)}
             </span>
           </div>
           <div className="mt-3 overflow-hidden rounded-[24px] border border-white/[0.06] bg-[#0F211E] py-3">
@@ -286,18 +286,22 @@ function ExpensesPage() {
       {/* دسکتاپ */}
       <div className="hidden lg:mt-6 lg:block lg:space-y-4">
         <div className="flex items-stretch gap-4">
-          <div className="w-[230px] shrink-0">
+          <div className="w-[230px] shrink-0 flex flex-col gap-3">
             <PeriodTabs />
+            <PeriodNavigator />
           </div>
 
           <div className="flex-1">
             <StatCard
-              title={`کل مصارف ${periodLabels[period]}`}
+              title={`کل مصارف ${getPeriodOffsetLabel(period, periodOffset)}`}
               value={formatNumber(summary.expense)}
               icon={ArrowUpRight}
               tone="expense"
               featured
+              fillHeight
               change={expenseChange}
+              onClick={() => setSummaryOpen(true)}
+              clickHint="برای خلاصه‌ی همه‌ی دوره‌ها کلیک کن"
             />
           </div>
         </div>
@@ -310,7 +314,7 @@ function ExpensesPage() {
                   روند مصارف
                 </h2>
                 <span className="text-[12px] text-[#5C736C]">
-                  {periodLabels[period]}
+                  {getPeriodOffsetLabel(period, periodOffset)}
                 </span>
               </div>
 
@@ -323,7 +327,7 @@ function ExpensesPage() {
                   <ExpenseTrendChart
                     data={trend}
                     period={period}
-                    weekOffset={weekOffset}
+                    periodOffset={periodOffset}
                     fixedHeight={360}
                   />
                 )}
@@ -338,7 +342,7 @@ function ExpensesPage() {
                   دسته‌بندی مصارف
                 </h2>
                 <span className="text-[12px] text-[#5C736C]">
-                  {periodLabels[period]}
+                  {getPeriodOffsetLabel(period, periodOffset)}
                 </span>
               </div>
 
@@ -474,6 +478,12 @@ function ExpensesPage() {
           </div>
         </div>
       </div>
+
+      <SummaryModal
+        open={summaryOpen}
+        onClose={() => setSummaryOpen(false)}
+        mode="expense"
+      />
     </div>
   );
 }

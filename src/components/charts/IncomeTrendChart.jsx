@@ -7,7 +7,7 @@ function formatNumber(value) {
 }
 
 function getChartLayout(period, dataLength) {
-  if (period === 'monthly' || period === 'weekly') {
+  if (period === 'daily' || period === 'monthly' || period === 'weekly') {
     return { shouldScroll: false, chartWidth: null };
   }
 
@@ -21,24 +21,43 @@ function getChartLayout(period, dataLength) {
   };
 }
 
+const INCOME_COLOR = '#4FD1BE';
+const INCOME_DIM = 'rgba(79, 209, 190, 0.28)';
+
 export default function IncomeTrendChart({
   data = [],
   period = 'weekly',
+  periodOffset = 0,
   fixedHeight,
 }) {
   const isDesktop = useIsDesktop();
 
   const categories = data.map((item) => item.label);
-  const income = data.map((item) => item.income || 0);
+
+  const isDaily = period === 'daily';
+  const isMonthly = period === 'monthly';
+  const isBar = isDaily || isMonthly;
 
   const { shouldScroll, chartWidth } = getChartLayout(period, data.length);
   const scrollRef = useChartAutoScroll(data, period, shouldScroll);
 
-  const isMonthly = period === 'monthly';
+  // ⭐ سری: در حالت روزانه fillColor برای هر ستون
+  const series = [
+    {
+      name: 'درآمد',
+      data: isDaily
+        ? data.map((item) => ({
+            x: item.label,
+            y: item.income || 0,
+            fillColor: item.isCurrent ? INCOME_COLOR : INCOME_DIM,
+          }))
+        : data.map((item) => item.income || 0),
+    },
+  ];
 
   const options = {
     chart: {
-      type: isMonthly ? 'bar' : 'area',
+      type: isBar ? 'bar' : 'area',
       toolbar: { show: false },
       zoom: { enabled: false },
       background: 'transparent',
@@ -53,9 +72,9 @@ export default function IncomeTrendChart({
         dynamicAnimation: { enabled: true, speed: 350 },
       },
     },
-    colors: ['#4FD1BE'],
+    colors: [INCOME_COLOR],
 
-    ...(!isMonthly && {
+    ...(!isBar && {
       stroke: { curve: 'smooth', width: 2.2 },
       fill: {
         type: 'gradient',
@@ -68,19 +87,23 @@ export default function IncomeTrendChart({
       },
     }),
 
-    ...(isMonthly && {
+    ...(isBar && {
       plotOptions: {
         bar: {
-          borderRadius: 2,
-          columnWidth: '80%',
+          // ⭐ بدون distributed → بدون legend خودکار
+          borderRadius: 3,
+          columnWidth: isDaily ? '55%' : '80%',
           borderRadiusApplication: 'end',
         },
       },
     }),
 
+    // ⭐ لیست پایین حذف بشه
+    legend: { show: false },
+
     dataLabels: { enabled: false },
     xaxis: {
-      categories,
+      ...(isDaily ? { type: 'category' } : { categories }),
       tickAmount: data.length > 1 ? data.length - 1 : 1,
       labels: {
         rotate: isMonthly ? -60 : 0,
@@ -93,9 +116,13 @@ export default function IncomeTrendChart({
             ? isDesktop
               ? '10px'
               : '7px'
-            : isDesktop
-              ? '12px'
-              : '10px',
+            : isDaily
+              ? isDesktop
+                ? '11px'
+                : '9px'
+              : isDesktop
+                ? '12px'
+                : '10px',
           fontFamily: 'Vazirmatn, sans-serif',
         },
       },
@@ -125,16 +152,14 @@ export default function IncomeTrendChart({
     },
   };
 
-  const series = [{ name: 'درآمد', data: income }];
-
   const height =
     fixedHeight ||
     (isDesktop
-      ? isMonthly
+      ? isBar
         ? 400
         : 320
-      : isMonthly
-        ? 300
+      : isBar
+        ? 280
         : 230);
 
   return (
@@ -152,10 +177,10 @@ export default function IncomeTrendChart({
           }
         >
           <Chart
-            key={`${period}-${data.length}-${shouldScroll}-${isDesktop}-${fixedHeight || 'auto'}`}
+            key={`${period}-${periodOffset}-${data.length}-${shouldScroll}-${isDesktop}-${fixedHeight || 'auto'}`}
             options={options}
             series={series}
-            type={isMonthly ? 'bar' : 'area'}
+            type={isBar ? 'bar' : 'area'}
             height={height}
             width="100%"
           />
