@@ -182,9 +182,6 @@ select {
 
 /* =========================================================
    ⭐ Background Layer
-   نکته: filter روی عکس حذف شده چون Chrome یه Backdrop Root
-   می‌سازه و backdrop-filter نمی‌تونه ازش رد بشه.
-   به‌جاش، رنگ و تیرگی با overlay کنترل می‌شه.
    ========================================================= */
 
 .kh-bg-layer {
@@ -202,63 +199,83 @@ select {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  /* ⭐ filter این‌جا حذف شد */
+  filter: brightness(0.78) saturate(1.30) contrast(1.05);
 }
 
 .kh-bg-overlay {
   position: absolute;
   inset: 0;
-  /* ⭐ تیرگی + ته‌مایه‌ی فیروزه‌ای روی عکس */
   background:
     linear-gradient(
       180deg,
-      rgba(6, 30, 34, 0.35) 0%,
-      rgba(6, 30, 34, 0.55) 50%,
-      rgba(6, 30, 34, 0.80) 100%
+      rgba(6, 30, 34, 0.42) 0%,
+      rgba(6, 30, 34, 0.60) 50%,
+      rgba(6, 30, 34, 0.85) 100%
     ),
     linear-gradient(
       180deg,
       rgba(0, 60, 55, 0.10) 0%,
-      rgba(0, 40, 40, 0.15) 100%
+      rgba(0, 40, 40, 0.18) 100%
     );
 }
 
 /* =========================================================
-   ⭐ Glass Effects
+   ⭐ Glass Effects — بدون backdrop-filter (سازگار با همه)
+   فقط با گرادیان + سایه + بوردِر، ظاهر شیشه‌ای یکدست
    ========================================================= */
 
 .glass {
-  background: rgba(11, 34, 38, 0.48);
-  backdrop-filter: blur(40px) saturate(170%);
-  -webkit-backdrop-filter: blur(40px) saturate(170%);
-  border: 1px solid rgba(0, 209, 167, 0.10);
+  background: linear-gradient(
+    135deg,
+    rgba(30, 60, 65, 0.55) 0%,
+    rgba(11, 34, 38, 0.78) 55%,
+    rgba(9, 28, 32, 0.88) 100%
+  );
+  border: 1px solid rgba(0, 209, 167, 0.12);
   box-shadow:
-    inset 0 1px 0 0 rgba(0, 209, 167, 0.08),
-    0 10px 44px rgba(0, 0, 0, 0.28);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.18),
+    0 10px 36px rgba(0, 0, 0, 0.40),
+    0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .glass-strong {
-  background: rgba(9, 28, 32, 0.65);
-  backdrop-filter: blur(52px) saturate(180%);
-  -webkit-backdrop-filter: blur(52px) saturate(180%);
-  border: 1px solid rgba(0, 209, 167, 0.14);
+  background: linear-gradient(
+    135deg,
+    rgba(26, 52, 58, 0.68) 0%,
+    rgba(9, 28, 32, 0.88) 55%,
+    rgba(7, 22, 26, 0.95) 100%
+  );
+  border: 1px solid rgba(0, 209, 167, 0.16);
   box-shadow:
-    inset 0 1px 0 0 rgba(0, 209, 167, 0.10),
-    0 12px 48px rgba(0, 0, 0, 0.38);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.25),
+    0 14px 44px rgba(0, 0, 0, 0.50),
+    0 4px 12px rgba(0, 0, 0, 0.30);
 }
 
 .glass-light {
-  background: rgba(13, 40, 44, 0.32);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
-  border: 1px solid rgba(0, 209, 167, 0.08);
+  background: linear-gradient(
+    135deg,
+    rgba(28, 56, 62, 0.45) 0%,
+    rgba(13, 40, 44, 0.68) 100%
+  );
+  border: 1px solid rgba(0, 209, 167, 0.10);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+    0 6px 20px rgba(0, 0, 0, 0.30);
 }
 
 .glass-inner {
-  background: rgba(11, 34, 38, 0.38);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(0, 209, 167, 0.08);
+  background: linear-gradient(
+    135deg,
+    rgba(24, 50, 55, 0.55) 0%,
+    rgba(11, 34, 38, 0.72) 100%
+  );
+  border: 1px solid rgba(0, 209, 167, 0.10);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+    0 4px 14px rgba(0, 0, 0, 0.25);
 }
 
 /* =========================================================
