@@ -101,7 +101,8 @@ function AppShell() {
   }
 
   return (
-    <div className="relative min-h-dvh text-[#F8FAFC]" data-vaul-drawer-wrapper>
+    /* ⭐ data-vaul-drawer-wrapper حذف شد */
+    <div className="relative min-h-dvh text-[#F8FAFC]">
       <Sidebar />
 
       <main className="mx-auto w-full max-w-[420px] pb-24 lg:max-w-none lg:pb-12 lg:pr-[260px]">
