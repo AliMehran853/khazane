@@ -13,9 +13,9 @@ function App() {
 
   return (
     <>
-      {/* ⭐ لایه‌ی پس‌زمینه‌ی عکس — fixed برای همه‌ی صفحات */}
+      {/* ⭐ لایه‌ی پس‌زمینه داخل DOM، نه خارج از stacking context */}
       <div className="kh-bg-layer" aria-hidden="true">
-        <img src="/background.png" alt="" className="kh-bg-img" />
+        <div className="kh-bg-img" />
         <div className="kh-bg-overlay" />
       </div>
 
