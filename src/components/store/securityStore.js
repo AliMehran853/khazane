@@ -1,22 +1,20 @@
 import { create } from 'zustand';
 
+import { PIN_LENGTH } from '../utils/constants';
+
 export const useSecurityStore = create((set) => ({
-  // وضعیت قفل
   locked: false,
   checking: true,
-  method: 'pin', // 'pin' یا 'biometric'
+  method: 'pin',
 
-  // تنظیمات امنیتی
   lockEnabled: false,
   pinEnabled: false,
   biometricEnabled: false,
   biometricAvailable: false,
 
-  // PIN flow
   pinBuffer: '',
   pinError: '',
 
-  // Actions
   setLocked: (locked) => set({ locked }),
   setChecking: (checking) => set({ checking }),
   setMethod: (method) => set({ method }),
@@ -28,16 +26,12 @@ export const useSecurityStore = create((set) => ({
 
   appendPin: (digit) =>
     set((state) => ({
-      pinBuffer: (state.pinBuffer + digit).slice(0, 6),
+      pinBuffer: (state.pinBuffer + digit).slice(0, PIN_LENGTH),
     })),
   clearPinBuffer: () => set({ pinBuffer: '' }),
   backspacePin: () =>
     set((state) => ({ pinBuffer: state.pinBuffer.slice(0, -1) })),
   setPinError: (pinError) => set({ pinError }),
 
-  reset: () =>
-    set({
-      pinBuffer: '',
-      pinError: '',
-    }),
+  reset: () => set({ pinBuffer: '', pinError: '' }),
 }));

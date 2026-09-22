@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
+
 import {
   isWebAuthnSupported,
   isBiometricAvailable,
 } from '../services/securityService';
 
 export function useBiometricCheck() {
-  const [available, setAvailable] = useState(null); // null = در حال چک
+  const [available, setAvailable] = useState(null);
   const [supported, setSupported] = useState(false);
 
   useEffect(() => {

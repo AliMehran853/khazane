@@ -12,8 +12,7 @@ import {
 import AnimatedNumber from '../common/AnimatedNumber';
 import ChangeBadge from '../common/ChangeBadge';
 import { getPeriodOffsetLabel, getBaselineLabel } from '../utils/dates';
-
-const FA_NUM = new Intl.NumberFormat('fa-AF');
+import { formatNumber } from '../utils/formatting';
 
 export default function BalanceHero({
   summary,
@@ -41,116 +40,48 @@ export default function BalanceHero({
   }
 
   return (
-    <section className="glass-strong relative mt-4 overflow-hidden rounded-[28px] p-5">
-      {/* ⭐ عکس داخلی — واضح در بالا */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage: 'url(/background.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center 35%',
-          opacity: 0.55,
-          filter: 'blur(0.5px) saturate(1.6) brightness(1.05)',
-        }}
-      />
-
-      {/* ⭐ گرادیان حرفه‌ای: روشن در بالا → تیره در پایین */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: isNegative
-            ? `linear-gradient(
-                180deg,
-                rgba(11,34,38,0.10) 0%,
-                rgba(11,34,38,0.45) 35%,
-                rgba(11,34,38,0.80) 65%,
-                rgba(20,10,14,0.94) 100%
-              )`
-            : `linear-gradient(
-                180deg,
-                rgba(11,34,38,0.08) 0%,
-                rgba(11,34,38,0.42) 35%,
-                rgba(11,34,38,0.80) 65%,
-                rgba(11,34,38,0.94) 100%
-              )`,
-        }}
-      />
-
-      {/* ⭐ گرادیان جانبی: سمت چپ کمی روشن‌تر، سمت راست تیره‌تر */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'linear-gradient(90deg, rgba(11,34,38,0.00) 0%, rgba(11,34,38,0.35) 100%)',
-        }}
-      />
-
-      {/* هاله‌ی فیروزه‌ای ملایم در گوشه‌ی بالا-چپ */}
-      <div
-        className="pointer-events-none absolute -left-16 -top-16 h-44 w-44 rounded-full blur-3xl"
-        style={{
-          background: isNegative
-            ? 'rgba(244,63,94,0.18)'
-            : 'rgba(0,209,167,0.22)',
-        }}
-      />
+    <section className="kh-hero mt-4 p-5">
+      <div className="kh-hero-bg" />
+      <div className="kh-hero-overlay-v" data-negative={isNegative} />
+      <div className="kh-hero-overlay-h" />
+      <div className="kh-hero-glow" data-negative={isNegative} />
 
       <div className="relative">
-        {/* هدر */}
         <div className="flex items-center justify-between">
-          <p
-            className="text-[11.5px] font-medium tracking-wide text-[#B8C6CD]"
-            style={{
-              textShadow: '0 1px 3px rgba(0,0,0,0.55)',
-            }}
-          >
+          <p className="kh-hero-text-shadow text-xs font-medium tracking-wide text-fg-2">
             موجودی {periodLabel}
           </p>
-          <div className="flex h-7 w-7 items-center justify-center rounded-full border border-[#00D1A7]/30 bg-[#00D1A7]/[0.14] backdrop-blur-md">
-            <Sparkles size={13} strokeWidth={2} className="text-[#00D1A7]" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-full border border-primary/30 bg-primary/15 backdrop-blur-md">
+            <Sparkles size={13} strokeWidth={2} className="text-primary" />
           </div>
         </div>
 
-        {/* عدد بزرگ */}
         <div className="mt-3 flex items-end gap-2">
           <p
-            className="text-[38px] font-extrabold leading-none tracking-tight"
-            style={{
-              backgroundImage: isNegative
-                ? 'linear-gradient(135deg, #F43F5E 0%, #BE123C 100%)'
-                : 'linear-gradient(135deg, #FFFFFF 0%, #00D1A7 130%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              filter: isNegative
-                ? 'drop-shadow(0 4px 16px rgba(244,63,94,0.45))'
-                : 'drop-shadow(0 4px 16px rgba(0,209,167,0.45))',
-            }}
+            className={[
+              'kh-hero-gradient-text text-5xl font-extrabold leading-none tracking-tight',
+              isNegative ? 'kh-hero-negative' : 'kh-hero-positive',
+            ].join(' ')}
           >
             <AnimatedNumber value={summary.balance} duration={750} />
           </p>
-          <span
-            className="mb-1 text-[12px] font-semibold text-[#B8C6CD]"
-            style={{ textShadow: '0 1px 3px rgba(0,0,0,0.55)' }}
-          >
+          <span className="kh-hero-text-shadow mb-1 text-sm font-semibold text-fg-2">
             افغانی
           </span>
         </div>
 
         {isNegative && (
-          <span className="mt-2 inline-block rounded-full border border-[#F43F5E]/40 bg-[#F43F5E]/[0.20] px-2.5 py-0.5 text-[10px] font-bold text-[#F43F5E] backdrop-blur-md">
+          <span className="mt-2 inline-block rounded-full border border-expense/40 bg-expense/20 px-2.5 py-0.5 text-2xs font-bold text-expense backdrop-blur-md">
             کمبود
           </span>
         )}
 
-        {/* جداکننده‌ی تزئینی */}
         <div className="mt-5 flex items-center gap-3">
           <div className="h-px flex-1 bg-gradient-to-l from-transparent via-white/[0.18] to-transparent" />
-          <div className="h-1 w-1 rounded-full bg-[#00D1A7]/60 shadow-[0_0_8px_rgba(0,209,167,0.6)]" />
+          <div className="h-1 w-1 rounded-full bg-primary/60 shadow-[0_0_8px_rgba(0,209,167,0.6)]" />
           <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/[0.18] to-transparent" />
         </div>
 
-        {/* ردیف‌های مقایسه */}
         <div className="mt-4 space-y-2.5">
           <CompareRow
             icon={ArrowDownLeft}
@@ -174,27 +105,20 @@ export default function BalanceHero({
           />
         </div>
 
-        {/* دکمه‌ی خلاصه */}
         {onOpenSummary && (
           <button
             type="button"
             onClick={onOpenSummary}
-            className="
-              group mt-4 flex w-full items-center justify-between gap-2
-              rounded-2xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.10]
-              px-4 py-3 backdrop-blur-md transition-all
-              hover:border-[#00D1A7]/40 hover:bg-[#00D1A7]/[0.16]
-              active:scale-[0.98]
-            "
+            className="group mt-4 flex w-full items-center justify-between gap-2 rounded-2xl border border-primary/25 bg-primary/10 px-4 py-3 backdrop-blur-md transition-all hover:border-primary/40 hover:bg-primary/15 active:scale-[0.98]"
           >
-            <span className="flex items-center gap-2 text-[12px] font-semibold text-[#00D1A7]">
+            <span className="flex items-center gap-2 text-sm font-semibold text-primary">
               <BarChart3 size={15} strokeWidth={2.2} />
               خلاصه‌ی همه‌ی دوره‌ها
             </span>
             <ChevronLeft
               size={16}
               strokeWidth={2}
-              className="text-[#00D1A7] transition-transform group-hover:-translate-x-0.5"
+              className="text-primary transition-transform group-hover:-translate-x-0.5"
             />
           </button>
         )}
@@ -202,10 +126,6 @@ export default function BalanceHero({
     </section>
   );
 }
-
-// ============================================================
-// نسخه‌ی دسکتاپ
-// ============================================================
 
 function DesktopHero({
   summary,
@@ -218,78 +138,36 @@ function DesktopHero({
   const hasComparison = Boolean(comparison);
 
   return (
-    <section className="glass-strong relative flex items-center gap-7 overflow-hidden rounded-[28px] px-7 py-7">
-      {/* عکس داخلی */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage: 'url(/background.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center 40%',
-          opacity: 0.5,
-          filter: 'blur(0.5px) saturate(1.6) brightness(1.05)',
-        }}
-      />
-
-      {/* گرادیان افقی: چپ روشن‌تر، راست تیره‌تر */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: isNegative
-            ? 'linear-gradient(90deg, rgba(11,34,38,0.15) 0%, rgba(11,34,38,0.75) 45%, rgba(20,10,14,0.94) 100%)'
-            : 'linear-gradient(90deg, rgba(11,34,38,0.12) 0%, rgba(11,34,38,0.72) 45%, rgba(11,34,38,0.94) 100%)',
-        }}
-      />
-
-      {/* هاله‌ی گوشه‌ی بالا-چپ */}
-      <div
-        className="pointer-events-none absolute -left-20 -top-20 h-56 w-56 rounded-full blur-3xl"
-        style={{
-          background: isNegative
-            ? 'rgba(244,63,94,0.20)'
-            : 'rgba(0,209,167,0.24)',
-        }}
-      />
+    <section className="kh-hero flex items-center gap-7 px-7 py-7">
+      <div className="kh-hero-bg kh-hero-bg-desktop" />
+      <div className="kh-hero-overlay-d" data-negative={isNegative} />
+      <div className="kh-hero-glow kh-hero-glow-desktop" data-negative={isNegative} />
 
       <div className="relative flex shrink-0 flex-col">
         <div className="flex items-center gap-2">
-          <p
-            className="text-[13px] font-medium tracking-wide text-[#B8C6CD]"
-            style={{ textShadow: '0 1px 3px rgba(0,0,0,0.55)' }}
-          >
+          <p className="kh-hero-text-shadow text-base font-medium tracking-wide text-fg-2">
             موجودی {periodLabel}
           </p>
-          <div className="flex h-6 w-6 items-center justify-center rounded-full border border-[#00D1A7]/30 bg-[#00D1A7]/[0.14] backdrop-blur-md">
-            <Sparkles size={11} strokeWidth={2} className="text-[#00D1A7]" />
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border border-primary/30 bg-primary/15 backdrop-blur-md">
+            <Sparkles size={11} strokeWidth={2} className="text-primary" />
           </div>
         </div>
 
         <p
-          className="mt-3 text-[48px] font-extrabold leading-none tracking-tight"
-          style={{
-            backgroundImage: isNegative
-              ? 'linear-gradient(135deg, #F43F5E 0%, #BE123C 100%)'
-              : 'linear-gradient(135deg, #FFFFFF 0%, #00D1A7 130%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            filter: isNegative
-              ? 'drop-shadow(0 4px 20px rgba(244,63,94,0.45))'
-              : 'drop-shadow(0 4px 20px rgba(0,209,167,0.45))',
-          }}
+          className={[
+            'kh-hero-gradient-text mt-3 text-5xl font-extrabold leading-none tracking-tight',
+            isNegative ? 'kh-hero-negative' : 'kh-hero-positive',
+          ].join(' ')}
         >
           <AnimatedNumber value={summary.balance} duration={750} />
         </p>
 
         <div className="mt-3 flex items-center gap-2">
-          <p
-            className="text-[12px] font-semibold text-[#B8C6CD]"
-            style={{ textShadow: '0 1px 3px rgba(0,0,0,0.55)' }}
-          >
+          <p className="kh-hero-text-shadow text-sm font-semibold text-fg-2">
             افغانی
           </p>
           {isNegative && (
-            <span className="rounded-full border border-[#F43F5E]/40 bg-[#F43F5E]/[0.20] px-2.5 py-0.5 text-[10px] font-bold text-[#F43F5E] backdrop-blur-md">
+            <span className="rounded-full border border-expense/40 bg-expense/20 px-2.5 py-0.5 text-2xs font-bold text-expense backdrop-blur-md">
               کمبود
             </span>
           )}
@@ -328,10 +206,6 @@ function DesktopHero({
   );
 }
 
-// ============================================================
-// Helperها
-// ============================================================
-
 function buildSentence({ tone, current, previous, period, periodOffset }) {
   const c = Number(current) || 0;
   const p = Number(previous) || 0;
@@ -341,7 +215,7 @@ function buildSentence({ tone, current, previous, period, periodOffset }) {
 
   const diff = c - p;
   const absDiff = Math.abs(Math.round(diff));
-  const amountText = FA_NUM.format(absDiff);
+  const amountText = formatNumber(absDiff);
   const typeLabel = tone === 'income' ? 'درآمد' : 'مصرف';
 
   const periodLabel = getPeriodOffsetLabel(period, periodOffset);
@@ -350,7 +224,7 @@ function buildSentence({ tone, current, previous, period, periodOffset }) {
   if (diff === 0) {
     return {
       text: `${periodLabel} نسبت به ${baselineLabel} بدون تغییر مانده`,
-      color: 'text-[#B8C6CD]',
+      color: 'text-fg-2',
     };
   }
 
@@ -359,13 +233,9 @@ function buildSentence({ tone, current, previous, period, periodOffset }) {
 
   return {
     text: `${periodLabel} نسبت به ${baselineLabel} ${amountText} افغانی ${typeLabel} ${direction} بوده`,
-    color: isGood ? 'text-[#00D1A7]' : 'text-[#F43F5E]',
+    color: isGood ? 'text-primary' : 'text-expense',
   };
 }
-
-// ============================================================
-// CompareRow (موبایل)
-// ============================================================
 
 function CompareRow({
   icon: Icon,
@@ -380,10 +250,10 @@ function CompareRow({
   const [expanded, setExpanded] = useState(false);
 
   const isIncome = tone === 'income';
-  const accentText = isIncome ? 'text-[#00D1A7]' : 'text-[#F43F5E]';
+  const accentText = isIncome ? 'text-primary' : 'text-expense';
   const accentBg = isIncome
-    ? 'from-[#00D1A7]/[0.12] to-[#00D1A7]/[0.03] border-[#00D1A7]/25'
-    : 'from-[#F43F5E]/[0.12] to-[#F43F5E]/[0.03] border-[#F43F5E]/25';
+    ? 'from-primary/[0.12] to-primary/[0.03] border-primary/25'
+    : 'from-expense/[0.12] to-expense/[0.03] border-expense/25';
 
   const showComparison = current !== undefined && previous !== undefined;
   const sentence = showComparison
@@ -414,20 +284,18 @@ function CompareRow({
           className={[
             'flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
             isIncome
-              ? 'bg-[#00D1A7]/[0.20] text-[#00D1A7]'
-              : 'bg-[#F43F5E]/[0.20] text-[#F43F5E]',
+              ? 'bg-primary/20 text-primary'
+              : 'bg-expense/20 text-expense',
           ].join(' ')}
         >
           <Icon size={16} strokeWidth={2.2} />
         </div>
 
         <div className="flex min-w-0 flex-1 items-baseline gap-2">
-          <span className="text-[11.5px] font-medium text-[#B8C6CD]">
-            {label}
-          </span>
+          <span className="text-xs font-medium text-fg-2">{label}</span>
           <span
             className={[
-              'text-[16px] font-extrabold tabular-nums',
+              'text-xl font-extrabold tabular-nums',
               accentText,
             ].join(' ')}
           >
@@ -450,7 +318,7 @@ function CompareRow({
               size={13}
               strokeWidth={2.4}
               className={[
-                'shrink-0 text-[#6E828B] transition-transform duration-200',
+                'shrink-0 text-fg-3 transition-transform duration-200',
                 expanded ? 'rotate-180' : '',
               ].join(' ')}
             />
@@ -469,7 +337,7 @@ function CompareRow({
           >
             <p
               className={[
-                'border-t border-white/[0.08] px-3.5 pb-3 pt-2.5 text-[10.5px] leading-relaxed',
+                'border-t border-border-1 px-3.5 pb-3 pt-2.5 text-2xs leading-relaxed',
                 sentence.color,
               ].join(' ')}
             >
@@ -481,10 +349,6 @@ function CompareRow({
     </div>
   );
 }
-
-// ============================================================
-// CompareCard (دسکتاپ)
-// ============================================================
 
 function CompareCard({
   icon: Icon,
@@ -499,10 +363,10 @@ function CompareCard({
   const [expanded, setExpanded] = useState(false);
 
   const isIncome = tone === 'income';
-  const accentText = isIncome ? 'text-[#00D1A7]' : 'text-[#F43F5E]';
+  const accentText = isIncome ? 'text-primary' : 'text-expense';
   const accentBg = isIncome
-    ? 'from-[#00D1A7]/[0.14] to-[#00D1A7]/[0.04] border-[#00D1A7]/25'
-    : 'from-[#F43F5E]/[0.14] to-[#F43F5E]/[0.04] border-[#F43F5E]/25';
+    ? 'from-primary/[0.14] to-primary/[0.04] border-primary/25'
+    : 'from-expense/[0.14] to-expense/[0.04] border-expense/25';
 
   const showComparison = current !== undefined && previous !== undefined;
   const sentence = showComparison
@@ -528,15 +392,13 @@ function CompareCard({
               className={[
                 'flex h-9 w-9 items-center justify-center rounded-full',
                 isIncome
-                  ? 'bg-[#00D1A7]/[0.20] text-[#00D1A7]'
-                  : 'bg-[#F43F5E]/[0.20] text-[#F43F5E]',
+                  ? 'bg-primary/20 text-primary'
+                  : 'bg-expense/20 text-expense',
               ].join(' ')}
             >
               <Icon size={16} strokeWidth={2.2} />
             </div>
-            <span className="text-[12px] font-medium text-[#B8C6CD]">
-              {label}
-            </span>
+            <span className="text-sm font-medium text-fg-2">{label}</span>
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -554,7 +416,7 @@ function CompareCard({
                 size={13}
                 strokeWidth={2.4}
                 className={[
-                  'shrink-0 text-[#6E828B] transition-transform duration-200',
+                  'shrink-0 text-fg-3 transition-transform duration-200',
                   expanded ? 'rotate-180' : '',
                 ].join(' ')}
               />
@@ -564,7 +426,7 @@ function CompareCard({
 
         <p
           className={[
-            'mt-3 text-[26px] font-extrabold tabular-nums tracking-tight',
+            'mt-3 text-3xl font-extrabold tabular-nums tracking-tight',
             accentText,
           ].join(' ')}
         >
@@ -583,7 +445,7 @@ function CompareCard({
           >
             <p
               className={[
-                'border-t border-white/[0.08] px-4 pb-3 pt-2.5 text-[10.5px] leading-relaxed',
+                'border-t border-border-1 px-4 pb-3 pt-2.5 text-2xs leading-relaxed',
                 sentence.color,
               ].join(' ')}
             >

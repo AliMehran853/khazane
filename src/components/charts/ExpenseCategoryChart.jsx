@@ -1,15 +1,17 @@
 import Chart from 'react-apexcharts';
+
 import { prepareCategoryChartData } from '../utils/categoryPalette';
 import { useIsDesktop } from '../hooks/useIsDesktop';
-
-function formatNumber(value) {
-  return new Intl.NumberFormat('fa-AF').format(Math.round(value || 0));
-}
+import { useAppStore } from '../store/appStore';
+import { getChartTheme } from '../utils/chartTheme';
+import { formatNumber } from '../utils/formatting';
 
 export default function ExpenseCategoryChart({ categories = [], fixedHeight }) {
   const isDesktop = useIsDesktop();
+  const theme = useAppStore((s) => s.theme);
 
   const prepared = prepareCategoryChartData(categories);
+  const t = getChartTheme();
 
   const labels = prepared.map((c) => c.name);
   const values = prepared.map((c) => c.total || 0);
@@ -19,7 +21,7 @@ export default function ExpenseCategoryChart({ categories = [], fixedHeight }) {
     chart: {
       type: 'donut',
       background: 'transparent',
-      fontFamily: 'Vazirmatn, sans-serif',
+      fontFamily: t.fontFamily,
       parentHeightOffset: 0,
       animations: {
         enabled: true,
@@ -34,16 +36,16 @@ export default function ExpenseCategoryChart({ categories = [], fixedHeight }) {
       show: true,
       position: 'bottom',
       horizontalAlign: 'center',
-      fontFamily: 'Vazirmatn, sans-serif',
+      fontFamily: t.fontFamily,
       fontSize: isDesktop ? '13px' : '11px',
-      labels: { colors: '#94A3B8' },
+      labels: { colors: t.text2 },
       markers: { width: 8, height: 8, radius: 10 },
       itemMargin: { horizontal: isDesktop ? 12 : 6, vertical: 2 },
     },
     dataLabels: { enabled: false },
     stroke: {
       width: 2,
-      colors: ['rgba(15,23,42,0.6)'],
+      colors: [t.isLight ? 'rgba(15,23,42,0.08)' : 'rgba(15,23,42,0.6)'],
     },
     plotOptions: {
       pie: {
@@ -54,23 +56,23 @@ export default function ExpenseCategoryChart({ categories = [], fixedHeight }) {
             name: {
               show: true,
               fontSize: isDesktop ? '14px' : '12px',
-              color: '#94A3B8',
-              fontFamily: 'Vazirmatn, sans-serif',
+              color: t.text2,
+              fontFamily: t.fontFamily,
             },
             value: {
               show: true,
               fontSize: isDesktop ? '24px' : '18px',
               fontWeight: 800,
-              color: '#F8FAFC',
-              fontFamily: 'Vazirmatn, sans-serif',
+              color: t.isLight ? '#0f172a' : '#f8fafc',
+              fontFamily: t.fontFamily,
               formatter: (val) => formatNumber(val),
             },
             total: {
               show: true,
               label: 'مجموع',
               fontSize: isDesktop ? '14px' : '12px',
-              color: '#94A3B8',
-              fontFamily: 'Vazirmatn, sans-serif',
+              color: t.text2,
+              fontFamily: t.fontFamily,
               formatter: (w) => {
                 const sum = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
                 return formatNumber(sum);
@@ -81,7 +83,7 @@ export default function ExpenseCategoryChart({ categories = [], fixedHeight }) {
       },
     },
     tooltip: {
-      theme: 'dark',
+      theme: t.isLight ? 'light' : 'dark',
       rtl: true,
       y: { formatter: (value) => `${formatNumber(value)} افغانی` },
     },
@@ -90,9 +92,9 @@ export default function ExpenseCategoryChart({ categories = [], fixedHeight }) {
   const height = fixedHeight || (isDesktop ? 360 : 260);
 
   return (
-    <div className="w-full px-1 pt-1" dir="rtl">
+    <div className="kh-chart-box" key={theme}>
       <Chart
-        key={`donut-${isDesktop}-${fixedHeight || 'auto'}`}
+        key={`donut-${isDesktop}-${fixedHeight || 'auto'}-${theme}`}
         options={options}
         series={values}
         type="donut"

@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 
 import AnimatedNumber from '../common/AnimatedNumber';
-
 import { useAppStore } from '../store/appStore';
 import {
   getPeriodSummary,
@@ -25,61 +24,43 @@ import {
   getPeriodSubLabel,
   getMaxOffset,
 } from '../utils/dates';
-
-const FA_NUM = new Intl.NumberFormat('fa-AF');
-
-function lockBody() {
-  const body = document.body;
-  const scrollbarWidth =
-    window.innerWidth - document.documentElement.clientWidth;
-  const prevOverflow = body.style.overflow;
-  const prevPaddingRight = body.style.paddingRight;
-
-  body.style.overflow = 'hidden';
-  if (scrollbarWidth > 0) {
-    body.style.paddingRight = `${scrollbarWidth}px`;
-  }
-
-  return () => {
-    body.style.overflow = prevOverflow;
-    body.style.paddingRight = prevPaddingRight;
-  };
-}
+import { formatNumber } from '../utils/formatting';
+import { lockBody } from '../utils/scrollLock';
 
 const SECTIONS = [
   {
     key: 'daily',
     period: 'daily',
     icon: Sun,
-    accent: 'text-[#00D1A7]',
+    accent: 'text-primary',
     resetLabel: 'امروز',
   },
   {
     key: 'weekly',
     period: 'weekly',
     icon: CalendarDays,
-    accent: 'text-[#3B82F6]',
+    accent: 'text-blue',
     resetLabel: 'این هفته',
   },
   {
     key: 'monthly',
     period: 'monthly',
     icon: CalendarRange,
-    accent: 'text-[#8B5CF6]',
+    accent: 'text-purple',
     resetLabel: 'این ماه',
   },
   {
     key: 'yearly',
     period: 'yearly',
     icon: Calendar,
-    accent: 'text-[#F59E0B]',
+    accent: 'text-orange',
     resetLabel: 'امسال',
   },
   {
     key: 'allTime',
     period: 'allTime',
     icon: History,
-    accent: 'text-[#94A3B8]',
+    accent: 'text-fg-2',
     resetLabel: null,
   },
 ];
@@ -108,7 +89,7 @@ export default function SummaryModal({ open, onClose, mode = 'both' }) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="kh-modal-overlay"
           />
 
           <motion.div
@@ -117,30 +98,18 @@ export default function SummaryModal({ open, onClose, mode = 'both' }) {
             exit={{ y: '100%' }}
             transition={{ duration: 0.34, ease: [0.32, 0.72, 0, 1] }}
             dir="rtl"
-            className="
-              glass-strong relative z-10 flex max-h-[90vh] w-full flex-col
-              overflow-hidden rounded-t-[28px] shadow-2xl
-              lg:max-h-[88vh] lg:max-w-[480px] lg:rounded-[28px]
-            "
+            className="glass-strong relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-3xl shadow-2xl lg:max-h-[88vh] lg:max-w-[480px] lg:rounded-3xl"
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
-            <div
-              className="pointer-events-none absolute inset-x-0 top-0 h-32"
-              style={{
-                background:
-                  'radial-gradient(circle at 50% 0%, rgba(0,209,167,0.20), transparent 70%)',
-              }}
-            />
+            <div className="kh-modal-glow" />
 
             <div className="relative shrink-0 px-5 pt-3 pb-4 lg:px-6 lg:pt-5">
-              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/[0.18] lg:hidden" />
+              <div className="kh-drag-handle lg:hidden" />
 
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] text-[#64748B]">
-                    {titles.subtitle}
-                  </p>
-                  <h2 className="mt-0.5 text-[18px] font-extrabold text-[#F8FAFC] lg:text-[20px]">
+                  <p className="text-xs text-fg-3">{titles.subtitle}</p>
+                  <h2 className="mt-0.5 text-xl font-extrabold text-fg-1 lg:text-2xl">
                     {titles.title}
                   </h2>
                 </div>
@@ -149,7 +118,7 @@ export default function SummaryModal({ open, onClose, mode = 'both' }) {
                   type="button"
                   onClick={onClose}
                   aria-label="بستن"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.06] text-[#94A3B8] backdrop-blur-md active:scale-95"
+                  className="kh-close-btn"
                 >
                   <X size={18} />
                 </button>
@@ -159,11 +128,7 @@ export default function SummaryModal({ open, onClose, mode = 'both' }) {
             <div className="relative min-h-0 flex-1 overflow-y-auto px-5 pb-6 lg:px-6">
               <div className="space-y-3">
                 {SECTIONS.map((section) => (
-                  <SummarySection
-                    key={section.key}
-                    section={section}
-                    mode={mode}
-                  />
+                  <SummarySection key={section.key} section={section} mode={mode} />
                 ))}
               </div>
             </div>
@@ -197,14 +162,12 @@ function SummarySection({ section, mode }) {
       try {
         setLoading(true);
         let data;
-
         if (isAllTime) {
           data = await getAllTimeSummary();
         } else {
           const baseDate = getPeriodBaseDate(period, offset);
           data = await getPeriodSummary({ period, baseDate });
         }
-
         if (cancelled) return;
         setSummary(data);
       } catch (err) {
@@ -232,34 +195,29 @@ function SummarySection({ section, mode }) {
   const singleColumn = mode !== 'both';
 
   return (
-    <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 backdrop-blur-md">
+    <div className="rounded-2xl border border-border-1 bg-fill-1 p-4 backdrop-blur-md">
       <div className="mb-3 flex items-center justify-between gap-2">
         <button
           type="button"
           disabled={!canGoForward}
           onClick={() => setOffset((o) => Math.min(0, o + 1))}
           aria-label="بعدی"
-          className={[
-            'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all',
-            canGoForward
-              ? 'text-[#94A3B8] hover:bg-white/[0.06] hover:text-[#00D1A7] active:scale-90'
-              : 'cursor-not-allowed text-[#334155]',
-          ].join(' ')}
+          className="kh-nav-btn !h-7 !w-7"
         >
           <ChevronRight size={16} strokeWidth={2.2} />
         </button>
 
         <div className="flex min-w-0 flex-1 items-center justify-center gap-2">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.04]">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border-1 bg-fill-1">
             <Icon size={14} strokeWidth={2} className={accent} />
           </div>
 
           <div className="flex min-w-0 flex-col items-center gap-0">
-            <p className="truncate text-[12.5px] font-bold leading-tight text-[#F8FAFC]">
+            <p className="truncate text-sm font-bold leading-tight text-fg-1">
               {currentLabel}
             </p>
             {subLabel && (
-              <p className="mt-0.5 truncate text-[10px] font-medium leading-tight text-[#64748B]">
+              <p className="mt-0.5 truncate text-2xs font-medium leading-tight text-fg-3">
                 {subLabel}
               </p>
             )}
@@ -271,12 +229,7 @@ function SummarySection({ section, mode }) {
           disabled={!canGoBack}
           onClick={() => setOffset((o) => o - 1)}
           aria-label="قبلی"
-          className={[
-            'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all',
-            canGoBack
-              ? 'text-[#94A3B8] hover:bg-white/[0.06] hover:text-[#00D1A7] active:scale-90'
-              : 'cursor-not-allowed text-[#334155]',
-          ].join(' ')}
+          className="kh-nav-btn !h-7 !w-7"
         >
           <ChevronLeft size={16} strokeWidth={2.2} />
         </button>
@@ -296,18 +249,18 @@ function SummarySection({ section, mode }) {
             ].join(' ')}
           >
             {showIncome && (
-              <div className="rounded-xl border border-[#00D1A7]/20 bg-[#00D1A7]/[0.08] px-3 py-2.5 backdrop-blur-md">
-                <p className="text-[10px] font-medium text-[#94A3B8]">درآمد</p>
-                <p className="mt-1 text-[15px] font-extrabold tabular-nums text-[#00D1A7]">
+              <div className="rounded-xl border border-primary/20 bg-primary/[0.08] px-3 py-2.5 backdrop-blur-md">
+                <p className="text-2xs font-medium text-fg-2">درآمد</p>
+                <p className="mt-1 text-lg font-extrabold tabular-nums text-primary">
                   <AnimatedNumber value={summary.income} duration={550} />
                 </p>
               </div>
             )}
 
             {showExpense && (
-              <div className="rounded-xl border border-[#F43F5E]/20 bg-[#F43F5E]/[0.08] px-3 py-2.5 backdrop-blur-md">
-                <p className="text-[10px] font-medium text-[#94A3B8]">مصرف</p>
-                <p className="mt-1 text-[15px] font-extrabold tabular-nums text-[#F43F5E]">
+              <div className="rounded-xl border border-expense/20 bg-expense/[0.08] px-3 py-2.5 backdrop-blur-md">
+                <p className="text-2xs font-medium text-fg-2">مصرف</p>
+                <p className="mt-1 text-lg font-extrabold tabular-nums text-expense">
                   <AnimatedNumber value={summary.expense} duration={550} />
                 </p>
               </div>
@@ -315,15 +268,15 @@ function SummarySection({ section, mode }) {
           </div>
 
           {hasData && mode === 'both' && (
-            <div className="mt-2.5 flex items-center justify-between border-t border-white/[0.08] pt-2.5">
-              <span className="text-[10.5px] text-[#64748B]">موجودی</span>
+            <div className="mt-2.5 flex items-center justify-between border-t border-border-1 pt-2.5">
+              <span className="text-2xs text-fg-3">موجودی</span>
               <span
                 className={[
-                  'text-[12.5px] font-bold tabular-nums',
-                  summary.balance >= 0 ? 'text-[#F8FAFC]' : 'text-[#F43F5E]',
+                  'text-sm font-bold tabular-nums',
+                  summary.balance >= 0 ? 'text-fg-1' : 'text-expense',
                 ].join(' ')}
               >
-                {FA_NUM.format(Math.round(summary.balance))} افغانی
+                {formatNumber(summary.balance)} افغانی
               </span>
             </div>
           )}
@@ -332,12 +285,7 @@ function SummarySection({ section, mode }) {
             <button
               type="button"
               onClick={() => setOffset(0)}
-              className="
-                mt-2.5 flex w-full items-center justify-center gap-1.5
-                rounded-xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.08]
-                py-1.5 text-[10.5px] font-semibold text-[#00D1A7]
-                backdrop-blur-md transition-all hover:bg-[#00D1A7]/[0.14] active:scale-[0.98]
-              "
+              className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-xl border border-primary/25 bg-primary/[0.08] py-1.5 text-2xs font-semibold text-primary backdrop-blur-md transition-all hover:bg-primary/[0.14] active:scale-[0.98]"
             >
               <RotateCcw size={11} strokeWidth={2.2} />
               بازگشت به {resetLabel}

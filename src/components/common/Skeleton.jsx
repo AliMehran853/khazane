@@ -9,6 +9,7 @@ export function SkeletonLine({ width = '100%', height = 12, className = '' }) {
 
 export function SkeletonChart({ height = 230 }) {
   const bars = [38, 62, 45, 78, 55, 70, 48];
+
   return (
     <div
       className="flex items-end justify-between gap-2 px-4 pb-2 pt-3"
@@ -26,14 +27,13 @@ export function SkeletonChart({ height = 230 }) {
 }
 
 export function SkeletonDonut({ height = 260 }) {
+  const ring = Math.min(height - 80, 160);
+
   return (
     <div className="flex items-center justify-center" style={{ height }}>
       <div
         className="kh-skeleton rounded-full"
-        style={{
-          width: Math.min(height - 80, 160),
-          height: Math.min(height - 80, 160),
-        }}
+        style={{ width: ring, height: ring }}
       />
     </div>
   );
@@ -41,7 +41,7 @@ export function SkeletonDonut({ height = 260 }) {
 
 export function SkeletonStatCard() {
   return (
-    <div className="glass rounded-[22px] p-4 lg:p-5">
+    <div className="glass rounded-3xl p-4 lg:p-5">
       <div className="kh-skeleton h-3 w-16 rounded" />
       <div className="kh-skeleton mt-3 h-6 w-24 rounded" />
     </div>
@@ -50,7 +50,7 @@ export function SkeletonStatCard() {
 
 export function SkeletonListRow() {
   return (
-    <div className="flex items-center gap-3 border-b border-white/[0.06] px-4 py-3 last:border-b-0">
+    <div className="flex items-center gap-3 border-b border-border-1 px-4 py-3 last:border-b-0">
       <div className="kh-skeleton h-10 w-10 shrink-0 rounded-xl" />
       <div className="min-w-0 flex-1">
         <div className="kh-skeleton h-3 w-24 rounded" />
@@ -63,7 +63,7 @@ export function SkeletonListRow() {
 
 export function SkeletonList({ rows = 5 }) {
   return (
-    <div className="glass overflow-hidden rounded-[24px]">
+    <div className="glass overflow-hidden rounded-3xl">
       {Array.from({ length: rows }).map((_, i) => (
         <SkeletonListRow key={i} />
       ))}

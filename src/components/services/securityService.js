@@ -9,10 +9,6 @@ const KEYS = {
   CREDENTIAL_ID: 'biometricCredentialId',
 };
 
-// ============================================================
-// Settings helpers
-// ============================================================
-
 async function getSetting(key) {
   const row = await db.settings.get(key);
   return row?.value ?? null;
@@ -21,10 +17,6 @@ async function getSetting(key) {
 async function setSetting(key, value) {
   await db.settings.put({ key, value, updatedAt: Date.now() });
 }
-
-// ============================================================
-// Hex/Buffer helpers
-// ============================================================
 
 function bufferToHex(buffer) {
   return Array.from(new Uint8Array(buffer))
@@ -40,10 +32,6 @@ function hexToUint8Array(hex) {
   return bytes;
 }
 
-// ============================================================
-// PIN hashing (PBKDF2)
-// ============================================================
-
 async function derivePinHash(pin, saltBytes) {
   const encoder = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
@@ -51,7 +39,7 @@ async function derivePinHash(pin, saltBytes) {
     encoder.encode(pin),
     'PBKDF2',
     false,
-    ['deriveBits']
+    ['deriveBits'],
   );
   const derivedBits = await crypto.subtle.deriveBits(
     {
@@ -61,14 +49,10 @@ async function derivePinHash(pin, saltBytes) {
       hash: 'SHA-256',
     },
     keyMaterial,
-    256
+    256,
   );
   return bufferToHex(derivedBits);
 }
-
-// ============================================================
-// Lock flag
-// ============================================================
 
 export async function isLockEnabled() {
   return Boolean(await getSetting(KEYS.LOCK_ENABLED));
@@ -89,10 +73,6 @@ export async function isBiometricEnabled() {
 export async function setBiometricEnabled(enabled) {
   await setSetting(KEYS.BIOMETRIC_ENABLED, Boolean(enabled));
 }
-
-// ============================================================
-// PIN
-// ============================================================
 
 export async function hasPin() {
   const hash = await getSetting(KEYS.PIN_HASH);
@@ -128,10 +108,6 @@ export async function clearPin() {
   await db.settings.delete(KEYS.PIN_SALT);
   await setSetting(KEYS.PIN_ENABLED, false);
 }
-
-// ============================================================
-// WebAuthn
-// ============================================================
 
 export function isWebAuthnSupported() {
   return (

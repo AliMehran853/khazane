@@ -8,9 +8,9 @@ import {
   hasPin,
 } from '../services/securityService';
 import { useSecurityStore } from '../store/securityStore';
+import { STORAGE_KEYS } from '../utils/constants';
 
-// ⭐ کلید sessionStorage برای تشخیص اینکه کاربر همین session قفل را باز کرده
-export const SESSION_UNLOCK_KEY = 'khazane_unlocked';
+export const SESSION_UNLOCK_KEY = STORAGE_KEYS.sessionUnlock;
 
 export function useAppLock() {
   const locked = useSecurityStore((s) => s.locked);
@@ -41,7 +41,6 @@ export function useAppLock() {
 
         setLockEnabled(lockOn);
 
-        // اگر قفل غیرفعال است → باز کن
         if (!lockOn) {
           setLocked(false);
           setChecking(false);
@@ -49,7 +48,6 @@ export function useAppLock() {
           return;
         }
 
-        // ⭐ اگر کاربر همین session قفل را باز کرده (مثل رفرش)، دوباره قفل نکن
         const unlockedThisSession =
           sessionStorage.getItem(SESSION_UNLOCK_KEY) === '1';
 
@@ -60,7 +58,6 @@ export function useAppLock() {
           return;
         }
 
-        // Cold start → بررسی روش‌های ورود
         const [pinOn, bioOn, pinExists] = await Promise.all([
           isPinEnabled(),
           isBiometricEnabled(),

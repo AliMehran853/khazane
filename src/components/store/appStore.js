@@ -1,6 +1,20 @@
 import { create } from 'zustand';
 
+import { STORAGE_KEYS } from '../utils/constants';
+
+function loadTheme() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.theme);
+    if (saved === 'light' || saved === 'dark') return saved;
+  } catch {
+    /* ignore */
+  }
+  return 'dark';
+}
+
 export const useAppStore = create((set) => ({
+  theme: loadTheme(),
+
   period: 'daily',
   periodOffset: 0,
 
@@ -12,20 +26,33 @@ export const useAppStore = create((set) => ({
   dateChoiceOpen: false,
   dateChoiceType: 'expense',
 
-  // ⭐ Toast قفل دوره
   periodLockToastOpen: false,
 
-  selectedCategoryId: null,
   dataVersion: 0,
 
-  setPeriod: (period) =>
-    set({
-      period,
-      periodOffset: 0,
+  setTheme: (theme) => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.theme, theme);
+    } catch {
+      /* ignore */
+    }
+    set({ theme });
+  },
+
+  toggleTheme: () =>
+    set((state) => {
+      const next = state.theme === 'dark' ? 'light' : 'dark';
+      try {
+        localStorage.setItem(STORAGE_KEYS.theme, next);
+      } catch {
+        /* ignore */
+      }
+      return { theme: next };
     }),
 
-  setPeriodOffset: (n) => set({ periodOffset: n }),
+  setPeriod: (period) => set({ period, periodOffset: 0 }),
 
+  setPeriodOffset: (n) => set({ periodOffset: n }),
   resetPeriodOffset: () => set({ periodOffset: 0 }),
 
   openTransactionSheet: (type = 'expense', transaction = null, date = null) =>
@@ -48,12 +75,8 @@ export const useAppStore = create((set) => ({
 
   closeDateChoice: () => set({ dateChoiceOpen: false }),
 
-  // ⭐ Toast قفل دوره
   showPeriodLockToast: () => set({ periodLockToastOpen: true }),
   hidePeriodLockToast: () => set({ periodLockToastOpen: false }),
-
-  setSelectedCategoryId: (categoryId) =>
-    set({ selectedCategoryId: categoryId }),
 
   refreshData: () =>
     set((state) => ({ dataVersion: state.dataVersion + 1 })),

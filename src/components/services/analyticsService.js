@@ -8,8 +8,9 @@ import {
   endOfDay,
   getPreviousPeriodDate,
 } from '../utils/dates';
+import { MEMBER_ID } from '../utils/constants';
 
-async function getMemberTransactions(memberId = 'self') {
+async function getMemberTransactions(memberId = MEMBER_ID) {
   return db.transactions.where('memberId').equals(memberId).toArray();
 }
 
@@ -32,7 +33,7 @@ function countBetween(transactions, start, end) {
 
 export async function getPeriodSummary({
   period = 'weekly',
-  memberId = 'self',
+  memberId = MEMBER_ID,
   baseDate,
 } = {}) {
   const { start, end } = getRange(period, baseDate || new Date());
@@ -49,7 +50,7 @@ export async function getPeriodSummary({
   };
 }
 
-export async function getAllTimeSummary({ memberId = 'self' } = {}) {
+export async function getAllTimeSummary({ memberId = MEMBER_ID } = {}) {
   const transactions = await getMemberTransactions(memberId);
 
   let income = 0;
@@ -72,7 +73,7 @@ export async function getAllTimeSummary({ memberId = 'self' } = {}) {
 export async function getCategorySummary({
   period = 'weekly',
   type = 'expense',
-  memberId = 'self',
+  memberId = MEMBER_ID,
   baseDate,
 } = {}) {
   const { start, end } = getRange(period, baseDate || new Date());
@@ -97,14 +98,9 @@ export async function getCategorySummary({
     .sort((a, b) => b.total - a.total);
 }
 
-// ============================================================
-// ⭐ روند درآمد و مصرف
-//   daily  → ۷ روز هفته با اسم کامل و هایلایت روز انتخابی
-// ============================================================
-
 export async function getIncomeExpenseTrend({
   period = 'weekly',
-  memberId = 'self',
+  memberId = MEMBER_ID,
   baseDate,
 } = {}) {
   const transactions = await getMemberTransactions(memberId);
@@ -112,16 +108,14 @@ export async function getIncomeExpenseTrend({
   const todayKey = today.toDateString();
   const refDate = baseDate || today;
 
-  // ⭐ روزانه: ۷ روز هفته، اسم کامل، هایلایت روز انتخابی
   if (period === 'daily') {
     const days = getWeekDays(refDate);
     const selectedKey = startOfDay(refDate).toDateString();
-
     return days.map((day) => {
       const s = startOfDay(day.date);
       const e = endOfDay(day.date);
       return {
-        label: day.label, // ← اسم کامل (شنبه، یکشنبه، ...)
+        label: day.label,
         income: sumBetween(transactions, 'income', s, e),
         expense: sumBetween(transactions, 'expense', s, e),
         isCurrent: day.date.toDateString() === selectedKey,
@@ -172,7 +166,7 @@ export async function getIncomeExpenseTrend({
 
 export async function getRecentTransactions({
   limit = 8,
-  memberId = 'self',
+  memberId = MEMBER_ID,
   period,
   baseDate,
 } = {}) {
@@ -194,14 +188,13 @@ export async function getRecentTransactions({
 
 export async function getPeriodComparison({
   period = 'weekly',
-  memberId = 'self',
+  memberId = MEMBER_ID,
   baseDate,
   periodOffset = 0,
 } = {}) {
   const refDate = baseDate || new Date();
 
   let baselineDate;
-
   if (periodOffset < 0) {
     baselineDate = new Date();
   } else {

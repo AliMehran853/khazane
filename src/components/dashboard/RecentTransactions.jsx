@@ -3,30 +3,29 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ListChecks } from 'lucide-react';
 
 import TransactionList from '../transactions/TransactionList';
-
-function formatNumber(value) {
-  return new Intl.NumberFormat('fa-AF').format(Math.round(value || 0));
-}
-
-const INITIAL_LIMIT = 5;
-const EXPANDED_LIMIT = 20;
+import { formatNumber } from '../utils/formatting';
+import {
+  RECENT_TX_LIMIT,
+  RECENT_TX_EXPANDED_LIMIT,
+  ROUTES,
+} from '../utils/constants';
 
 export default function RecentTransactions({
   transactions = [],
   categoriesMap = {},
   limit,
   showNavigateButton = true,
-  navigateTo = '/expenses',
+  navigateTo = ROUTES.expenses,
 }) {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
 
-  const initial = limit || INITIAL_LIMIT;
+  const initial = limit || RECENT_TX_LIMIT;
   const total = transactions.length;
   const hasMore = total > initial;
 
   const visible = expanded
-    ? transactions.slice(0, EXPANDED_LIMIT)
+    ? transactions.slice(0, RECENT_TX_EXPANDED_LIMIT)
     : transactions.slice(0, initial);
 
   function handleShowAll() {
@@ -40,10 +39,10 @@ export default function RecentTransactions({
   return (
     <section className="mt-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-[15px] font-bold text-[#F8FAFC] lg:text-[17px]">
+        <h2 className="text-lg font-bold text-fg-1 lg:text-xl">
           تراکنش‌های اخیر
         </h2>
-        <span className="text-[11px] text-[#64748B] lg:text-[12px]">
+        <span className="text-xs text-fg-3 lg:text-sm">
           {formatNumber(total)} تراکنش
         </span>
       </div>
@@ -58,26 +57,18 @@ export default function RecentTransactions({
           <button
             type="button"
             onClick={handleShowAll}
-            className="
-              glass mt-3 flex w-full items-center justify-center gap-2
-              rounded-2xl py-3 text-[12.5px] font-semibold text-[#00D1A7]
-              transition-all hover:border-[#00D1A7]/30 active:scale-[0.98]
-            "
+            className="glass mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-primary transition-all hover:border-primary/30 active:scale-[0.98]"
           >
             <ListChecks size={16} strokeWidth={2} />
             نمایش همه ({formatNumber(total - visible.length)} مورد دیگر)
           </button>
         )}
 
-        {expanded && total > INITIAL_LIMIT && (
+        {expanded && total > RECENT_TX_LIMIT && (
           <button
             type="button"
             onClick={() => setExpanded(false)}
-            className="
-              glass mt-3 flex w-full items-center justify-center gap-2
-              rounded-2xl py-3 text-[12.5px] font-semibold text-[#94A3B8]
-              transition-all hover:border-[#00D1A7]/30 active:scale-[0.98]
-            "
+            className="glass mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-fg-2 transition-all hover:border-primary/30 active:scale-[0.98]"
           >
             <ChevronLeft size={16} strokeWidth={2} className="rotate-90" />
             بستن

@@ -56,5 +56,3 @@ export function useTransactions({ type, categoryId, periodRange } = {}) {
     reload: loadTransactions,
   };
 }
-
-// (خط export default StatCard به اشتباه اینجا بود - حذف شد)

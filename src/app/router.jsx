@@ -8,20 +8,22 @@ import ExpensesPage from '../components/pages/ExpensesPage';
 import SettingsPage from '../components/pages/SettingsPage';
 import SearchPage from '../components/pages/SearchPage';
 
+import { ROUTES } from '../components/utils/constants';
+
 const router = createBrowserRouter([
   {
     element: <AppShell />,
     children: [
-      { path: '/', element: <HomePage /> },
-      { path: '/income', element: <IncomePage /> },
-      { path: '/expenses', element: <ExpensesPage /> },
-      { path: '/settings', element: <SettingsPage /> },
-      { path: '/search', element: <SearchPage /> },
+      { path: ROUTES.home, element: <HomePage /> },
+      { path: ROUTES.income, element: <IncomePage /> },
+      { path: ROUTES.expenses, element: <ExpensesPage /> },
+      { path: ROUTES.settings, element: <SettingsPage /> },
+      { path: ROUTES.search, element: <SearchPage /> },
     ],
   },
   {
     path: '*',
-    element: <Navigate to="/" replace />,
+    element: <Navigate to={ROUTES.home} replace />,
   },
 ]);
 

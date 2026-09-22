@@ -2,14 +2,16 @@ import { NavLink } from 'react-router-dom';
 import { Home, ArrowDownLeft, ArrowUpRight, Settings } from 'lucide-react';
 
 import { useHaptic } from '../hooks/useHaptic';
+import { ROUTES } from '../utils/constants';
 
-const leftItems = [
-  { label: 'خانه', to: '/', icon: Home, end: true },
-  { label: 'درآمد', to: '/income', icon: ArrowDownLeft },
+const LEFT_ITEMS = [
+  { label: 'خانه', to: ROUTES.home, icon: Home, end: true },
+  { label: 'درآمد', to: ROUTES.income, icon: ArrowDownLeft },
 ];
-const rightItems = [
-  { label: 'مصارف', to: '/expenses', icon: ArrowUpRight },
-  { label: 'تنظیمات', to: '/settings', icon: Settings },
+
+const RIGHT_ITEMS = [
+  { label: 'مصارف', to: ROUTES.expenses, icon: ArrowUpRight },
+  { label: 'تنظیمات', to: ROUTES.settings, icon: Settings },
 ];
 
 function NavItem({ label, to, icon: Icon, end = false }) {
@@ -23,22 +25,9 @@ function NavItem({ label, to, icon: Icon, end = false }) {
       onClick={() => haptic.tap()}
     >
       {({ isActive }) => (
-        <div
-          className={[
-            'flex min-h-[48px] min-w-[48px] flex-col items-center justify-center rounded-2xl px-1',
-            'transition-all duration-200 active:scale-[0.94]',
-            isActive ? 'text-[#00D1A7]' : 'text-[#94A3B8]',
-          ].join(' ')}
-        >
+        <div className="kh-nav-item" data-active={isActive}>
           <Icon size={19} strokeWidth={isActive ? 2.4 : 1.8} />
-          <span
-            className={[
-              'mt-1 text-[10px] font-semibold leading-none',
-              isActive ? 'text-[#00D1A7]' : 'text-[#94A3B8]',
-            ].join(' ')}
-          >
-            {label}
-          </span>
+          <span className="kh-nav-item-label">{label}</span>
         </div>
       )}
     </NavLink>
@@ -48,15 +37,15 @@ function NavItem({ label, to, icon: Icon, end = false }) {
 function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-1/2 z-40 w-full max-w-[420px] -translate-x-1/2 px-3 pb-[env(safe-area-inset-bottom)] lg:hidden">
-      <div className="glass-strong relative mb-2 flex h-[64px] items-center justify-between rounded-[23px] px-2">
+      <div className="kh-nav-bar mb-2">
         <div className="flex h-full flex-1 items-center justify-between pl-3">
-          {leftItems.map((item) => (
+          {LEFT_ITEMS.map((item) => (
             <NavItem key={item.to} {...item} />
           ))}
         </div>
         <div className="w-[60px] shrink-0" />
         <div className="flex h-full flex-1 items-center justify-between pr-4">
-          {rightItems.map((item) => (
+          {RIGHT_ITEMS.map((item) => (
             <NavItem key={item.to} {...item} />
           ))}
         </div>

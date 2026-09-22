@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+
 import { vibrate, HAPTIC } from '../utils/haptics';
 
 export function useHaptic() {

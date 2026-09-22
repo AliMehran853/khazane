@@ -6,21 +6,19 @@ export default function AboutCard({ onClick, isLast = false }) {
       type="button"
       onClick={onClick}
       className={[
-        'flex min-h-[70px] w-full items-center gap-3 px-4 text-right',
-        'transition-colors lg:min-h-[64px] lg:px-5',
-        'active:bg-white/[0.04]',
-        !isLast ? 'border-b border-white/[0.06]' : '',
+        'kh-settings-row',
+        !isLast ? 'border-b border-border-1' : '',
       ].join(' ')}
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.06] text-[#94A3B8] lg:h-9 lg:w-9">
+      <div className="kh-settings-row-icon">
         <Info size={19} strokeWidth={1.8} />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-[13.5px] font-semibold text-[#F8FAFC] lg:text-[14px]">
+        <p className="text-md font-semibold text-fg-1 lg:text-base">
           درباره‌ی خزانه
         </p>
-        <p className="mt-1 truncate text-[11px] text-[#64748B] lg:text-[11.5px]">
+        <p className="mt-1 truncate text-xs text-fg-3 lg:text-sm">
           اطلاعات اپ و ارتباط با سازنده
         </p>
       </div>
@@ -28,7 +26,7 @@ export default function AboutCard({ onClick, isLast = false }) {
       <ChevronLeft
         size={18}
         strokeWidth={1.8}
-        className="shrink-0 text-[#64748B]"
+        className="shrink-0 text-fg-3"
       />
     </button>
   );

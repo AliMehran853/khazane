@@ -9,8 +9,7 @@ import { useSecurityStore } from '../store/securityStore';
 import { useIsDesktop } from '../hooks/useIsDesktop';
 import { SESSION_UNLOCK_KEY } from '../hooks/useAppLock';
 import { verifyPin, verifyBiometric } from '../services/securityService';
-
-const PIN_LENGTH = 4;
+import { PIN_LENGTH } from '../utils/constants';
 
 function LockScreen() {
   const isDesktop = useIsDesktop();
@@ -40,9 +39,7 @@ function LockScreen() {
   function handleUnlocked() {
     setUnlocking(true);
     sessionStorage.setItem(SESSION_UNLOCK_KEY, '1');
-    setTimeout(() => {
-      setLocked(false);
-    }, 380);
+    setTimeout(() => setLocked(false), 380);
   }
 
   function triggerShake() {
@@ -142,7 +139,6 @@ function LockScreen() {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-6 lg:px-8">
-      {/* هاله‌ی فیروزه‌ای */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -161,12 +157,7 @@ function LockScreen() {
           duration: unlocking ? 0.4 : 0.35,
           ease: unlocking ? 'easeIn' : 'easeOut',
         }}
-        className="
-          relative z-10 flex w-full max-w-[340px] flex-col items-center
-          lg:max-w-[400px]
-          lg:glass-strong lg:rounded-[28px]
-          lg:px-7 lg:py-8
-        "
+        className="relative z-10 flex w-full max-w-[340px] flex-col items-center lg:max-w-[400px] lg:glass-strong lg:rounded-3xl lg:px-7 lg:py-8"
       >
         <motion.div
           initial={{ scale: 0.75, opacity: 0 }}
@@ -184,7 +175,7 @@ function LockScreen() {
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.12, duration: 0.4 }}
-          className="mt-5 text-[26px] font-extrabold text-[#F8FAFC] lg:mt-4 lg:text-[24px]"
+          className="mt-5 text-3xl font-extrabold text-fg-1 lg:mt-4 lg:text-2xl"
         >
           خزانه
         </motion.h1>
@@ -193,7 +184,7 @@ function LockScreen() {
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.18, duration: 0.4 }}
-          className="mt-2 max-w-[260px] text-center text-[12px] leading-relaxed text-[#94A3B8] lg:mt-2 lg:max-w-[300px] lg:text-[12.5px]"
+          className="mt-2 max-w-[260px] text-center text-sm leading-relaxed text-fg-2 lg:max-w-[300px] lg:text-base"
         >
           مدیریت درآمد و مصارف روزانه‌ات
           <br />
@@ -213,10 +204,10 @@ function LockScreen() {
               >
                 <BiometricButton onPress={handleBiometric} />
 
-                <p className="mt-5 text-[13px] font-semibold text-[#F8FAFC]">
+                <p className="mt-5 text-base font-semibold text-fg-1">
                   ورود با اثر انگشت
                 </p>
-                <p className="mt-1.5 text-center text-[11px] leading-relaxed text-[#64748B]">
+                <p className="mt-1.5 text-center text-xs leading-relaxed text-fg-3">
                   برای باز کردن، دستت را روی سنسور نگهدار
                 </p>
 
@@ -228,7 +219,7 @@ function LockScreen() {
                       setPinError('');
                       clearPinBuffer();
                     }}
-                    className="mt-10 text-[12px] font-semibold text-[#00D1A7]"
+                    className="mt-10 text-sm font-semibold text-primary"
                   >
                     ورود با رمز عبور
                   </button>
@@ -245,7 +236,7 @@ function LockScreen() {
                 transition={{ duration: 0.32, ease: 'easeOut' }}
                 className="flex flex-col items-center"
               >
-                <p className="text-[13px] font-semibold text-[#F8FAFC] lg:text-[13.5px]">
+                <p className="text-base font-semibold text-fg-1 lg:text-md">
                   رمز عبور را وارد کنید
                 </p>
 
@@ -265,8 +256,8 @@ function LockScreen() {
                         animate={{
                           scale: filled ? 1 : 0.9,
                           backgroundColor: filled
-                            ? '#00D1A7'
-                            : 'rgba(255,255,255,0.15)',
+                            ? 'var(--kh-primary)'
+                            : 'var(--kh-fill-3)',
                         }}
                         transition={{ duration: 0.18, ease: 'easeOut' }}
                         className="h-3.5 w-3.5 rounded-full"
@@ -283,7 +274,7 @@ function LockScreen() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -4 }}
                         transition={{ duration: 0.2 }}
-                        className="mt-2 text-[11px] text-[#F43F5E]"
+                        className="mt-2 text-xs text-expense"
                       >
                         {pinError}
                       </motion.p>
@@ -308,7 +299,7 @@ function LockScreen() {
                       clearPinBuffer();
                       autoTriedRef.current = false;
                     }}
-                    className="mt-6 text-[12px] font-semibold text-[#00D1A7]"
+                    className="mt-6 text-sm font-semibold text-primary"
                   >
                     ورود با اثر انگشت
                   </button>
@@ -322,7 +313,7 @@ function LockScreen() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.35, delay: 0.25 }}
-                className="text-center text-[12px] text-[#64748B]"
+                className="text-center text-sm text-fg-3"
               >
                 در حال آماده‌سازی...
               </motion.p>

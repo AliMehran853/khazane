@@ -1,30 +1,23 @@
 import Chart from 'react-apexcharts';
+
 import { useChartAutoScroll } from '../hooks/useChartAutoScroll';
 import { useIsDesktop } from '../hooks/useIsDesktop';
-
-function formatNumber(value) {
-  return new Intl.NumberFormat('fa-AF').format(Math.round(value || 0));
-}
+import { useAppStore } from '../store/appStore';
+import { getChartTheme, alpha } from '../utils/chartTheme';
+import { formatNumber } from '../utils/formatting';
 
 function getChartLayout(period, dataLength) {
   if (period === 'daily' || period === 'monthly' || period === 'weekly') {
     return { shouldScroll: false, chartWidth: null };
   }
-
   const columnWidth = 72;
   const visibleCount = 5;
   const shouldScroll = dataLength > visibleCount;
-
   return {
     shouldScroll,
     chartWidth: shouldScroll ? dataLength * columnWidth : null,
   };
 }
-
-const INCOME_COLOR = '#00D1A7';
-const INCOME_DIM = 'rgba(0, 209, 167, 0.30)';
-const EXPENSE_COLOR = '#F43F5E';
-const EXPENSE_DIM = 'rgba(244, 63, 94, 0.30)';
 
 export default function IncomeExpenseChart({
   data = [],
@@ -33,15 +26,19 @@ export default function IncomeExpenseChart({
   fixedHeight,
 }) {
   const isDesktop = useIsDesktop();
+  const theme = useAppStore((s) => s.theme);
+  const t = getChartTheme();
 
   const categories = data.map((item) => item.label);
-
   const isDaily = period === 'daily';
   const isMonthly = period === 'monthly';
   const isBar = isDaily || isMonthly;
 
   const { shouldScroll, chartWidth } = getChartLayout(period, data.length);
   const scrollRef = useChartAutoScroll(data, period, shouldScroll);
+
+  const incomeDim = alpha(t.income, 0.3);
+  const expenseDim = alpha(t.expense, 0.3);
 
   let series;
   if (isDaily) {
@@ -51,7 +48,7 @@ export default function IncomeExpenseChart({
         data: data.map((item) => ({
           x: item.label,
           y: item.income || 0,
-          fillColor: item.isCurrent ? INCOME_COLOR : INCOME_DIM,
+          fillColor: item.isCurrent ? t.income : incomeDim,
         })),
       },
       {
@@ -59,7 +56,7 @@ export default function IncomeExpenseChart({
         data: data.map((item) => ({
           x: item.label,
           y: item.expense || 0,
-          fillColor: item.isCurrent ? EXPENSE_COLOR : EXPENSE_DIM,
+          fillColor: item.isCurrent ? t.expense : expenseDim,
         })),
       },
     ];
@@ -76,7 +73,7 @@ export default function IncomeExpenseChart({
       toolbar: { show: false },
       zoom: { enabled: false },
       background: 'transparent',
-      fontFamily: 'Vazirmatn, sans-serif',
+      fontFamily: t.fontFamily,
       parentHeightOffset: 0,
       redrawOnParentResize: false,
       redrawOnWindowResize: false,
@@ -87,7 +84,7 @@ export default function IncomeExpenseChart({
         dynamicAnimation: { enabled: true, speed: 350 },
       },
     },
-    colors: [INCOME_COLOR, EXPENSE_COLOR],
+    colors: [t.income, t.expense],
 
     ...(!isBar && {
       stroke: { curve: 'smooth', width: 2.2 },
@@ -122,7 +119,7 @@ export default function IncomeExpenseChart({
         hideOverlappingLabels: false,
         trim: false,
         style: {
-          colors: '#64748B',
+          colors: t.text3,
           fontSize: isMonthly
             ? isDesktop
               ? '10px'
@@ -134,7 +131,7 @@ export default function IncomeExpenseChart({
               : isDesktop
                 ? '12px'
                 : '10px',
-          fontFamily: 'Vazirmatn, sans-serif',
+          fontFamily: t.fontFamily,
         },
       },
       axisBorder: { show: false },
@@ -143,21 +140,21 @@ export default function IncomeExpenseChart({
     yaxis: {
       labels: {
         style: {
-          colors: '#64748B',
+          colors: t.text3,
           fontSize: isDesktop ? '11px' : '9px',
-          fontFamily: 'Vazirmatn, sans-serif',
+          fontFamily: t.fontFamily,
         },
         formatter: (value) => formatNumber(value),
       },
     },
     grid: {
-      borderColor: 'rgba(248,250,252,0.08)',
+      borderColor: t.grid,
       strokeDashArray: 4,
       xaxis: { lines: { show: false } },
       padding: { left: 2, right: 2 },
     },
     tooltip: {
-      theme: 'dark',
+      theme: t.isLight ? 'light' : 'dark',
       rtl: true,
       y: { formatter: (value) => `${formatNumber(value)} افغانی` },
     },
@@ -165,9 +162,9 @@ export default function IncomeExpenseChart({
       show: true,
       position: 'top',
       horizontalAlign: 'right',
-      fontFamily: 'Vazirmatn, sans-serif',
+      fontFamily: t.fontFamily,
       fontSize: isDesktop ? '13px' : '11px',
-      labels: { colors: '#94A3B8' },
+      labels: { colors: t.text2 },
       markers: { width: 7, height: 7, radius: 10 },
       itemMargin: { horizontal: 8 },
     },
@@ -175,16 +172,10 @@ export default function IncomeExpenseChart({
 
   const height =
     fixedHeight ||
-    (isDesktop
-      ? isBar
-        ? 400
-        : 340
-      : isBar
-        ? 300
-        : 250);
+    (isDesktop ? (isBar ? 400 : 340) : isBar ? 300 : 250);
 
   return (
-    <div className="w-full px-1 pt-1" dir="rtl">
+    <div className="kh-chart-box">
       <div
         ref={scrollRef}
         className={shouldScroll ? 'overflow-x-auto overflow-y-hidden pb-1' : ''}
@@ -198,7 +189,7 @@ export default function IncomeExpenseChart({
           }
         >
           <Chart
-            key={`${period}-${periodOffset}-${data.length}-${shouldScroll}-${isDesktop}-${fixedHeight || 'auto'}`}
+            key={`ie-${period}-${periodOffset}-${data.length}-${shouldScroll}-${isDesktop}-${fixedHeight || 'auto'}-${theme}`}
             options={options}
             series={series}
             type={isBar ? 'bar' : 'area'}

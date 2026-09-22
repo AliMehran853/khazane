@@ -1,11 +1,8 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+
 import { formatNumber } from '../utils/formatting';
 import { formatTransactionDate, getTodayShort } from '../utils/dates';
-
-// ============================================================
-// Escape HTML
-// ============================================================
 
 function escapeHtml(str) {
   return String(str || '')
@@ -15,10 +12,6 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
-
-// ============================================================
-// ساخت HTML گزارش
-// ============================================================
 
 function buildReportHTML({
   transactions,
@@ -35,7 +28,7 @@ function buildReportHTML({
         .map((t) => {
           const cat = categoriesMap[t.categoryId];
           const typeLabel = t.type === 'income' ? 'درآمد' : 'مصرف';
-          const color = t.type === 'income' ? '#1a7f6c' : '#c0392b';
+          const color = t.type === 'income' ? '#009d81' : '#be123c';
           const sign = t.type === 'income' ? '+' : '-';
           return `
             <tr>
@@ -50,13 +43,9 @@ function buildReportHTML({
           `;
         })
         .join('')
-    : `
-      <tr>
-        <td colspan="5" style="text-align:center;padding:30px;color:#888;">
-          هیچ تراکنشی یافت نشد
-        </td>
-      </tr>
-    `;
+    : `<tr><td colspan="5" style="text-align:center;padding:30px;color:#888;">
+        هیچ تراکنشی یافت نشد
+      </td></tr>`;
 
   const summaryHtml = showSummary
     ? `
@@ -73,8 +62,7 @@ function buildReportHTML({
             ${formatNumber(totalExpense)} ${escapeHtml(currency)}
           </div>
         </div>
-      </div>
-    `
+      </div>`
     : '';
 
   return `
@@ -83,12 +71,9 @@ function buildReportHTML({
         <div class="brand">خزانه</div>
         <div class="date">${escapeHtml(getTodayShort())}</div>
       </div>
-
       <h1>${escapeHtml(title)}</h1>
       ${periodLabel ? `<div class="period">${escapeHtml(periodLabel)}</div>` : ''}
-
       ${summaryHtml}
-
       <table>
         <thead>
           <tr>
@@ -99,11 +84,8 @@ function buildReportHTML({
             <th style="width:20%;">تاریخ</th>
           </tr>
         </thead>
-        <tbody>
-          ${rowsHtml}
-        </tbody>
+        <tbody>${rowsHtml}</tbody>
       </table>
-
       <div class="footer">
         ساخته شده با خزانه • مدیریت درآمد و مصارف شخصی
       </div>
@@ -111,53 +93,29 @@ function buildReportHTML({
   `;
 }
 
-// ============================================================
-// استایل گزارش
-// ============================================================
-
 const REPORT_STYLES = `
   * { box-sizing: border-box; }
   .page {
     width: 800px;
     padding: 32px 28px;
     background: #ffffff;
-    color: #222;
+    color: #0f172a;
     font-family: 'Vazirmatn', 'Tahoma', sans-serif;
     direction: rtl;
   }
   .header {
-    border-bottom: 2px solid #E3B341;
+    border-bottom: 2px solid #00D1A7;
     padding-bottom: 14px;
     margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-  .brand {
-    font-size: 22px;
-    font-weight: 800;
-    color: #B9862A;
-  }
-  .date {
-    font-size: 12px;
-    color: #666;
-  }
-  h1 {
-    font-size: 20px;
-    font-weight: 800;
-    margin: 0 0 6px;
-    color: #111;
-  }
-  .period {
-    font-size: 12px;
-    color: #888;
-    margin-bottom: 20px;
-  }
-  .summary {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 24px;
-  }
+  .brand { font-size: 22px; font-weight: 800; color: #00a88a; }
+  .date { font-size: 12px; color: #666; }
+  h1 { font-size: 20px; font-weight: 800; margin: 0 0 6px; color: #111; }
+  .period { font-size: 12px; color: #888; margin-bottom: 20px; }
+  .summary { display: flex; gap: 16px; margin-bottom: 24px; }
   .summary-card {
     flex: 1;
     border: 1px solid #eee;
@@ -165,47 +123,17 @@ const REPORT_STYLES = `
     padding: 14px 18px;
     background: #fafafa;
   }
-  .summary-card .label {
-    font-size: 11px;
-    color: #888;
-    margin-bottom: 6px;
-  }
-  .summary-card .value {
-    font-size: 20px;
-    font-weight: 800;
-  }
-  .income-value { color: #1a7f6c; }
-  .expense-value { color: #c0392b; }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  thead {
-    background: #f7f5ef;
-  }
-  th, td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #eee;
-    text-align: right;
-  }
-  th {
-    font-weight: 700;
-    font-size: 12px;
-    color: #555;
-  }
+  .summary-card .label { font-size: 11px; color: #888; margin-bottom: 6px; }
+  .summary-card .value { font-size: 20px; font-weight: 800; }
+  .income-value { color: #00a88a; }
+  .expense-value { color: #be123c; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: #f7faf9; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid #eee; text-align: right; }
+  th { font-weight: 700; font-size: 12px; color: #555; }
   tbody tr:last-child td { border-bottom: none; }
-  .footer {
-    margin-top: 30px;
-    font-size: 10px;
-    color: #aaa;
-    text-align: center;
-  }
+  .footer { margin-top: 30px; font-size: 10px; color: #aaa; text-align: center; }
 `;
-
-// ============================================================
-// Slice canvas
-// ============================================================
 
 function sliceCanvas(sourceCanvas, yOffset, height) {
   const slice = document.createElement('canvas');
@@ -224,15 +152,11 @@ function sliceCanvas(sourceCanvas, yOffset, height) {
     0,
     0,
     sourceCanvas.width,
-    height
+    height,
   );
 
   return slice;
 }
-
-// ============================================================
-// دانلود اجباری فایل PDF
-// ============================================================
 
 function downloadBlob(blob, fileName) {
   const url = URL.createObjectURL(blob);
@@ -245,16 +169,11 @@ function downloadBlob(blob, fileName) {
   document.body.appendChild(a);
   a.click();
 
-  // پاکسازی بعد از یک لحظه
   setTimeout(() => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, 1500);
 }
-
-// ============================================================
-// تابع اصلی
-// ============================================================
 
 export async function exportTransactionsToPDF({
   transactions = [],
@@ -267,7 +186,6 @@ export async function exportTransactionsToPDF({
   showSummary = true,
   fileName,
 }) {
-  // ۱. کانتینر مخفی
   const container = document.createElement('div');
   container.style.position = 'fixed';
   container.style.left = '-99999px';
@@ -295,7 +213,6 @@ export async function exportTransactionsToPDF({
   document.body.appendChild(container);
 
   try {
-    // ۲. منتظر لود فونت‌ها
     if (document.fonts && document.fonts.ready) {
       try {
         await document.fonts.ready;
@@ -306,7 +223,6 @@ export async function exportTransactionsToPDF({
 
     await new Promise((resolve) => setTimeout(resolve, 200));
 
-    // ۳. رندر به canvas
     const target = inner.querySelector('.page');
     const canvas = await html2canvas(target, {
       scale: 2,
@@ -316,7 +232,6 @@ export async function exportTransactionsToPDF({
       windowWidth: 800,
     });
 
-    // ۴. ساخت PDF
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -343,7 +258,6 @@ export async function exportTransactionsToPDF({
 
       const pageCanvas = sliceCanvas(canvas, yOffsetPx, actualSlicePx);
       const pageImg = pageCanvas.toDataURL('image/jpeg', 0.92);
-
       const drawHeightMm = actualSlicePx / pxPerMm;
 
       pdf.addImage(
@@ -354,25 +268,18 @@ export async function exportTransactionsToPDF({
         contentWidth,
         drawHeightMm,
         undefined,
-        'FAST'
+        'FAST',
       );
 
       yOffsetPx += actualSlicePx;
       remainingMm -= sliceMm;
 
-      if (remainingMm > 0) {
-        pdf.addPage();
-      }
+      if (remainingMm > 0) pdf.addPage();
     }
 
-    // ۵. اسم فایل
-    const ts = new Date()
-      .toISOString()
-      .slice(0, 19)
-      .replace(/[:T]/g, '-');
+    const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
     const finalName = fileName || `khazane-report-${ts}.pdf`;
 
-    // ۶. دانلود اجباری از طریق Blob
     const pdfBlob = pdf.output('blob');
     downloadBlob(pdfBlob, finalName);
 

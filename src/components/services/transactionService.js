@@ -1,4 +1,5 @@
 import db from '../db/database';
+import { MEMBER_ID } from '../utils/constants';
 
 function normalizeTransaction(transaction) {
   const amount = Number(transaction.amount);
@@ -6,27 +7,23 @@ function normalizeTransaction(transaction) {
   if (!Number.isFinite(amount) || amount <= 0) {
     throw new Error('مبلغ باید بیشتر از صفر باشد.');
   }
-
   if (!['income', 'expense'].includes(transaction.type)) {
     throw new Error('نوع تراکنش نامعتبر است.');
   }
-
   if (!transaction.categoryId) {
     throw new Error('دسته‌بندی را انتخاب کنید.');
   }
 
   const date = transaction.date ? new Date(transaction.date) : new Date();
-
   if (Number.isNaN(date.getTime())) {
     throw new Error('تاریخ تراکنش نامعتبر است.');
   }
 
   return {
-    memberId: transaction.memberId || 'self',
+    memberId: transaction.memberId || MEMBER_ID,
     type: transaction.type,
     categoryId: transaction.categoryId,
     amount,
-    // توجه: دیگر title نداریم، فقط note
     note: (transaction.note || '').trim(),
     date: date.toISOString(),
   };
@@ -48,7 +45,7 @@ export async function createTransaction(input) {
 }
 
 export async function getTransactions({
-  memberId = 'self',
+  memberId = MEMBER_ID,
   type,
   categoryId,
   startDate,
@@ -59,12 +56,8 @@ export async function getTransactions({
     .equals(memberId)
     .toArray();
 
-  if (type) {
-    transactions = transactions.filter((t) => t.type === type);
-  }
-  if (categoryId) {
-    transactions = transactions.filter((t) => t.categoryId === categoryId);
-  }
+  if (type) transactions = transactions.filter((t) => t.type === type);
+  if (categoryId) transactions = transactions.filter((t) => t.categoryId === categoryId);
   if (startDate) {
     const start = new Date(startDate);
     transactions = transactions.filter((t) => new Date(t.date) >= start);
@@ -98,6 +91,6 @@ export async function deleteTransaction(id) {
   await db.transactions.delete(id);
 }
 
-export async function getAllTransactions(memberId = 'self') {
+export async function getAllTransactions(memberId = MEMBER_ID) {
   return getTransactions({ memberId });
 }

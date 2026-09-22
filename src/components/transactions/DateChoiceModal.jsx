@@ -1,10 +1,15 @@
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CalendarDays, CalendarCheck2, X } from 'lucide-react';
 
 import { useAppStore } from '../store/appStore';
-import { getPeriodBaseDate, getWeekDays, formatFullDate } from '../utils/dates';
-
-const FA_NUM = new Intl.NumberFormat('fa-AF');
+import { lockBody } from '../utils/scrollLock';
+import {
+  getPeriodBaseDate,
+  getWeekDays,
+  formatFullDate,
+} from '../utils/dates';
+import { toPersianDigits } from '../utils/formatting';
 
 export default function DateChoiceModal() {
   const open = useAppStore((s) => s.dateChoiceOpen);
@@ -14,22 +19,23 @@ export default function DateChoiceModal() {
   const closeDateChoice = useAppStore((s) => s.closeDateChoice);
   const openTransactionSheet = useAppStore((s) => s.openTransactionSheet);
 
+  useEffect(() => {
+    if (!open) return;
+    return lockBody();
+  }, [open]);
+
   const baseDate = getPeriodBaseDate('weekly', periodOffset);
   const days = getWeekDays(baseDate);
   const today = new Date();
 
   function pickToday() {
     closeDateChoice();
-    setTimeout(() => {
-      openTransactionSheet(type, null, today);
-    }, 220);
+    setTimeout(() => openTransactionSheet(type, null, today), 220);
   }
 
   function pickDay(date) {
     closeDateChoice();
-    setTimeout(() => {
-      openTransactionSheet(type, null, date);
-    }, 220);
+    setTimeout(() => openTransactionSheet(type, null, date), 220);
   }
 
   return (
@@ -42,7 +48,7 @@ export default function DateChoiceModal() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
             onClick={closeDateChoice}
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="kh-modal-overlay"
           />
 
           <motion.div
@@ -52,25 +58,14 @@ export default function DateChoiceModal() {
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
             dir="rtl"
             style={{ willChange: 'transform, opacity' }}
-            className="
-              glass-strong relative z-10 w-full max-w-[420px] overflow-hidden
-              rounded-[26px]
-            "
+            className="glass-strong relative z-10 w-full max-w-[420px] overflow-hidden rounded-3xl"
           >
-            <div
-              className="pointer-events-none absolute inset-x-0 top-0 h-32"
-              style={{
-                background:
-                  'radial-gradient(circle at 50% 0%, rgba(0,209,167,0.20), transparent 70%)',
-              }}
-            />
+            <div className="kh-modal-glow" />
 
             <div className="relative flex items-start justify-between gap-3 px-5 pt-5 pb-4">
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] text-[#64748B]">
-                  تاریخ ثبت را انتخاب کن
-                </p>
-                <h2 className="mt-0.5 text-[17px] font-extrabold text-[#F8FAFC]">
+                <p className="text-xs text-fg-3">تاریخ ثبت را انتخاب کن</p>
+                <h2 className="mt-0.5 text-xl font-extrabold text-fg-1">
                   کجا ثبت بشه؟
                 </h2>
               </div>
@@ -79,7 +74,7 @@ export default function DateChoiceModal() {
                 type="button"
                 onClick={closeDateChoice}
                 aria-label="بستن"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.06] text-[#94A3B8] backdrop-blur-md active:scale-95"
+                className="kh-close-btn"
               >
                 <X size={18} />
               </button>
@@ -89,21 +84,16 @@ export default function DateChoiceModal() {
               <button
                 type="button"
                 onClick={pickToday}
-                className="
-                  flex w-full items-center gap-3 rounded-2xl
-                  border border-[#00D1A7]/30 bg-[#00D1A7]/[0.10]
-                  p-4 text-right backdrop-blur-md transition-all
-                  hover:bg-[#00D1A7]/[0.16] active:scale-[0.98]
-                "
+                className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-primary/10 p-4 text-right backdrop-blur-md transition-all hover:bg-primary/15 active:scale-[0.98]"
               >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.16] text-[#00D1A7]">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary/25 bg-primary/15 text-primary">
                   <CalendarCheck2 size={20} strokeWidth={2} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[14px] font-extrabold text-[#F8FAFC]">
+                  <p className="text-md font-extrabold text-fg-1">
                     ثبت در امروز
                   </p>
-                  <p className="mt-0.5 text-[11px] text-[#94A3B8]">
+                  <p className="mt-0.5 text-xs text-fg-2">
                     {formatFullDate(today)}
                   </p>
                 </div>
@@ -111,16 +101,16 @@ export default function DateChoiceModal() {
 
               <div className="mt-5">
                 <div className="mb-2.5 flex items-center gap-2">
-                  <div className="h-px flex-1 bg-white/[0.08]" />
-                  <span className="text-[10.5px] font-semibold text-[#64748B]">
+                  <div className="h-px flex-1 bg-border-1" />
+                  <span className="text-2xs font-semibold text-fg-3">
                     یا روزی از این هفته
                   </span>
-                  <div className="h-px flex-1 bg-white/[0.08]" />
+                  <div className="h-px flex-1 bg-border-1" />
                 </div>
 
                 <div className="grid grid-cols-4 gap-2">
                   {days.map((day) => {
-                    const dayNum = FA_NUM.format(day.date.getDate());
+                    const dayNum = toPersianDigits(day.date.getDate());
                     const isToday =
                       day.date.toDateString() === today.toDateString();
 
@@ -131,32 +121,29 @@ export default function DateChoiceModal() {
                         disabled={isToday}
                         onClick={() => pickDay(day.date)}
                         className={[
-                          'flex flex-col items-center justify-center rounded-2xl border py-3 backdrop-blur-md',
-                          'transition-all active:scale-95',
+                          'flex flex-col items-center justify-center rounded-2xl border py-3 backdrop-blur-md transition-all active:scale-95',
                           isToday
-                            ? 'cursor-not-allowed border-white/[0.06] bg-white/[0.03] opacity-40'
-                            : 'border-[#00D1A7]/25 bg-[#00D1A7]/[0.08] text-[#00D1A7] hover:bg-[#00D1A7]/[0.14]',
+                            ? 'cursor-not-allowed border-border-1 bg-fill-1 opacity-40'
+                            : 'border-primary/25 bg-primary/10 text-primary hover:bg-primary/15',
                         ].join(' ')}
                       >
                         <CalendarDays
                           size={14}
                           strokeWidth={2}
-                          className={
-                            isToday ? 'text-[#64748B]' : 'text-[#00D1A7]'
-                          }
+                          className={isToday ? 'text-fg-3' : 'text-primary'}
                         />
                         <span
                           className={[
-                            'mt-1 text-[10.5px] font-semibold',
-                            isToday ? 'text-[#64748B]' : 'text-[#F8FAFC]',
+                            'mt-1 text-2xs font-semibold',
+                            isToday ? 'text-fg-3' : 'text-fg-1',
                           ].join(' ')}
                         >
                           {day.shortLabel}
                         </span>
                         <span
                           className={[
-                            'mt-0.5 text-[10px] font-bold',
-                            isToday ? 'text-[#64748B]' : 'text-[#00D1A7]',
+                            'mt-0.5 text-2xs font-bold',
+                            isToday ? 'text-fg-3' : 'text-primary',
                           ].join(' ')}
                         >
                           {dayNum}
@@ -167,7 +154,7 @@ export default function DateChoiceModal() {
                 </div>
               </div>
 
-              <p className="mt-4 text-center text-[10px] leading-relaxed text-[#64748B]">
+              <p className="mt-4 text-center text-2xs leading-relaxed text-fg-3">
                 فقط روزهای این هفته در دسترس هستند. برای روزهای قدیمی‌تر،
                 ابتدا هفته را با فلش‌ها عوض کن.
               </p>

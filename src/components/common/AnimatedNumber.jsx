@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-const FA_NUM = new Intl.NumberFormat('fa-AF');
+import { formatNumber } from '../utils/formatting';
 
 function easeOutCubic(t) {
   return 1 - Math.pow(1 - t, 3);
@@ -9,8 +9,8 @@ function easeOutCubic(t) {
 export default function AnimatedNumber({
   value,
   duration = 700,
-  formatter,
-  className,
+  format = formatNumber,
+  className = '',
   style,
 }) {
   const target = Number(value) || 0;
@@ -49,13 +49,9 @@ export default function AnimatedNumber({
     return () => cancelAnimationFrame(rafRef.current);
   }, [target, duration]);
 
-  const out = formatter
-    ? formatter(display)
-    : FA_NUM.format(Math.round(display));
-
   return (
     <span className={className} style={style}>
-      {out}
+      {format(display)}
     </span>
   );
 }

@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 
-const FA_NUM = new Intl.NumberFormat('fa-AF');
+import { formatNumber } from '../utils/formatting';
 
 export function computeChange(current, previous) {
   const c = Number(current) || 0;
@@ -31,23 +31,23 @@ export default function ChangeBadge({
 
   const colorClass =
     change.type === 'flat'
-      ? 'text-[#94A3B8] bg-white/[0.06] border-white/[0.08]'
+      ? 'text-fg-2 bg-fill-2 border-border-1'
       : isGood
-        ? 'text-[#00D1A7] bg-[#00D1A7]/[0.14] border-[#00D1A7]/20'
-        : 'text-[#F43F5E] bg-[#F43F5E]/[0.14] border-[#F43F5E]/20';
+        ? 'text-primary bg-primary/15 border-primary/25'
+        : 'text-expense bg-expense/15 border-expense/25';
 
   let Icon = Minus;
   if (change.type === 'up') Icon = ArrowUp;
   else if (change.type === 'down') Icon = ArrowDown;
 
   const isSm = size === 'sm';
-  const amount = FA_NUM.format(Math.abs(Math.round(change.diff)));
+  const amount = formatNumber(Math.abs(change.diff));
 
   return (
     <span
       className={[
         'inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border font-bold tabular-nums backdrop-blur-md',
-        isSm ? 'px-2 py-[3px] text-[9.5px]' : 'px-2.5 py-1 text-[10.5px]',
+        isSm ? 'px-2 py-[3px] text-2xs' : 'px-2.5 py-1 text-xs',
         colorClass,
       ].join(' ')}
     >

@@ -25,7 +25,7 @@ export function useChartAutoScroll(data, period, shouldScroll) {
       attempts += 1;
 
       const allLabels = Array.from(
-        container.querySelectorAll('.apexcharts-xaxis-label')
+        container.querySelectorAll('.apexcharts-xaxis-label'),
       );
 
       const rendered = [];
@@ -34,15 +34,10 @@ export function useChartAutoScroll(data, period, shouldScroll) {
         if (rect.width === 0 && rect.height === 0) continue;
 
         const text = normalizeLabel(el.textContent);
-        const idx = data.findIndex(
-          (d) => normalizeLabel(d.label) === text
-        );
+        const idx = data.findIndex((d) => normalizeLabel(d.label) === text);
         if (idx < 0) continue;
 
-        rendered.push({
-          idx,
-          center: (rect.left + rect.right) / 2,
-        });
+        rendered.push({ idx, center: (rect.left + rect.right) / 2 });
       }
 
       if (rendered.length > 0) {
@@ -80,12 +75,9 @@ export function useChartAutoScroll(data, period, shouldScroll) {
         const containerRect = container.getBoundingClientRect();
         const containerCenter =
           (containerRect.left + containerRect.right) / 2;
-
         const D = targetScreenX - containerCenter;
 
-        if (Math.abs(D) >= 4) {
-          container.scrollLeft += D;
-        }
+        if (Math.abs(D) >= 4) container.scrollLeft += D;
 
         if (minDist > 0 && attempts < 6) {
           timeoutId = setTimeout(tryScroll, 200);
@@ -98,9 +90,7 @@ export function useChartAutoScroll(data, period, shouldScroll) {
       const maxScroll = Math.max(0, scrollWidth - clientWidth);
 
       if (maxScroll <= 0) {
-        if (attempts < 25) {
-          timeoutId = setTimeout(tryScroll, 150);
-        }
+        if (attempts < 25) timeoutId = setTimeout(tryScroll, 150);
         return;
       }
 

@@ -6,13 +6,7 @@ import {
   getPeriodSubLabel,
   getMaxOffset,
 } from '../utils/dates';
-
-const RESET_LABELS = {
-  daily: 'امروز',
-  weekly: 'این هفته',
-  monthly: 'این ماه',
-  yearly: 'امسال',
-};
+import { PERIOD_LABELS } from '../utils/constants';
 
 export default function PeriodNavigator() {
   const period = useAppStore((s) => s.period);
@@ -26,23 +20,18 @@ export default function PeriodNavigator() {
   const canGoBack = offset > maxOffset;
   const canGoForward = offset < 0;
   const isCurrent = offset === 0;
-  const resetLabel = RESET_LABELS[period] || 'حالا';
+  const resetLabel = PERIOD_LABELS[period] || 'حالا';
 
   return (
     <div className="glass rounded-2xl px-2 py-2">
       <div className="flex items-center justify-between gap-2">
-        {/* راست = آینده */}
         <button
           type="button"
           disabled={!canGoForward}
           onClick={() => setOffset(offset + 1)}
           aria-label="بعدی"
-          className={[
-            'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all',
-            canGoForward
-              ? 'text-[#94A3B8] hover:bg-white/[0.06] hover:text-[#00D1A7] active:scale-95'
-              : 'cursor-not-allowed text-[#334155]',
-          ].join(' ')}
+          data-disabled={!canGoForward}
+          className="kh-nav-btn"
         >
           <ChevronRight size={18} strokeWidth={2.2} />
         </button>
@@ -50,31 +39,26 @@ export default function PeriodNavigator() {
         <div className="min-w-0 flex-1 text-center">
           <p
             className={[
-              'truncate text-[12.5px] font-bold transition-colors',
-              isCurrent ? 'text-[#00D1A7]' : 'text-[#F8FAFC]',
+              'truncate text-sm font-bold transition-colors',
+              isCurrent ? 'text-primary' : 'text-fg-1',
             ].join(' ')}
           >
             {label}
           </p>
           {subLabel && (
-            <p className="mt-0.5 truncate text-[10.5px] font-medium text-[#64748B]">
+            <p className="mt-0.5 truncate text-2xs font-medium text-fg-3">
               {subLabel}
             </p>
           )}
         </div>
 
-        {/* چپ = گذشته */}
         <button
           type="button"
           disabled={!canGoBack}
           onClick={() => setOffset(offset - 1)}
           aria-label="قبلی"
-          className={[
-            'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all',
-            canGoBack
-              ? 'text-[#94A3B8] hover:bg-white/[0.06] hover:text-[#00D1A7] active:scale-95'
-              : 'cursor-not-allowed text-[#334155]',
-          ].join(' ')}
+          data-disabled={!canGoBack}
+          className="kh-nav-btn"
         >
           <ChevronLeft size={18} strokeWidth={2.2} />
         </button>
@@ -84,12 +68,7 @@ export default function PeriodNavigator() {
         <button
           type="button"
           onClick={() => setOffset(0)}
-          className="
-            mt-2 flex w-full items-center justify-center gap-1.5
-            rounded-xl border border-[#00D1A7]/30 bg-[#00D1A7]/[0.10]
-            py-1.5 text-[10.5px] font-semibold text-[#00D1A7]
-            transition-all hover:bg-[#00D1A7]/[0.16] active:scale-[0.98]
-          "
+          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-primary/30 bg-primary/10 py-1.5 text-2xs font-semibold text-primary transition-all hover:bg-primary/15 active:scale-[0.98]"
         >
           <RotateCcw size={11} strokeWidth={2.2} />
           بازگشت به {resetLabel}

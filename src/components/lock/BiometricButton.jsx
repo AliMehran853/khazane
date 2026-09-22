@@ -8,20 +8,16 @@ export default function BiometricButton({ onPress, disabled = false }) {
       onClick={onPress}
       disabled={disabled}
       whileTap={{ scale: 0.94 }}
-      className="
-        glass-strong relative flex h-[120px] w-[120px] items-center justify-center
-        rounded-full border-[#00D1A7]/40
-        disabled:opacity-50
-      "
+      className="kh-bio-btn glass-strong"
       aria-label="ورود با اثر انگشت"
     >
       <motion.div
-        className="absolute inset-0 rounded-full border border-[#00D1A7]/40"
+        className="kh-bio-ring"
         animate={{ scale: [1, 1.35], opacity: [0.55, 0] }}
         transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
       />
       <motion.div
-        className="absolute inset-0 rounded-full border border-[#00D1A7]/25"
+        className="kh-bio-ring kh-bio-ring-2"
         animate={{ scale: [1, 1.6], opacity: [0.35, 0] }}
         transition={{
           duration: 2.2,
@@ -31,7 +27,7 @@ export default function BiometricButton({ onPress, disabled = false }) {
         }}
       />
 
-      <Fingerprint size={52} strokeWidth={1.5} className="text-[#00D1A7]" />
+      <Fingerprint size={52} strokeWidth={1.5} className="text-primary" />
     </motion.button>
   );
 }

@@ -1,6 +1,8 @@
 import { ChevronLeft } from 'lucide-react';
+
 import AnimatedNumber from './AnimatedNumber';
 import ChangeBadge from './ChangeBadge';
+import { formatNumber } from '../utils/formatting';
 
 function StatCard({
   title,
@@ -17,20 +19,10 @@ function StatCard({
   const isIncome = tone === 'income';
   const clickable = typeof onClick === 'function';
 
-  const accent = isIncome
-    ? {
-        text: 'text-[#00D1A7]',
-        iconBg: 'bg-[#00D1A7]/[0.12]',
-      }
-    : {
-        text: 'text-[#F43F5E]',
-        iconBg: 'bg-[#F43F5E]/[0.12]',
-      };
+  const accentText = isIncome ? 'text-primary' : 'text-expense';
+  const accentBg = isIncome ? 'bg-primary/15' : 'bg-expense/15';
 
-  const numericValue =
-    typeof value === 'number'
-      ? value
-      : Number(String(value || '').replace(/[^\d.-]/g, '') || 0);
+  const numericValue = typeof value === 'number' ? value : Number(value) || 0;
 
   const Wrapper = clickable ? 'button' : 'div';
 
@@ -38,34 +30,31 @@ function StatCard({
     <Wrapper
       {...(clickable ? { type: 'button', onClick } : {})}
       className={[
-        'glass rounded-[22px] text-right',
-        'transition-all duration-200',
+        'glass rounded-3xl text-right transition-all duration-200',
         featured ? 'p-5 lg:p-6' : 'p-4 lg:p-5',
         fillHeight ? 'flex h-full flex-col justify-center' : '',
-        clickable
-          ? 'w-full hover:border-[#00D1A7]/30 active:scale-[0.99]'
-          : '',
+        clickable ? 'w-full hover:border-primary/30 active:scale-[0.99]' : '',
       ].join(' ')}
     >
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-medium text-[#64748B] lg:text-[12px]">
-            {title}
-          </p>
+          <p className="text-xs font-medium text-fg-3 lg:text-sm">{title}</p>
 
           <div className="mt-2 flex items-center gap-2">
             <p
               className={[
-                'font-extrabold tracking-tight text-[#F8FAFC]',
-                featured
-                  ? 'text-[28px] lg:text-[32px]'
-                  : 'text-[19px] lg:text-[22px]',
+                'font-extrabold tracking-tight text-fg-1',
+                featured ? 'text-4xl lg:text-5xl' : 'text-2xl lg:text-3xl',
               ].join(' ')}
             >
-              {animate && typeof value === 'number' ? (
-                <AnimatedNumber value={numericValue} duration={650} />
+              {animate ? (
+                <AnimatedNumber
+                  value={numericValue}
+                  duration={650}
+                  format={formatNumber}
+                />
               ) : (
-                value
+                formatNumber(numericValue)
               )}
             </p>
 
@@ -80,7 +69,7 @@ function StatCard({
           </div>
 
           {clickable && clickHint && (
-            <p className="mt-1.5 text-[10.5px] font-semibold text-[#00D1A7]/80">
+            <p className="mt-1.5 text-2xs font-semibold text-primary/80">
               {clickHint}
             </p>
           )}
@@ -90,8 +79,8 @@ function StatCard({
           {Icon && (
             <div
               className={[
-                'flex items-center justify-center rounded-2xl',
-                accent.iconBg,
+                'flex items-center justify-center rounded-xl',
+                accentBg,
                 featured
                   ? 'h-11 w-11 lg:h-12 lg:w-12'
                   : 'h-10 w-10 lg:h-11 lg:w-11',
@@ -100,7 +89,7 @@ function StatCard({
               <Icon
                 size={featured ? 20 : 18}
                 strokeWidth={1.9}
-                className={accent.text}
+                className={accentText}
               />
             </div>
           )}
@@ -109,7 +98,7 @@ function StatCard({
             <ChevronLeft
               size={16}
               strokeWidth={2.2}
-              className="text-[#00D1A7]"
+              className="text-primary"
             />
           )}
         </div>

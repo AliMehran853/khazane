@@ -7,9 +7,13 @@ import {
   markWelcomeSeen,
 } from '../services/settingsService';
 import { useAppStore } from '../store/appStore';
+import {
+  STORAGE_KEYS,
+  GREETING_CHECK_DELAY,
+} from '../utils/constants';
 
-const STORAGE_SHOWN_KEY = 'khazane_greetings_shown';
-const STORAGE_COUNTER_KEY = 'khazane_greetings_counter';
+const STORAGE_SHOWN_KEY = STORAGE_KEYS.greetingsShown;
+const STORAGE_COUNTER_KEY = STORAGE_KEYS.greetingsCounter;
 
 function getTodayKey() {
   const d = new Date();
@@ -71,7 +75,6 @@ export function useGreeting({ enabled = true } = {}) {
         if (!name) return;
         if (cancelled) return;
 
-        // ⭐ پیام خوش‌آمدگویی مخصوص — فقط یک بار پس از onboarding
         const seenWelcome = await hasSeenWelcome();
         if (!seenWelcome) {
           await markWelcomeSeen();
@@ -88,7 +91,6 @@ export function useGreeting({ enabled = true } = {}) {
           return;
         }
 
-        // ... منطق معمولی ۶ بازه × ۳۰ پیام
         const period = getPeriodForHour(new Date().getHours());
         if (!period.messages?.length) return;
 
@@ -120,7 +122,7 @@ export function useGreeting({ enabled = true } = {}) {
       }
     }
 
-    const t = setTimeout(check, 1400);
+    const t = setTimeout(check, GREETING_CHECK_DELAY);
 
     return () => {
       cancelled = true;

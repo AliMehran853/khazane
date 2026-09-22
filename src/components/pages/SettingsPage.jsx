@@ -59,27 +59,10 @@ import {
   clearBiometric,
 } from '../services/securityService';
 
-import { CURRENCY_OPTIONS, APP_VERSION } from '../utils/constants';
+import { CURRENCY_OPTIONS, APP_VERSION, PIN_LENGTH } from '../utils/constants';
 import { getTodayShort } from '../utils/dates';
-import { formatTime12, parseTime24, toTime24 } from '../utils/timeFormat';
-
-function lockBody() {
-  const body = document.body;
-  const scrollbarWidth =
-    window.innerWidth - document.documentElement.clientWidth;
-  const prevOverflow = body.style.overflow;
-  const prevPaddingRight = body.style.paddingRight;
-
-  body.style.overflow = 'hidden';
-  if (scrollbarWidth > 0) {
-    body.style.paddingRight = `${scrollbarWidth}px`;
-  }
-
-  return () => {
-    body.style.overflow = prevOverflow;
-    body.style.paddingRight = prevPaddingRight;
-  };
-}
+import { formatTime12FromString, parseTime24, toTime24 } from '../utils/formatting';
+import { lockBody } from '../utils/scrollLock';
 
 function TimePicker({ value, onChange }) {
   const { hour, minute, period } = parseTime24(value);
@@ -96,84 +79,62 @@ function TimePicker({ value, onChange }) {
     onChange(toTime24(hour, minute, p));
   }
 
+  function Option({ active, onClick, children }) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={[
+          'flex h-11 items-center justify-center rounded-xl border text-base font-bold backdrop-blur-md transition-all active:scale-95',
+          active
+            ? 'border-primary/50 bg-primary/[0.14] text-primary'
+            : 'border-border-1 bg-fill-1 text-fg-2',
+        ].join(' ')}
+      >
+        {children}
+      </button>
+    );
+  }
+
   return (
     <div className="space-y-5">
       <div>
-        <p className="mb-2 text-[11px] font-medium text-[#94A3B8]">ساعت</p>
+        <p className="mb-2 text-xs font-medium text-fg-2">ساعت</p>
         <div className="grid grid-cols-4 gap-2">
-          {hours.map((h) => {
-            const active = h === hour;
-            return (
-              <button
-                key={h}
-                type="button"
-                onClick={() => setHour(h)}
-                className={[
-                  'flex h-11 items-center justify-center rounded-xl border text-[14px] font-bold transition-all active:scale-95 backdrop-blur-md',
-                  active
-                    ? 'border-[#00D1A7]/50 bg-[#00D1A7]/[0.14] text-[#00D1A7]'
-                    : 'border-white/[0.08] bg-white/[0.04] text-[#94A3B8]',
-                ].join(' ')}
-              >
-                {h}
-              </button>
-            );
-          })}
+          {hours.map((h) => (
+            <Option key={h} active={h === hour} onClick={() => setHour(h)}>
+              {h}
+            </Option>
+          ))}
         </div>
       </div>
 
       <div>
-        <p className="mb-2 text-[11px] font-medium text-[#94A3B8]">دقیقه</p>
+        <p className="mb-2 text-xs font-medium text-fg-2">دقیقه</p>
         <div className="grid grid-cols-4 gap-2">
-          {minutes.map((m) => {
-            const active = m === minute;
-            return (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setMinute(m)}
-                className={[
-                  'flex h-11 items-center justify-center rounded-xl border text-[14px] font-bold transition-all active:scale-95 backdrop-blur-md',
-                  active
-                    ? 'border-[#00D1A7]/50 bg-[#00D1A7]/[0.14] text-[#00D1A7]'
-                    : 'border-white/[0.08] bg-white/[0.04] text-[#94A3B8]',
-                ].join(' ')}
-              >
-                {String(m).padStart(2, '0')}
-              </button>
-            );
-          })}
+          {minutes.map((m) => (
+            <Option key={m} active={m === minute} onClick={() => setMinute(m)}>
+              {String(m).padStart(2, '0')}
+            </Option>
+          ))}
         </div>
       </div>
 
       <div>
-        <p className="mb-2 text-[11px] font-medium text-[#94A3B8]">نوبت</p>
+        <p className="mb-2 text-xs font-medium text-fg-2">نوبت</p>
         <div className="grid grid-cols-2 gap-2">
-          {['صبح', 'شب'].map((p) => {
-            const active = p === period;
-            return (
-              <button
-                key={p}
-                type="button"
-                onClick={() => setPeriod(p)}
-                className={[
-                  'flex h-11 items-center justify-center rounded-xl border text-[13px] font-bold transition-all active:scale-95 backdrop-blur-md',
-                  active
-                    ? 'border-[#00D1A7]/50 bg-[#00D1A7]/[0.14] text-[#00D1A7]'
-                    : 'border-white/[0.08] bg-white/[0.04] text-[#94A3B8]',
-                ].join(' ')}
-              >
-                {p}
-              </button>
-            );
-          })}
+          {['صبح', 'شب'].map((p) => (
+            <Option key={p} active={p === period} onClick={() => setPeriod(p)}>
+              {p}
+            </Option>
+          ))}
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.08] p-4 text-center backdrop-blur-md">
-        <p className="text-[11px] text-[#94A3B8]">زمان یادآوری</p>
-        <p className="mt-1 text-[20px] font-extrabold text-[#00D1A7]">
-          {formatTime12(value)}
+      <div className="rounded-2xl border border-primary/25 bg-primary/[0.08] p-4 text-center backdrop-blur-md">
+        <p className="text-xs text-fg-2">زمان یادآوری</p>
+        <p className="mt-1 text-2xl font-extrabold text-primary">
+          {formatTime12FromString(value)}
         </p>
       </div>
     </div>
@@ -186,7 +147,6 @@ function PinSetupFlow({ onDone, onCancel }) {
   const [pinValue, setPinValue] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
-  const PIN_LENGTH = 4;
 
   function handleKey(digit) {
     if (pinValue.length >= PIN_LENGTH || saving) return;
@@ -227,10 +187,10 @@ function PinSetupFlow({ onDone, onCancel }) {
 
   return (
     <div className="flex flex-col items-center">
-      <p className="text-[14px] font-bold text-[#F8FAFC]">
+      <p className="text-md font-bold text-fg-1">
         {step === 'enter' ? 'رمز جدید را وارد کنید' : 'رمز را دوباره وارد کنید'}
       </p>
-      <p className="mt-1.5 text-[11px] text-[#64748B]">
+      <p className="mt-1.5 text-xs text-fg-3">
         {step === 'enter' ? '۴ رقم دلخواه' : 'برای اطمینان، تکرار کنید'}
       </p>
 
@@ -241,15 +201,15 @@ function PinSetupFlow({ onDone, onCancel }) {
             className={[
               'h-3.5 w-3.5 rounded-full transition-all duration-200',
               i < pinValue.length
-                ? 'scale-100 bg-[#00D1A7]'
-                : 'scale-90 bg-white/[0.12]',
+                ? 'scale-100 bg-primary'
+                : 'scale-90 bg-fill-3',
             ].join(' ')}
           />
         ))}
       </div>
 
       <div className="h-6">
-        {error && <p className="mt-2 text-[11px] text-[#F43F5E]">{error}</p>}
+        {error && <p className="mt-2 text-xs text-expense">{error}</p>}
       </div>
 
       <div className="mt-3 w-full">
@@ -263,7 +223,7 @@ function PinSetupFlow({ onDone, onCancel }) {
       <button
         type="button"
         onClick={onCancel}
-        className="mt-5 text-[12px] font-semibold text-[#94A3B8]"
+        className="mt-5 text-sm font-semibold text-fg-2"
       >
         انصراف
       </button>
@@ -287,7 +247,7 @@ function Sheet({ open, onClose, title, subtitle, children }) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
             onClick={onClose}
-            className="fixed inset-0 z-[100] bg-black/65 backdrop-blur-sm"
+            className="kh-modal-overlay fixed inset-0 z-[100]"
           />
 
           <motion.div
@@ -295,34 +255,24 @@ function Sheet({ open, onClose, title, subtitle, children }) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ duration: 0.34, ease: [0.32, 0.72, 0, 1] }}
-            className="
-              glass-strong fixed inset-x-3 bottom-3 z-[110] mx-auto
-              flex max-h-[88svh] w-auto max-w-[420px] flex-col
-              overflow-hidden rounded-[24px]
-              outline-none
-              lg:inset-x-auto lg:bottom-auto lg:left-1/2 lg:top-1/2
-              lg:max-h-[85vh] lg:w-full lg:max-w-[520px]
-              lg:-translate-x-1/2 lg:-translate-y-1/2
-            "
+            className="glass-strong fixed inset-x-3 bottom-3 z-[110] mx-auto flex max-h-[88svh] w-auto max-w-[420px] flex-col overflow-hidden rounded-3xl outline-none lg:inset-x-auto lg:bottom-auto lg:left-1/2 lg:top-1/2 lg:max-h-[85vh] lg:w-full lg:max-w-[520px] lg:-translate-x-1/2 lg:-translate-y-1/2"
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <div className="shrink-0 px-4 pt-3 pb-3 lg:px-6 lg:pt-4 lg:pb-4">
-              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/[0.18] lg:hidden" />
+              <div className="kh-drag-handle lg:hidden" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   {subtitle && (
-                    <p className="text-[11px] text-[#64748B] lg:text-[12px]">
-                      {subtitle}
-                    </p>
+                    <p className="text-xs text-fg-3 lg:text-sm">{subtitle}</p>
                   )}
-                  <h2 className="mt-0.5 text-[18px] font-bold text-[#F8FAFC] lg:text-[20px]">
+                  <h2 className="mt-0.5 text-xl font-bold text-fg-1 lg:text-2xl">
                     {title}
                   </h2>
                 </div>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.06] text-[#94A3B8] backdrop-blur-md active:scale-95 lg:h-10 lg:w-10"
+                  className="kh-close-btn lg:h-10 lg:w-10"
                   aria-label="بستن"
                 >
                   <X size={18} />
@@ -341,7 +291,7 @@ function Sheet({ open, onClose, title, subtitle, children }) {
 
 function SectionTitle({ children }) {
   return (
-    <h2 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[#64748B]">
+    <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-fg-3">
       {children}
     </h2>
   );
@@ -356,12 +306,8 @@ function SettingsPage() {
   const resetSecurity = useSecurityStore((s) => s.reset);
   const setMethod = useSecurityStore((s) => s.setMethod);
   const setPinEnabledInStore = useSecurityStore((s) => s.setPinEnabled);
-  const setBiometricEnabledInStore = useSecurityStore(
-    (s) => s.setBiometricEnabled,
-  );
-  const setBiometricAvailableInStore = useSecurityStore(
-    (s) => s.setBiometricAvailable,
-  );
+  const setBiometricEnabledInStore = useSecurityStore((s) => s.setBiometricEnabled);
+  const setBiometricAvailableInStore = useSecurityStore((s) => s.setBiometricAvailable);
 
   const { forceShow: forceShowReminder } = useDailyReminder();
   const { available: bioAvailable, checking: bioChecking } = useBiometricCheck();
@@ -454,7 +400,7 @@ function SettingsPage() {
         await setLockEnabled(true);
         setLocalLock(true);
         showToast('قفل برنامه فعال شد.');
-      } catch (err) {
+      } catch {
         showToast('فعال‌سازی قفل ناموفق بود.');
       }
     } else {
@@ -462,7 +408,7 @@ function SettingsPage() {
         await setLockEnabled(false);
         setLocalLock(false);
         showToast('قفل برنامه غیرفعال شد.');
-      } catch (err) {
+      } catch {
         showToast('غیرفعال‌سازی ناموفق بود.');
       }
     }
@@ -494,7 +440,6 @@ function SettingsPage() {
       if (!window.PublicKeyCredential) {
         throw new Error('مرورگر شما از اثر انگشت پشتیبانی نمی‌کند.');
       }
-
       const available = await window.PublicKeyCredential
         .isUserVerifyingPlatformAuthenticatorAvailable()
         .catch(() => false);
@@ -558,7 +503,7 @@ function SettingsPage() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       showToast('فایل پشتیبان دانلود شد.');
-    } catch (err) {
+    } catch {
       showToast('خروجی ناموفق بود.');
     }
   }
@@ -625,15 +570,10 @@ function SettingsPage() {
     <>
       <div className="px-4 pb-6 pt-6 lg:mx-auto lg:max-w-[1100px] lg:px-8 lg:pb-12 lg:pt-8">
         <header>
-          <p className="text-[11px] text-[#64748B] lg:text-[12px]">
-            شخصی‌سازی برنامه
-          </p>
-          <h1 className="mt-1 text-[21px] font-bold text-[#F8FAFC] lg:text-[26px]">
-            تنظیمات
-          </h1>
+          <p className="kh-page-subtitle">شخصی‌سازی برنامه</p>
+          <h1 className="kh-page-title">تنظیمات</h1>
         </header>
 
-        {/* موبایل */}
         <div className="lg:hidden">
           <InstallCard />
           <SettingsProfileCard
@@ -662,6 +602,7 @@ function SettingsPage() {
                   : 'هیچ روشی تنظیم نشده'
               }
               onClick={() => setSheet('lock')}
+              isLast
             />
           </SettingsGroup>
 
@@ -671,7 +612,7 @@ function SettingsPage() {
               title="یادآوری ثبت روزانه"
               subtitle={
                 reminderOn
-                  ? `هر شب ساعت ${formatTime12(reminderTime)}`
+                  ? `هر شب ساعت ${formatTime12FromString(reminderTime)}`
                   : 'غیرفعال'
               }
               checked={reminderOn}
@@ -682,8 +623,9 @@ function SettingsPage() {
               <SettingsButtonRow
                 icon={Clock}
                 title="زمان یادآوری"
-                subtitle={formatTime12(reminderTime)}
+                subtitle={formatTime12FromString(reminderTime)}
                 onClick={() => setSheet('reminderTime')}
+                isLast
               />
             )}
           </SettingsGroup>
@@ -711,19 +653,19 @@ function SettingsPage() {
             <button
               type="button"
               onClick={() => setConfirmLogout(true)}
-              className="glass mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-[#F43F5E]/25 py-3.5 text-[13px] font-semibold text-[#F43F5E] active:scale-[0.98]"
+              className="glass mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-expense/25 py-3.5 text-base font-semibold text-expense active:scale-[0.98]"
             >
               <LogOut size={17} strokeWidth={2} />
               خروج از حساب
             </button>
           )}
 
-          <p className="mt-6 text-center text-[10.5px] text-[#64748B]">
+          <p className="mt-6 text-center text-2xs text-fg-3">
             خزانه • نسخه {APP_VERSION} • {getTodayShort()}
           </p>
         </div>
 
-        {/* دسکتاپ */}
+        {/* Desktop */}
         <div className="mt-8 hidden lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-x-5 lg:gap-y-6">
           <div className="flex flex-col">
             <SectionTitle>حساب کاربری</SectionTitle>
@@ -803,7 +745,7 @@ function SettingsPage() {
                   title="یادآوری ثبت روزانه"
                   subtitle={
                     reminderOn
-                      ? `هر شب ساعت ${formatTime12(reminderTime)}`
+                      ? `هر شب ساعت ${formatTime12FromString(reminderTime)}`
                       : 'غیرفعال'
                   }
                   checked={reminderOn}
@@ -814,7 +756,7 @@ function SettingsPage() {
                   <SettingsButtonRow
                     icon={Clock}
                     title="زمان یادآوری"
-                    subtitle={formatTime12(reminderTime)}
+                    subtitle={formatTime12FromString(reminderTime)}
                     onClick={() => setSheet('reminderTime')}
                     isLast
                   />
@@ -831,7 +773,7 @@ function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setConfirmLogout(true)}
-                  className="glass flex w-full items-center justify-center gap-2 rounded-2xl border-[#F43F5E]/25 py-3.5 text-[13px] font-semibold text-[#F43F5E] transition-all hover:border-[#F43F5E]/40 active:scale-[0.98]"
+                  className="glass flex w-full items-center justify-center gap-2 rounded-2xl border-expense/25 py-3.5 text-base font-semibold text-expense transition-all hover:border-expense/40 active:scale-[0.98]"
                 >
                   <LogOut size={17} strokeWidth={2} />
                   خروج از حساب
@@ -841,7 +783,7 @@ function SettingsPage() {
           </div>
         </div>
 
-        <p className="mt-10 hidden text-center text-[10.5px] text-[#64748B] lg:block">
+        <p className="mt-10 hidden text-center text-2xs text-fg-3 lg:block">
           خزانه • نسخه {APP_VERSION} • {getTodayShort()}
         </p>
       </div>
@@ -852,24 +794,24 @@ function SettingsPage() {
         title="پروفایل"
         subtitle="اطلاعات شخصی"
       >
-        <label className="mb-2 block text-[11px] font-medium text-[#94A3B8]">
+        <label className="mb-2 block text-xs font-medium text-fg-2">
           نام نمایشی
         </label>
         <input
           value={nameInput}
           onChange={(e) => setNameInput(e.target.value)}
           placeholder="مثلاً احمد"
-          className="glass-inner w-full rounded-2xl px-4 py-3 text-[13px] text-[#F8FAFC] outline-none placeholder:text-[#64748B] focus:border-[#00D1A7]/50"
+          className="glass-inner w-full rounded-2xl px-4 py-3 text-base text-fg-1 outline-none placeholder:text-fg-3 focus:border-primary/50"
         />
 
-        <p className="mt-2 text-[10.5px] leading-relaxed text-[#64748B]">
+        <p className="mt-2 text-2xs leading-relaxed text-fg-3">
           نام نمایشی برای پیام‌های خوش‌آمدگویی و پروفایل استفاده می‌شود.
         </p>
 
         <button
           type="button"
           onClick={saveName}
-          className="mt-4 w-full rounded-2xl bg-[linear-gradient(155deg,#00D1A7,#00A88A)] py-3.5 text-[13px] font-bold text-[#0F172A] shadow-[0_6px_24px_rgba(0,209,167,0.30)] active:scale-[0.98]"
+          className="kh-btn kh-btn-primary mt-4 w-full py-3.5 text-base"
         >
           ذخیره
         </button>
@@ -886,7 +828,7 @@ function SettingsPage() {
         <button
           type="button"
           onClick={handleTestReminder}
-          className="mt-5 w-full rounded-2xl border border-[#00D1A7]/30 bg-[#00D1A7]/[0.10] py-3 text-[12px] font-semibold text-[#00D1A7] backdrop-blur-md active:scale-[0.98]"
+          className="mt-5 w-full rounded-2xl border border-primary/30 bg-primary/[0.10] py-3 text-sm font-semibold text-primary backdrop-blur-md active:scale-[0.98]"
         >
           نمایش آزمایشی یادآوری
         </button>
@@ -894,7 +836,7 @@ function SettingsPage() {
         <button
           type="button"
           onClick={() => setSheet(null)}
-          className="mt-3 w-full rounded-2xl bg-[linear-gradient(155deg,#00D1A7,#00A88A)] py-3.5 text-[13px] font-bold text-[#0F172A] shadow-[0_6px_24px_rgba(0,209,167,0.30)] active:scale-[0.98]"
+          className="kh-btn kh-btn-primary mt-3 w-full py-3.5 text-base"
         >
           ذخیره
         </button>
@@ -917,11 +859,11 @@ function SettingsPage() {
         ) : (
           <div className="space-y-4">
             <div className="glass-inner flex items-center gap-3 rounded-2xl p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.04] text-[#94A3B8]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border-1 bg-fill-1 text-fg-2">
                 <ShieldCheck size={19} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-semibold text-[#F8FAFC]">
+                <p className="text-base font-semibold text-fg-1">
                   رمز عبور
                 </p>
                 <div className="mt-1">
@@ -932,7 +874,7 @@ function SettingsPage() {
                 <button
                   type="button"
                   onClick={handleClearPin}
-                  className="shrink-0 rounded-xl bg-[#F43F5E]/[0.12] px-3 py-2 text-[11px] font-semibold text-[#F43F5E]"
+                  className="shrink-0 rounded-xl bg-expense/[0.12] px-3 py-2 text-xs font-semibold text-expense"
                 >
                   حذف
                 </button>
@@ -943,7 +885,7 @@ function SettingsPage() {
                     setPinSetupFromToggle(false);
                     setPinSetupOpen(true);
                   }}
-                  className="shrink-0 rounded-xl bg-[#00D1A7]/[0.16] px-3 py-2 text-[11px] font-semibold text-[#00D1A7]"
+                  className="shrink-0 rounded-xl bg-primary/[0.16] px-3 py-2 text-xs font-semibold text-primary"
                 >
                   تنظیم
                 </button>
@@ -951,18 +893,16 @@ function SettingsPage() {
             </div>
 
             <div className="glass-inner flex items-center gap-3 rounded-2xl p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.04] text-[#94A3B8]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border-1 bg-fill-1 text-fg-2">
                 <Fingerprint size={19} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-semibold text-[#F8FAFC]">
+                <p className="text-base font-semibold text-fg-1">
                   اثر انگشت / Face ID
                 </p>
                 <div className="mt-1">
                   {bioChecking ? (
-                    <span className="text-[10px] text-[#64748B]">
-                      در حال بررسی...
-                    </span>
+                    <span className="text-2xs text-fg-3">در حال بررسی...</span>
                   ) : (
                     <StatusBadge
                       active={bioOn}
@@ -977,7 +917,7 @@ function SettingsPage() {
                 <button
                   type="button"
                   onClick={handleClearBiometric}
-                  className="shrink-0 rounded-xl bg-[#F43F5E]/[0.12] px-3 py-2 text-[11px] font-semibold text-[#F43F5E]"
+                  className="shrink-0 rounded-xl bg-expense/[0.12] px-3 py-2 text-xs font-semibold text-expense"
                 >
                   حذف
                 </button>
@@ -986,14 +926,14 @@ function SettingsPage() {
                   type="button"
                   disabled={busy || bioChecking}
                   onClick={handleRegisterBiometric}
-                  className="shrink-0 rounded-xl bg-[#00D1A7]/[0.16] px-3 py-2 text-[11px] font-semibold text-[#00D1A7] disabled:opacity-40"
+                  className="shrink-0 rounded-xl bg-primary/[0.16] px-3 py-2 text-xs font-semibold text-primary disabled:opacity-40"
                 >
-                  {busy ? '...' : bioChecking ? '...' : 'فعال‌سازی'}
+                  {busy || bioChecking ? '...' : 'فعال‌سازی'}
                 </button>
               )}
             </div>
 
-            <p className="pt-1 text-center text-[10.5px] leading-relaxed text-[#64748B]">
+            <p className="pt-1 text-center text-2xs leading-relaxed text-fg-3">
               همه‌ی اطلاعات فقط روی همین دستگاه ذخیره می‌شود و هیچ‌گاه به سرور
               فرستاده نمی‌شود.
             </p>
@@ -1018,27 +958,23 @@ function SettingsPage() {
                 className={[
                   'flex w-full items-center justify-between rounded-2xl border px-4 py-3.5 text-right backdrop-blur-md transition-all',
                   isActive
-                    ? 'border-[#00D1A7]/40 bg-[#00D1A7]/[0.12]'
-                    : 'border-white/[0.08] bg-white/[0.04] active:scale-[0.99]',
+                    ? 'border-primary/40 bg-primary/[0.12]'
+                    : 'border-border-1 bg-fill-1 active:scale-[0.99]',
                 ].join(' ')}
               >
                 <div className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.04] text-[16px] font-bold text-[#00D1A7]">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-border-1 bg-fill-1 text-lg font-bold text-primary">
                     {opt.symbol}
                   </span>
                   <div>
-                    <p className="text-[13px] font-semibold text-[#F8FAFC]">
+                    <p className="text-base font-semibold text-fg-1">
                       {opt.label}
                     </p>
-                    <p className="mt-0.5 text-[10.5px] text-[#64748B]">
-                      {opt.code}
-                    </p>
+                    <p className="mt-0.5 text-2xs text-fg-3">{opt.code}</p>
                   </div>
                 </div>
                 {isActive && (
-                  <span className="text-[11px] font-bold text-[#00D1A7]">
-                    ✓
-                  </span>
+                  <span className="text-xs font-bold text-primary">✓</span>
                 )}
               </button>
             );
@@ -1058,28 +994,28 @@ function SettingsPage() {
             onClick={handleExport}
             className="glass-inner flex w-full items-center gap-3 rounded-2xl p-4 text-right active:scale-[0.99]"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.14] text-[#00D1A7]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/25 bg-primary/[0.14] text-primary">
               <Database size={19} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-semibold text-[#F8FAFC]">
+              <p className="text-base font-semibold text-fg-1">
                 خروجی گرفتن
               </p>
-              <p className="mt-1 text-[11px] text-[#64748B]">
+              <p className="mt-1 text-xs text-fg-3">
                 ذخیره‌ی همه‌ی تراکنش‌ها در یک فایل JSON
               </p>
             </div>
           </button>
 
           <label className="glass-inner flex w-full cursor-pointer items-center gap-3 rounded-2xl p-4 active:scale-[0.99]">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.14] text-[#00D1A7]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/25 bg-primary/[0.14] text-primary">
               <Database size={19} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-semibold text-[#F8FAFC]">
+              <p className="text-base font-semibold text-fg-1">
                 بازیابی از فایل
               </p>
-              <p className="mt-1 text-[11px] text-[#64748B]">
+              <p className="mt-1 text-xs text-fg-3">
                 ⚠ همه‌ی داده‌های فعلی جایگزین می‌شوند
               </p>
             </div>
@@ -1099,17 +1035,17 @@ function SettingsPage() {
         title="پاک‌سازی و شروع مجدد"
         subtitle="همه‌چیز مثل اولین نصب"
       >
-        <p className="rounded-2xl border border-[#F43F5E]/25 bg-[#F43F5E]/[0.10] p-4 text-[12px] leading-relaxed text-[#F43F5E] backdrop-blur-md">
+        <p className="rounded-2xl border border-expense/25 bg-expense/[0.10] p-4 text-sm leading-relaxed text-expense backdrop-blur-md">
           با این کار{' '}
           <span className="font-bold">
-            همه‌ی تراکنش‌ها، دسته‌بندی‌ها، تنظیمات، پروفایل، قفل،
-            یادآوری‌ها و پشتیبان‌ها
+            همه‌ی تراکنش‌ها، دسته‌بندی‌ها، تنظیمات، پروفایل، قفل، یادآوری‌ها و
+            پشتیبان‌ها
           </span>{' '}
           پاک می‌شود و برنامه کاملاً از نو شروع می‌شود.
         </p>
 
         <div className="glass-inner mt-4 rounded-2xl p-4">
-          <p className="text-[11.5px] leading-relaxed text-[#94A3B8]">
+          <p className="text-xs leading-relaxed text-fg-2">
             بعد از این کار دوباره سؤال‌های اولیه پرسیده می‌شود — دقیقاً انگار
             همین حالا اپ رو نصب کرده‌ای.
           </p>
@@ -1120,7 +1056,7 @@ function SettingsPage() {
             type="button"
             disabled={resetting}
             onClick={() => setConfirmReset(false)}
-            className="rounded-2xl border border-white/[0.10] bg-white/[0.06] py-3.5 text-[12.5px] font-semibold text-[#94A3B8] backdrop-blur-md disabled:opacity-50"
+            className="kh-btn kh-btn-ghost py-3.5 text-sm"
           >
             انصراف
           </button>
@@ -1128,7 +1064,7 @@ function SettingsPage() {
             type="button"
             disabled={resetting}
             onClick={handleResetApp}
-            className="flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(155deg,#F43F5E,#BE123C)] py-3.5 text-[12.5px] font-bold text-white disabled:opacity-60"
+            className="kh-btn kh-btn-danger flex items-center justify-center gap-2 py-3.5 text-sm"
           >
             {resetting ? (
               '...'
@@ -1148,7 +1084,7 @@ function SettingsPage() {
         title="خروج از حساب"
         subtitle="بعد از خروج باید دوباره وارد شوید"
       >
-        <p className="glass-inner rounded-2xl p-4 text-[12px] leading-relaxed text-[#94A3B8]">
+        <p className="glass-inner rounded-2xl p-4 text-sm leading-relaxed text-fg-2">
           با خروج از حساب، برنامه بلافاصله قفل می‌شود و برای ورود دوباره به{' '}
           {pinOn ? 'رمز عبور' : ''}
           {pinOn && bioOn ? ' یا ' : ''}
@@ -1158,14 +1094,14 @@ function SettingsPage() {
           <button
             type="button"
             onClick={() => setConfirmLogout(false)}
-            className="rounded-2xl border border-white/[0.10] bg-white/[0.06] py-3.5 text-[12.5px] font-semibold text-[#94A3B8] backdrop-blur-md"
+            className="kh-btn kh-btn-ghost py-3.5 text-sm"
           >
             انصراف
           </button>
           <button
             type="button"
             onClick={handleLogout}
-            className="flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(155deg,#F43F5E,#BE123C)] py-3.5 text-[12.5px] font-bold text-white"
+            className="kh-btn kh-btn-danger flex items-center justify-center gap-2 py-3.5 text-sm"
           >
             <LogOut size={16} />
             خروج
@@ -1177,7 +1113,7 @@ function SettingsPage() {
 
       {toast && (
         <div className="pointer-events-none fixed bottom-[100px] left-1/2 z-[200] max-w-[90vw] -translate-x-1/2">
-          <div className="glass-strong rounded-2xl px-4 py-2.5 text-center text-[12px] font-medium text-[#F8FAFC] shadow-lg">
+          <div className="glass-strong rounded-2xl px-4 py-2.5 text-center text-sm font-medium text-fg-1 shadow-lg">
             {toast}
           </div>
         </div>

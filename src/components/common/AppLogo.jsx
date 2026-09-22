@@ -1,13 +1,20 @@
-export default function AppLogo({ size = 80, withShadow = true }) {
+import { useId } from 'react';
+
+export default function AppLogo({
+  size = 80,
+  withShadow = true,
+  className = '',
+}) {
+  const rawId = useId();
+  const gradId = `kh-logo-grad-${rawId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
+
   return (
     <div
-      className="relative"
+      className={['relative shrink-0', className].join(' ')}
       style={{
         width: size,
         height: size,
-        filter: withShadow
-          ? 'drop-shadow(0 8px 24px rgba(0,209,167,0.35))'
-          : undefined,
+        filter: withShadow ? 'var(--kh-logo-shadow)' : undefined,
       }}
     >
       <svg
@@ -16,11 +23,12 @@ export default function AppLogo({ size = 80, withShadow = true }) {
         viewBox="0 0 100 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
       >
         <defs>
-          <linearGradient id="logoPrimary" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#00D1A7" />
-            <stop offset="100%" stopColor="#00A88A" />
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--kh-primary)" />
+            <stop offset="100%" stopColor="var(--kh-primary-dark)" />
           </linearGradient>
         </defs>
 
@@ -30,7 +38,7 @@ export default function AppLogo({ size = 80, withShadow = true }) {
           width="84"
           height="84"
           rx="24"
-          fill="url(#logoPrimary)"
+          fill={`url(#${gradId})`}
         />
 
         <text
@@ -40,7 +48,7 @@ export default function AppLogo({ size = 80, withShadow = true }) {
           fontFamily="Vazirmatn, sans-serif"
           fontSize="56"
           fontWeight="800"
-          fill="#0F172A"
+          fill="var(--kh-on-primary)"
         >
           $
         </text>

@@ -1,28 +1,23 @@
 import Chart from 'react-apexcharts';
+
 import { useChartAutoScroll } from '../hooks/useChartAutoScroll';
 import { useIsDesktop } from '../hooks/useIsDesktop';
-
-function formatNumber(value) {
-  return new Intl.NumberFormat('fa-AF').format(Math.round(value || 0));
-}
+import { useAppStore } from '../store/appStore';
+import { getChartTheme, alpha } from '../utils/chartTheme';
+import { formatNumber } from '../utils/formatting';
 
 function getChartLayout(period, dataLength) {
   if (period === 'daily' || period === 'monthly' || period === 'weekly') {
     return { shouldScroll: false, chartWidth: null };
   }
-
   const columnWidth = 72;
   const visibleCount = 5;
   const shouldScroll = dataLength > visibleCount;
-
   return {
     shouldScroll,
     chartWidth: shouldScroll ? dataLength * columnWidth : null,
   };
 }
-
-const EXPENSE_COLOR = '#F43F5E';
-const EXPENSE_DIM = 'rgba(244, 63, 94, 0.30)';
 
 export default function ExpenseTrendChart({
   data = [],
@@ -31,15 +26,18 @@ export default function ExpenseTrendChart({
   fixedHeight,
 }) {
   const isDesktop = useIsDesktop();
+  const theme = useAppStore((s) => s.theme);
+  const t = getChartTheme();
 
   const categories = data.map((item) => item.label);
-
   const isDaily = period === 'daily';
   const isMonthly = period === 'monthly';
   const isBar = isDaily || isMonthly;
 
   const { shouldScroll, chartWidth } = getChartLayout(period, data.length);
   const scrollRef = useChartAutoScroll(data, period, shouldScroll);
+
+  const expenseDim = alpha(t.expense, 0.3);
 
   const series = [
     {
@@ -48,7 +46,7 @@ export default function ExpenseTrendChart({
         ? data.map((item) => ({
             x: item.label,
             y: item.expense || 0,
-            fillColor: item.isCurrent ? EXPENSE_COLOR : EXPENSE_DIM,
+            fillColor: item.isCurrent ? t.expense : expenseDim,
           }))
         : data.map((item) => item.expense || 0),
     },
@@ -60,7 +58,7 @@ export default function ExpenseTrendChart({
       toolbar: { show: false },
       zoom: { enabled: false },
       background: 'transparent',
-      fontFamily: 'Vazirmatn, sans-serif',
+      fontFamily: t.fontFamily,
       parentHeightOffset: 0,
       redrawOnParentResize: false,
       redrawOnWindowResize: false,
@@ -71,7 +69,7 @@ export default function ExpenseTrendChart({
         dynamicAnimation: { enabled: true, speed: 350 },
       },
     },
-    colors: [EXPENSE_COLOR],
+    colors: [t.expense],
 
     ...(!isBar && {
       stroke: { curve: 'smooth', width: 2.2 },
@@ -97,7 +95,6 @@ export default function ExpenseTrendChart({
     }),
 
     legend: { show: false },
-
     dataLabels: { enabled: false },
     xaxis: {
       ...(isDaily ? { type: 'category' } : { categories }),
@@ -108,7 +105,7 @@ export default function ExpenseTrendChart({
         hideOverlappingLabels: false,
         trim: false,
         style: {
-          colors: '#64748B',
+          colors: t.text3,
           fontSize: isMonthly
             ? isDesktop
               ? '10px'
@@ -120,7 +117,7 @@ export default function ExpenseTrendChart({
               : isDesktop
                 ? '12px'
                 : '10px',
-          fontFamily: 'Vazirmatn, sans-serif',
+          fontFamily: t.fontFamily,
         },
       },
       axisBorder: { show: false },
@@ -129,21 +126,21 @@ export default function ExpenseTrendChart({
     yaxis: {
       labels: {
         style: {
-          colors: '#64748B',
+          colors: t.text3,
           fontSize: isDesktop ? '11px' : '9px',
-          fontFamily: 'Vazirmatn, sans-serif',
+          fontFamily: t.fontFamily,
         },
         formatter: (value) => formatNumber(value),
       },
     },
     grid: {
-      borderColor: 'rgba(248,250,252,0.08)',
+      borderColor: t.grid,
       strokeDashArray: 4,
       xaxis: { lines: { show: false } },
       padding: { left: 2, right: 2 },
     },
     tooltip: {
-      theme: 'dark',
+      theme: t.isLight ? 'light' : 'dark',
       rtl: true,
       y: { formatter: (value) => `${formatNumber(value)} افغانی` },
     },
@@ -151,16 +148,10 @@ export default function ExpenseTrendChart({
 
   const height =
     fixedHeight ||
-    (isDesktop
-      ? isBar
-        ? 400
-        : 320
-      : isBar
-        ? 280
-        : 230);
+    (isDesktop ? (isBar ? 400 : 320) : isBar ? 280 : 230);
 
   return (
-    <div className="w-full px-1 pt-1" dir="rtl">
+    <div className="kh-chart-box">
       <div
         ref={scrollRef}
         className={shouldScroll ? 'overflow-x-auto overflow-y-hidden pb-1' : ''}
@@ -174,7 +165,7 @@ export default function ExpenseTrendChart({
           }
         >
           <Chart
-            key={`${period}-${periodOffset}-${data.length}-${shouldScroll}-${isDesktop}-${fixedHeight || 'auto'}`}
+            key={`exp-${period}-${periodOffset}-${data.length}-${shouldScroll}-${isDesktop}-${fixedHeight || 'auto'}-${theme}`}
             options={options}
             series={series}
             type={isBar ? 'bar' : 'area'}

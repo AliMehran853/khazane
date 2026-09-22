@@ -1,7 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
-import db from '../db/database';
 
-const HOURS_24_MS = 24 * 60 * 60 * 1000;
+import db from '../db/database';
+import {
+  REMINDER_HOURS_MS,
+  REMINDER_CHECK_DELAY,
+} from '../utils/constants';
 
 const KEYS = {
   REMINDER_ENABLED: 'reminderEnabled',
@@ -22,21 +25,21 @@ async function shouldShowReminder() {
   if (!enabled) return false;
 
   const now = Date.now();
-
-  // آخرین نمایش
   const lastShownAt = Number(await getSetting(KEYS.LAST_SHOWN)) || 0;
-  if (now - lastShownAt < HOURS_24_MS) return false;
+  if (now - lastShownAt < REMINDER_HOURS_MS) return false;
 
-  // آخرین تراکنش
-  const all = await db.transactions.toArray();
-  const lastTransaction = all.reduce((latest, t) => {
-    const ts = Number(t.createdAt) || new Date(t.date).getTime();
-    return ts > latest ? ts : latest;
-  }, 0);
+  // Optimized: use Dexie's orderBy instead of loading all transactions
+  const latestTx = await db.transactions
+    .orderBy('createdAt')
+    .last()
+    .catch(() => null);
 
-  // اگر تراکنشی نداری یا از ۲۴ ساعت گذشته → نشان بده
+  const lastTransaction = latestTx
+    ? Number(latestTx.createdAt) || new Date(latestTx.date).getTime()
+    : 0;
+
   if (lastTransaction === 0) return true;
-  return now - lastTransaction >= HOURS_24_MS;
+  return now - lastTransaction >= REMINDER_HOURS_MS;
 }
 
 export function useDailyReminder() {
@@ -54,7 +57,7 @@ export function useDailyReminder() {
       }
     }
 
-    const t = setTimeout(check, 1200);
+    const t = setTimeout(check, REMINDER_CHECK_DELAY);
 
     return () => {
       cancelled = true;
@@ -71,7 +74,6 @@ export function useDailyReminder() {
     }
   }, []);
 
-  // ⭐ تابع تست برای دکمه‌ی Debug در تنظیمات
   const forceShow = useCallback(async () => {
     await db.settings.delete(KEYS.LAST_SHOWN);
     setVisible(true);

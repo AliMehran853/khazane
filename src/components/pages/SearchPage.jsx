@@ -7,7 +7,7 @@ import TransactionList from '../transactions/TransactionList';
 import { getTransactions } from '../services/transactionService';
 import { getCategories } from '../services/categoryService';
 import { useAppStore } from '../store/appStore';
-import { toEnglishDigits } from '../utils/formatting';
+import { toEnglishDigits, formatNumber } from '../utils/formatting';
 
 const FILTERS = [
   { id: 'all', label: 'همه' },
@@ -83,7 +83,6 @@ function SearchPage() {
 
   return (
     <div className="min-h-dvh pb-24 lg:pb-12">
-      {/* هدر چسبان */}
       <div className="glass-strong sticky top-0 z-30 rounded-none border-x-0 border-t-0">
         <div className="px-4 pb-3 pt-4 lg:px-0 lg:pt-6">
           <div className="flex items-center gap-2">
@@ -91,10 +90,7 @@ function SearchPage() {
               type="button"
               onClick={() => navigate(-1)}
               aria-label="بازگشت"
-              className="
-                glass flex h-11 w-11 shrink-0 items-center justify-center
-                rounded-2xl text-[#94A3B8] active:scale-95 lg:h-10 lg:w-10
-              "
+              className="glass flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-fg-2 active:scale-95 lg:h-10 lg:w-10"
             >
               <ArrowRight size={18} strokeWidth={2} />
             </button>
@@ -103,7 +99,7 @@ function SearchPage() {
               <Search
                 size={17}
                 strokeWidth={2}
-                className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#64748B]"
+                className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-fg-3"
               />
               <input
                 type="text"
@@ -111,24 +107,14 @@ function SearchPage() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="جستجو در دسته، توضیحات یا مبلغ..."
                 autoFocus
-                className="
-                  glass-inner w-full rounded-2xl
-                  py-3 pr-10 pl-10 text-[13px] text-[#F8FAFC]
-                  outline-none placeholder:text-[#64748B]
-                  focus:border-[#00D1A7]/50
-                  lg:py-2.5
-                "
+                className="glass-inner w-full rounded-2xl py-3 pr-10 pl-10 text-base text-fg-1 outline-none placeholder:text-fg-3 focus:border-primary/50 lg:py-2.5"
               />
               {query && (
                 <button
                   type="button"
                   onClick={() => setQuery('')}
                   aria-label="پاک کردن"
-                  className="
-                    absolute left-2.5 top-1/2 flex h-7 w-7 -translate-y-1/2
-                    items-center justify-center rounded-full text-[#64748B]
-                    transition-colors hover:bg-white/[0.08] hover:text-[#F8FAFC]
-                  "
+                  className="absolute left-2.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-fg-3 transition-colors hover:bg-fill-3 hover:text-fg-1"
                 >
                   <X size={14} />
                 </button>
@@ -136,7 +122,6 @@ function SearchPage() {
             </div>
           </div>
 
-          {/* فیلترها */}
           <div className="mt-3 flex gap-1.5">
             {FILTERS.map((f) => {
               const active = filter === f.id;
@@ -146,12 +131,10 @@ function SearchPage() {
                   type="button"
                   onClick={() => setFilter(f.id)}
                   className={[
-                    'flex min-h-[34px] items-center rounded-xl px-3.5 backdrop-blur-md',
-                    'text-[11.5px] font-semibold border',
-                    'transition-all active:scale-[0.97]',
+                    'flex min-h-[34px] items-center rounded-xl px-3.5 text-xs font-semibold backdrop-blur-md transition-all active:scale-[0.97]',
                     active
-                      ? 'border-[#00D1A7]/30 bg-[#00D1A7]/[0.14] text-[#00D1A7]'
-                      : 'border-white/[0.08] bg-white/[0.04] text-[#94A3B8] hover:bg-white/[0.06]',
+                      ? 'border border-primary/30 bg-primary/[0.14] text-primary'
+                      : 'border border-border-1 bg-fill-1 text-fg-2 hover:bg-fill-2',
                   ].join(' ')}
                 >
                   {f.label}
@@ -162,23 +145,22 @@ function SearchPage() {
         </div>
       </div>
 
-      {/* نتایج */}
       <div className="px-4 pt-4 lg:px-0 lg:pt-6">
         {loading && (
-          <p className="py-10 text-center text-[12px] text-[#64748B]">
+          <p className="py-10 text-center text-sm text-fg-3">
             در حال بارگذاری...
           </p>
         )}
 
         {showHint && (
           <div className="glass rounded-3xl px-5 py-10 text-center">
-            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#00D1A7]/25 bg-[#00D1A7]/[0.14] text-[#00D1A7]">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/25 bg-primary/[0.14] text-primary">
               <Search size={24} strokeWidth={1.8} />
             </div>
-            <p className="text-[13.5px] font-semibold text-[#F8FAFC]">
+            <p className="text-base font-semibold text-fg-1">
               جستجو در تراکنش‌ها
             </p>
-            <p className="mt-1.5 text-[11.5px] leading-relaxed text-[#94A3B8]">
+            <p className="mt-1.5 text-xs leading-relaxed text-fg-2">
               با تایپ نام دسته، توضیحات یا مبلغ، تراکنش مورد نظرت رو پیدا کن.
             </p>
           </div>
@@ -186,10 +168,10 @@ function SearchPage() {
 
         {showEmpty && (
           <div className="glass rounded-3xl px-5 py-10 text-center">
-            <p className="text-[13.5px] font-semibold text-[#94A3B8]">
+            <p className="text-base font-semibold text-fg-2">
               نتیجه‌ای پیدا نشد
             </p>
-            <p className="mt-1.5 text-[11.5px] text-[#64748B]">
+            <p className="mt-1.5 text-xs text-fg-3">
               عبارت دیگری را امتحان کن یا فیلتر را تغییر بده.
             </p>
           </div>
@@ -197,8 +179,8 @@ function SearchPage() {
 
         {showResults && (
           <>
-            <p className="mb-3 text-[11px] text-[#64748B]">
-              {new Intl.NumberFormat('fa-AF').format(results.length)} نتیجه
+            <p className="mb-3 text-xs text-fg-3">
+              {formatNumber(results.length)} نتیجه
             </p>
             <TransactionList
               transactions={results}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Search, WalletCards } from 'lucide-react';
+import { FileText, Moon, Search, Sun } from 'lucide-react';
 
 import PeriodTabs from '../common/PeriodTabs';
 import PeriodNavigator from '../common/PeriodNavigator';
@@ -17,10 +17,8 @@ import { getCategories } from '../services/categoryService';
 import { getTransactions } from '../services/transactionService';
 import { exportTransactionsToPDF } from '../services/exportService';
 import { getPeriodRange, getPeriodOffsetLabel } from '../utils/dates';
-
-function formatNumber(value) {
-  return new Intl.NumberFormat('fa-AF').format(Math.round(value || 0));
-}
+import { formatNumber } from '../utils/formatting';
+import { ROUTES } from '../utils/constants';
 
 function HomePage() {
   const navigate = useNavigate();
@@ -28,6 +26,8 @@ function HomePage() {
   const period = useAppStore((s) => s.period);
   const periodOffset = useAppStore((s) => s.periodOffset);
   const dataVersion = useAppStore((s) => s.dataVersion);
+  const theme = useAppStore((s) => s.theme);
+  const toggleTheme = useAppStore((s) => s.toggleTheme);
 
   const { summary, trend, recentTransactions, comparison, loading } =
     useAnalytics({ period, periodOffset });
@@ -88,62 +88,51 @@ function HomePage() {
     }
   }
 
-  const Header = (
-    <header className="flex items-start justify-between gap-3">
-      <div>
-        <p className="text-[11px] font-medium text-[#64748B] lg:text-[12px]">
-          مدیریت مالی شخصی
-        </p>
-        <h1 className="mt-1 text-[21px] font-bold text-[#F8FAFC] lg:text-[26px]">
-          خزانه
-        </h1>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => navigate('/search')}
-          aria-label="جستجو"
-          className="
-            glass flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl
-            text-[#94A3B8] transition-colors
-            hover:border-[#00D1A7]/30 hover:text-[#00D1A7]
-            active:scale-95
-            lg:h-10 lg:w-10
-          "
-        >
-          <Search size={18} strokeWidth={1.9} />
-        </button>
-
-        <button
-          type="button"
-          onClick={handleExportPDF}
-          disabled={exporting}
-          className="
-            glass flex h-11 shrink-0 items-center gap-2 rounded-2xl px-3.5
-            text-[11.5px] font-semibold text-[#00D1A7]
-            transition-all hover:border-[#00D1A7]/30
-            active:scale-95 disabled:opacity-40
-            lg:h-10 lg:text-[12px]
-          "
-          aria-label="خروجی PDF ترکیبی"
-        >
-          <FileText size={17} strokeWidth={1.9} />
-          {exporting ? '...' : 'PDF'}
-        </button>
-
-        <div className="glass flex h-11 w-11 items-center justify-center rounded-2xl text-[#00D1A7] lg:h-10 lg:w-10">
-          <WalletCards size={20} strokeWidth={1.9} />
-        </div>
-      </div>
-    </header>
-  );
-
   return (
     <div className="px-4 pb-6 pt-6 lg:px-0 lg:pt-8">
-      {Header}
+      <header className="flex items-start justify-between gap-3">
+        <div>
+          <p className="kh-page-subtitle">مدیریت مالی شخصی</p>
+          <h1 className="kh-page-title">خزانه</h1>
+        </div>
 
-      {/* موبایل */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigate(ROUTES.search)}
+            aria-label="جستجو"
+            className="glass kh-header-icon-btn"
+          >
+            <Search size={18} strokeWidth={1.9} />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleExportPDF}
+            disabled={exporting}
+            aria-label="خروجی PDF ترکیبی"
+            className="glass flex h-11 shrink-0 items-center gap-2 rounded-2xl px-3.5 text-xs font-semibold text-primary transition-all hover:border-primary/30 active:scale-95 disabled:opacity-40 lg:h-10 lg:text-sm"
+          >
+            <FileText size={17} strokeWidth={1.9} />
+            {exporting ? '...' : 'PDF'}
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'حالت روشن' : 'حالت تاریک'}
+            className="glass kh-header-icon-btn text-primary"
+          >
+            {theme === 'dark' ? (
+              <Sun size={18} strokeWidth={1.9} />
+            ) : (
+              <Moon size={18} strokeWidth={1.9} />
+            )}
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile */}
       <div className="lg:hidden">
         <section className="mt-6">
           <PeriodTabs />
@@ -163,12 +152,12 @@ function HomePage() {
 
         <section className="mt-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-[15px] font-bold text-[#F8FAFC]">روند مالی</h2>
-            <span className="text-[10.5px] text-[#64748B]">
+            <h2 className="text-lg font-bold text-fg-1">روند مالی</h2>
+            <span className="text-2xs text-fg-3">
               {getPeriodOffsetLabel(period, periodOffset)}
             </span>
           </div>
-          <div className="glass mt-3 overflow-hidden rounded-[24px] py-3">
+          <div className="glass mt-3 overflow-hidden rounded-3xl py-3">
             {loading ? (
               <SkeletonChart height={250} />
             ) : (
@@ -183,7 +172,7 @@ function HomePage() {
 
         {loading ? (
           <section className="mt-6">
-            <h2 className="mb-3 text-[15px] font-bold text-[#F8FAFC]">
+            <h2 className="mb-3 text-lg font-bold text-fg-1">
               تراکنش‌های اخیر
             </h2>
             <SkeletonList rows={4} />
@@ -198,7 +187,7 @@ function HomePage() {
         )}
       </div>
 
-      {/* دسکتاپ */}
+      {/* Desktop */}
       <div className="hidden lg:mt-6 lg:block lg:space-y-4">
         <div className="grid grid-cols-12 items-stretch gap-4">
           <div className="col-span-4 flex flex-col gap-3">
@@ -210,19 +199,15 @@ function HomePage() {
             <button
               type="button"
               onClick={() => setSummaryOpen(true)}
-              className="
-                glass flex h-full w-full flex-col justify-center rounded-[22px]
-                p-5 text-right transition-all
-                hover:border-[#00D1A7]/30 active:scale-[0.99] lg:p-6
-              "
+              className="glass flex h-full w-full flex-col justify-center rounded-3xl p-5 text-right transition-all hover:border-primary/30 active:scale-[0.99] lg:p-6"
             >
-              <p className="text-[11px] font-medium text-[#64748B] lg:text-[12px]">
+              <p className="text-xs font-medium text-fg-3 lg:text-sm">
                 خلاصه‌ی همه‌ی دوره‌ها
               </p>
-              <p className="mt-2 text-[15px] font-extrabold text-[#00D1A7] lg:text-[16px]">
+              <p className="mt-2 text-lg font-extrabold text-primary lg:text-xl">
                 امروز، هفته، ماه، سال، همه
               </p>
-              <p className="mt-1 text-[10.5px] text-[#64748B]">
+              <p className="mt-1 text-2xs text-fg-3">
                 برای مشاهده کلیک کنید
               </p>
             </button>
@@ -232,19 +217,15 @@ function HomePage() {
             <button
               type="button"
               onClick={() => setSummaryOpen(true)}
-              className="
-                glass-strong flex h-full w-full flex-col justify-center rounded-[22px]
-                border-[#00D1A7]/20 p-5 text-right transition-all
-                active:scale-[0.99] lg:p-6
-              "
+              className="glass-strong flex h-full w-full flex-col justify-center rounded-3xl border-primary/20 p-5 text-right transition-all active:scale-[0.99] lg:p-6"
             >
-              <p className="text-[11px] font-medium text-[#94A3B8] lg:text-[12px]">
+              <p className="text-xs font-medium text-fg-2 lg:text-sm">
                 موجودی از ابتدا
               </p>
-              <p className="mt-2 text-[22px] font-extrabold tabular-nums text-[#F8FAFC] lg:text-[24px]">
+              <p className="mt-2 text-2xl font-extrabold tabular-nums text-fg-1 lg:text-3xl">
                 {formatNumber(summary.balance)}
               </p>
-              <p className="mt-1 text-[10.5px] text-[#64748B]">افغانی</p>
+              <p className="mt-1 text-2xs text-fg-3">افغانی</p>
             </button>
           </div>
         </div>
@@ -259,12 +240,10 @@ function HomePage() {
 
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-8">
-            <div className="glass flex h-[480px] flex-col overflow-hidden rounded-[24px]">
+            <div className="glass flex h-[480px] flex-col overflow-hidden rounded-3xl">
               <div className="flex shrink-0 items-center justify-between px-5 pt-4 pb-2">
-                <h2 className="text-[16px] font-bold text-[#F8FAFC]">
-                  روند مالی
-                </h2>
-                <span className="text-[12px] text-[#64748B]">
+                <h2 className="text-xl font-bold text-fg-1">روند مالی</h2>
+                <span className="text-sm text-fg-3">
                   {getPeriodOffsetLabel(period, periodOffset)}
                 </span>
               </div>
@@ -285,17 +264,17 @@ function HomePage() {
           </div>
 
           <div className="col-span-4">
-            <div className="glass flex h-[480px] flex-col overflow-hidden rounded-[24px]">
+            <div className="glass flex h-[480px] flex-col overflow-hidden rounded-3xl">
               <div className="flex shrink-0 items-center justify-between px-5 pt-4 pb-3">
-                <h2 className="text-[15px] font-bold text-[#F8FAFC]">
+                <h2 className="text-lg font-bold text-fg-1">
                   تراکنش‌های اخیر
                 </h2>
-                <span className="text-[11px] text-[#64748B]">
+                <span className="text-xs text-fg-3">
                   {formatNumber(recentTransactions.length)} تراکنش
                 </span>
               </div>
 
-              <div className="mx-5 h-px shrink-0 bg-white/[0.08]" />
+              <div className="mx-5 h-px shrink-0 bg-border-1" />
 
               <div className="min-h-0 flex-1 overflow-y-auto">
                 {loading ? (
@@ -303,10 +282,10 @@ function HomePage() {
                 ) : recentTransactions.length === 0 ? (
                   <div className="flex h-full items-center justify-center px-4 text-center">
                     <div>
-                      <p className="text-[13px] font-semibold text-[#94A3B8]">
+                      <p className="text-base font-semibold text-fg-2">
                         هنوز تراکنشی ثبت نشده است
                       </p>
-                      <p className="mt-1 text-[11px] text-[#64748B]">
+                      <p className="mt-1 text-xs text-fg-3">
                         از دکمه‌ی + در سایدبار استفاده کن.
                       </p>
                     </div>
@@ -318,8 +297,7 @@ function HomePage() {
                         key={t.id}
                         className="tx-list-item"
                         style={{
-                          contentVisibility:
-                            index >= 8 ? 'auto' : 'visible',
+                          contentVisibility: index >= 8 ? 'auto' : 'visible',
                         }}
                       >
                         <TransactionItem
