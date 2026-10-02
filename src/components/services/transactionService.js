@@ -1,22 +1,29 @@
+// ============================================================
+// Transaction Service — i18n-aware
+// ============================================================
+
 import db from '../db/database';
+import i18n from '../../i18n';
 import { MEMBER_ID } from '../utils/constants';
+
+const t = (key, opts = {}) => i18n.t(key, opts);
 
 function normalizeTransaction(transaction) {
   const amount = Number(transaction.amount);
 
   if (!Number.isFinite(amount) || amount <= 0) {
-    throw new Error('مبلغ باید بیشتر از صفر باشد.');
+    throw new Error(t('errors.amountPositive'));
   }
   if (!['income', 'expense'].includes(transaction.type)) {
-    throw new Error('نوع تراکنش نامعتبر است.');
+    throw new Error(t('errors.transactionTypeInvalid'));
   }
   if (!transaction.categoryId) {
-    throw new Error('دسته‌بندی را انتخاب کنید.');
+    throw new Error(t('errors.categoryRequired'));
   }
 
   const date = transaction.date ? new Date(transaction.date) : new Date();
   if (Number.isNaN(date.getTime())) {
-    throw new Error('تاریخ تراکنش نامعتبر است.');
+    throw new Error(t('errors.transactionDateInvalid'));
   }
 
   return {
@@ -57,7 +64,8 @@ export async function getTransactions({
     .toArray();
 
   if (type) transactions = transactions.filter((t) => t.type === type);
-  if (categoryId) transactions = transactions.filter((t) => t.categoryId === categoryId);
+  if (categoryId)
+    transactions = transactions.filter((t) => t.categoryId === categoryId);
   if (startDate) {
     const start = new Date(startDate);
     transactions = transactions.filter((t) => new Date(t.date) >= start);
@@ -78,7 +86,7 @@ export async function getTransactionById(id) {
 
 export async function updateTransaction(id, input) {
   const existing = await db.transactions.get(id);
-  if (!existing) throw new Error('تراکنش پیدا نشد.');
+  if (!existing) throw new Error(t('errors.transactionNotFound'));
 
   const normalized = normalizeTransaction(input);
   const updated = { ...existing, ...normalized, updatedAt: Date.now() };

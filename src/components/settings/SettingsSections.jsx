@@ -1,4 +1,5 @@
 import { ChevronLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function SettingsGroup({ children }) {
   return (
@@ -48,7 +49,7 @@ export function SettingsButtonRow({
       <ChevronLeft
         size={18}
         strokeWidth={1.8}
-        className="shrink-0 text-fg-3"
+        className="shrink-0 text-fg-3 rtl:block ltr:rotate-180"
       />
     </button>
   );
@@ -102,6 +103,8 @@ export function SettingsToggleRow({
 }
 
 export function SettingsProfileCard({ name, onClick }) {
+  const { t } = useTranslation();
+
   return (
     <button
       type="button"
@@ -116,26 +119,33 @@ export function SettingsProfileCard({ name, onClick }) {
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-md font-bold text-fg-1 lg:text-lg">
-          {name || 'کاربر خزانه'}
+          {name || t('settings.userDefault')}
         </p>
         <p className="mt-1 text-xs text-fg-2 lg:text-sm">
-          حساب محلی روی همین دستگاه
+          {t('settings.localAccount')}
         </p>
       </div>
 
-      <ChevronLeft size={18} className="shrink-0 text-fg-3" />
+      <ChevronLeft
+        size={18}
+        className="shrink-0 text-fg-3 rtl:block ltr:rotate-180"
+      />
     </button>
   );
 }
 
 export function StatusBadge({
   active,
-  activeLabel = 'فعال',
-  inactiveLabel = 'غیرفعال',
+  activeLabel,
+  inactiveLabel,
 }) {
+  const { t } = useTranslation();
+  const finalActiveLabel = activeLabel || t('security.active');
+  const finalInactiveLabel = inactiveLabel || t('security.inactive');
+
   return (
     <span className="kh-status-badge" data-active={active}>
-      {active ? activeLabel : inactiveLabel}
+      {active ? finalActiveLabel : finalInactiveLabel}
     </span>
   );
 }

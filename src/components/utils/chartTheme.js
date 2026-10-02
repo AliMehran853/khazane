@@ -2,6 +2,8 @@
 // Chart theme — reads CSS tokens so ApexCharts respects theme
 // ============================================================
 
+import i18n from '../../i18n';
+
 const FALLBACK = {
   income: '#00d1a7',
   expense: '#f43f5e',
@@ -12,10 +14,16 @@ const FALLBACK = {
   tooltipText: '#f8fafc',
   fontFamily: 'Vazirmatn, sans-serif',
   isLight: false,
+  isRTL: true,
 };
 
 export function getChartTheme() {
-  if (typeof document === 'undefined') return FALLBACK;
+  const lang = i18n.language || 'fa';
+  const isRTL = lang === 'fa';
+
+  if (typeof document === 'undefined') {
+    return { ...FALLBACK, isRTL };
+  }
 
   const root = getComputedStyle(document.documentElement);
   const get = (name) => root.getPropertyValue(name).trim();
@@ -30,6 +38,7 @@ export function getChartTheme() {
     tooltipText: get('--kh-chart-tooltip-text') || FALLBACK.tooltipText,
     fontFamily: 'Vazirmatn, sans-serif',
     isLight: document.documentElement.getAttribute('data-theme') === 'light',
+    isRTL,
   };
 }
 

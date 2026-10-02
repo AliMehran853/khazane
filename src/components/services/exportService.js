@@ -1,8 +1,15 @@
+// ============================================================
+// Export Service — PDF generation (locale & calendar aware)
+// ============================================================
+
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+import i18n from '../../i18n';
 import { formatNumber } from '../utils/formatting';
 import { formatTransactionDate, getTodayShort } from '../utils/dates';
+
+const t = (key, opts = {}) => i18n.t(key, opts);
 
 function escapeHtml(str) {
   return String(str || '')
@@ -20,55 +27,64 @@ function buildReportHTML({
   periodLabel,
   totalIncome,
   totalExpense,
-  currency,
+  currencyLabel,
   showSummary,
 }) {
+  const lang = i18n.language || 'fa';
+  const dir = lang === 'fa' ? 'rtl' : 'ltr';
+  const textAlign = lang === 'fa' ? 'right' : 'left';
+  const fontFamily =
+    lang === 'fa'
+      ? "'Vazirmatn', Tahoma, sans-serif"
+      : "-apple-system, 'Segoe UI', Roboto, sans-serif";
+
   const rowsHtml = transactions.length
     ? transactions
-        .map((t) => {
-          const cat = categoriesMap[t.categoryId];
-          const typeLabel = t.type === 'income' ? 'درآمد' : 'مصرف';
-          const color = t.type === 'income' ? '#009d81' : '#be123c';
-          const sign = t.type === 'income' ? '+' : '-';
+        .map((tr) => {
+          const cat = categoriesMap[tr.categoryId];
+          const typeLabel =
+            tr.type === 'income' ? t('transaction.income') : t('transaction.expense');
+          const color = tr.type === 'income' ? '#009d81' : '#be123c';
+          const sign = tr.type === 'income' ? '+' : '-';
           return `
             <tr>
-              <td>${escapeHtml(cat?.name || 'بدون دسته')}</td>
-              <td>${escapeHtml(t.note || '-')}</td>
+              <td>${escapeHtml(cat?.name || t('transaction.uncategorized'))}</td>
+              <td>${escapeHtml(tr.note || '-')}</td>
               <td>${escapeHtml(typeLabel)}</td>
               <td style="color:${color};font-weight:700;direction:ltr;text-align:center;">
-                ${sign}${formatNumber(t.amount)}
+                ${sign}${formatNumber(tr.amount)}
               </td>
-              <td>${escapeHtml(formatTransactionDate(t.date))}</td>
+              <td>${escapeHtml(formatTransactionDate(tr.date))}</td>
             </tr>
           `;
         })
         .join('')
     : `<tr><td colspan="5" style="text-align:center;padding:30px;color:#888;">
-        هیچ تراکنشی یافت نشد
+        ${escapeHtml(t('pdf.noTransactions'))}
       </td></tr>`;
 
   const summaryHtml = showSummary
     ? `
       <div class="summary">
         <div class="summary-card">
-          <div class="label">مجموع درآمد</div>
+          <div class="label">${escapeHtml(t('summary.totalIncome'))}</div>
           <div class="value income-value" style="direction:ltr;">
-            ${formatNumber(totalIncome)} ${escapeHtml(currency)}
+            ${formatNumber(totalIncome)} ${escapeHtml(currencyLabel)}
           </div>
         </div>
         <div class="summary-card">
-          <div class="label">مجموع مصارف</div>
+          <div class="label">${escapeHtml(t('summary.totalExpense'))}</div>
           <div class="value expense-value" style="direction:ltr;">
-            ${formatNumber(totalExpense)} ${escapeHtml(currency)}
+            ${formatNumber(totalExpense)} ${escapeHtml(currencyLabel)}
           </div>
         </div>
       </div>`
     : '';
 
   return `
-    <div class="page">
+    <div class="page" dir="${dir}" style="font-family:${fontFamily};">
       <div class="header">
-        <div class="brand">خزانه</div>
+        <div class="brand">${escapeHtml(t('app.name'))}</div>
         <div class="date">${escapeHtml(getTodayShort())}</div>
       </div>
       <h1>${escapeHtml(title)}</h1>
@@ -77,17 +93,17 @@ function buildReportHTML({
       <table>
         <thead>
           <tr>
-            <th style="width:18%;">دسته‌بندی</th>
-            <th style="width:32%;">توضیحات</th>
-            <th style="width:12%;">نوع</th>
-            <th style="width:18%;">مبلغ (${escapeHtml(currency)})</th>
-            <th style="width:20%;">تاریخ</th>
+            <th style="width:18%;text-align:${textAlign};">${escapeHtml(t('pdf.category'))}</th>
+            <th style="width:32%;text-align:${textAlign};">${escapeHtml(t('pdf.note'))}</th>
+            <th style="width:12%;text-align:${textAlign};">${escapeHtml(t('pdf.type'))}</th>
+            <th style="width:18%;text-align:center;">${escapeHtml(t('pdf.amount'))} (${escapeHtml(currencyLabel)})</th>
+            <th style="width:20%;text-align:${textAlign};">${escapeHtml(t('pdf.date'))}</th>
           </tr>
         </thead>
         <tbody>${rowsHtml}</tbody>
       </table>
       <div class="footer">
-        ساخته شده با خزانه • مدیریت درآمد و مصارف شخصی
+        ${escapeHtml(t('pdf.footer'))}
       </div>
     </div>
   `;
@@ -100,8 +116,6 @@ const REPORT_STYLES = `
     padding: 32px 28px;
     background: #ffffff;
     color: #0f172a;
-    font-family: 'Vazirmatn', 'Tahoma', sans-serif;
-    direction: rtl;
   }
   .header {
     border-bottom: 2px solid #00D1A7;
@@ -129,7 +143,7 @@ const REPORT_STYLES = `
   .expense-value { color: #be123c; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead { background: #f7faf9; }
-  th, td { padding: 10px 12px; border-bottom: 1px solid #eee; text-align: right; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid #eee; }
   th { font-weight: 700; font-size: 12px; color: #555; }
   tbody tr:last-child td { border-bottom: none; }
   .footer { margin-top: 30px; font-size: 10px; color: #aaa; text-align: center; }
@@ -178,14 +192,17 @@ function downloadBlob(blob, fileName) {
 export async function exportTransactionsToPDF({
   transactions = [],
   categoriesMap = {},
-  title = 'گزارش',
+  title,
   periodLabel = '',
   totalIncome = 0,
   totalExpense = 0,
-  currency = 'افغانی',
+  currencyLabel,
   showSummary = true,
   fileName,
 }) {
+  const finalTitle = title || t('pdf.reportTitle');
+  const finalCurrency = currencyLabel || t('currencies.AFN.label');
+
   const container = document.createElement('div');
   container.style.position = 'fixed';
   container.style.left = '-99999px';
@@ -200,11 +217,11 @@ export async function exportTransactionsToPDF({
   inner.innerHTML = buildReportHTML({
     transactions,
     categoriesMap,
-    title,
+    title: finalTitle,
     periodLabel,
     totalIncome,
     totalExpense,
-    currency,
+    currencyLabel: finalCurrency,
     showSummary,
   });
 

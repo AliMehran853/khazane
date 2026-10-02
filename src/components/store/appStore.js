@@ -15,6 +15,13 @@ function loadTheme() {
 export const useAppStore = create((set) => ({
   theme: loadTheme(),
 
+  language: 'fa',
+  calendarId: 'afghan',
+  currencyCode: 'AFN',
+
+  // ⭐ برای trigger کردن re-render نمودارها و کامپوننت‌های وابسته به زبان
+  langVersion: 0,
+
   period: 'daily',
   periodOffset: 0,
 
@@ -49,6 +56,16 @@ export const useAppStore = create((set) => ({
       }
       return { theme: next };
     }),
+
+  setLanguage: (language) => set({ language }),
+  setCalendarId: (calendarId) => set({ calendarId }),
+  setCurrencyCode: (currencyCode) => set({ currencyCode }),
+
+  setRegion: ({ language, calendarId, currencyCode }) =>
+    set({ language, calendarId, currencyCode }),
+
+  bumpLangVersion: () =>
+    set((state) => ({ langVersion: state.langVersion + 1 })),
 
   setPeriod: (period) => set({ period, periodOffset: 0 }),
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Search, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import TransactionList from '../transactions/TransactionList';
 
@@ -8,12 +9,6 @@ import { getTransactions } from '../services/transactionService';
 import { getCategories } from '../services/categoryService';
 import { useAppStore } from '../store/appStore';
 import { toEnglishDigits, formatNumber } from '../utils/formatting';
-
-const FILTERS = [
-  { id: 'all', label: 'همه' },
-  { id: 'income', label: 'درآمد' },
-  { id: 'expense', label: 'مصارف' },
-];
 
 function normalizeText(str) {
   return String(str || '')
@@ -26,6 +21,7 @@ function normalizeText(str) {
 }
 
 function SearchPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dataVersion = useAppStore((s) => s.dataVersion);
 
@@ -62,15 +58,21 @@ function SearchPage() {
     };
   }, [dataVersion]);
 
+  const filters = [
+    { id: 'all', label: t('search.filters.all') },
+    { id: 'income', label: t('search.filters.income') },
+    { id: 'expense', label: t('search.filters.expense') },
+  ];
+
   const results = useMemo(() => {
     const q = normalizeText(toEnglishDigits(query));
     if (!q) return [];
 
-    return transactions.filter((t) => {
-      if (filter !== 'all' && t.type !== filter) return false;
-      const cat = categoriesMap[t.categoryId];
+    return transactions.filter((tx) => {
+      if (filter !== 'all' && tx.type !== filter) return false;
+      const cat = categoriesMap[tx.categoryId];
       const haystack = normalizeText(
-        `${cat?.name || ''} ${t.note || ''} ${t.amount || ''}`,
+        `${cat?.name || ''} ${tx.note || ''} ${tx.amount || ''}`,
       );
       return haystack.includes(q);
     });
@@ -89,23 +91,23 @@ function SearchPage() {
             <button
               type="button"
               onClick={() => navigate(-1)}
-              aria-label="بازگشت"
+              aria-label={t('common.back')}
               className="glass flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-fg-2 active:scale-95 lg:h-10 lg:w-10"
             >
-              <ArrowRight size={18} strokeWidth={2} />
+              <ArrowRight size={18} strokeWidth={2} className="rtl:block ltr:rotate-180" />
             </button>
 
             <div className="relative flex-1">
               <Search
                 size={17}
                 strokeWidth={2}
-                className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-fg-3"
+                className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-fg-3 rtl:right-3.5 ltr:left-3.5"
               />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="جستجو در دسته، توضیحات یا مبلغ..."
+                placeholder={t('search.placeholder')}
                 autoFocus
                 className="glass-inner w-full rounded-2xl py-3 pr-10 pl-10 text-base text-fg-1 outline-none placeholder:text-fg-3 focus:border-primary/50 lg:py-2.5"
               />
@@ -113,8 +115,8 @@ function SearchPage() {
                 <button
                   type="button"
                   onClick={() => setQuery('')}
-                  aria-label="پاک کردن"
-                  className="absolute left-2.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-fg-3 transition-colors hover:bg-fill-3 hover:text-fg-1"
+                  aria-label="clear"
+                  className="absolute left-2.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-fg-3 transition-colors hover:bg-fill-3 hover:text-fg-1 rtl:left-2.5 ltr:right-2.5"
                 >
                   <X size={14} />
                 </button>
@@ -123,7 +125,7 @@ function SearchPage() {
           </div>
 
           <div className="mt-3 flex gap-1.5">
-            {FILTERS.map((f) => {
+            {filters.map((f) => {
               const active = filter === f.id;
               return (
                 <button
@@ -148,7 +150,7 @@ function SearchPage() {
       <div className="px-4 pt-4 lg:px-0 lg:pt-6">
         {loading && (
           <p className="py-10 text-center text-sm text-fg-3">
-            در حال بارگذاری...
+            {t('common.loading')}
           </p>
         )}
 
@@ -158,10 +160,10 @@ function SearchPage() {
               <Search size={24} strokeWidth={1.8} />
             </div>
             <p className="text-base font-semibold text-fg-1">
-              جستجو در تراکنش‌ها
+              {t('search.hintTitle')}
             </p>
             <p className="mt-1.5 text-xs leading-relaxed text-fg-2">
-              با تایپ نام دسته، توضیحات یا مبلغ، تراکنش مورد نظرت رو پیدا کن.
+              {t('search.hintText')}
             </p>
           </div>
         )}
@@ -169,10 +171,10 @@ function SearchPage() {
         {showEmpty && (
           <div className="glass rounded-3xl px-5 py-10 text-center">
             <p className="text-base font-semibold text-fg-2">
-              نتیجه‌ای پیدا نشد
+              {t('search.noResults')}
             </p>
             <p className="mt-1.5 text-xs text-fg-3">
-              عبارت دیگری را امتحان کن یا فیلتر را تغییر بده.
+              {t('search.noResultsHint')}
             </p>
           </div>
         )}
@@ -180,7 +182,9 @@ function SearchPage() {
         {showResults && (
           <>
             <p className="mb-3 text-xs text-fg-3">
-              {formatNumber(results.length)} نتیجه
+              {t('search.resultCount', {
+                count: formatNumber(results.length),
+              })}
             </p>
             <TransactionList
               transactions={results}

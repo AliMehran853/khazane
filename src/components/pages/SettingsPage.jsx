@@ -6,12 +6,15 @@ import {
   Coins,
   Database,
   Fingerprint,
+  Globe,
   LogOut,
+  Languages,
   RotateCcw,
   ShieldCheck,
   Trash2,
   X,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import {
   SettingsGroup,
@@ -32,12 +35,11 @@ import { useDailyReminder } from '../hooks/useDailyReminder';
 import { useBiometricCheck } from '../hooks/useBiometricCheck';
 import { useHaptic } from '../hooks/useHaptic';
 import { SESSION_UNLOCK_KEY } from '../hooks/useAppLock';
+import { useCurrencyLabel } from '../hooks/useCurrencyLabel';
 
 import {
   getUserName,
   setUserName,
-  getCurrencyLabel,
-  setCurrencyLabel,
   isReminderEnabled,
   setReminderEnabled,
   getReminderTime,
@@ -59,12 +61,32 @@ import {
   clearBiometric,
 } from '../services/securityService';
 
-import { CURRENCY_OPTIONS, APP_VERSION, PIN_LENGTH } from '../utils/constants';
+import {
+  getCurrentRegionId,
+  getCurrentLanguage,
+  getCurrentCurrencyCode,
+  updateLanguage,
+  updateRegion,
+  changeCurrencyWithReset,
+  countTransactions,
+} from '../../services/regionService';
+
+import { REGIONS, REGION_ORDER } from '../../config/regions';
+import { APP_VERSION, PIN_LENGTH } from '../utils/constants';
 import { getTodayShort } from '../utils/dates';
-import { formatTime12FromString, parseTime24, toTime24 } from '../utils/formatting';
+import {
+  formatTime12FromString,
+  parseTime24,
+  toTime24,
+} from '../utils/formatting';
 import { lockBody } from '../utils/scrollLock';
 
+/* ============================================================
+   Time Picker
+   ============================================================ */
+
 function TimePicker({ value, onChange }) {
+  const { t } = useTranslation();
   const { hour, minute, period } = parseTime24(value);
   const hours = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   const minutes = [0, 15, 30, 45];
@@ -99,7 +121,9 @@ function TimePicker({ value, onChange }) {
   return (
     <div className="space-y-5">
       <div>
-        <p className="mb-2 text-xs font-medium text-fg-2">ساعت</p>
+        <p className="mb-2 text-xs font-medium text-fg-2">
+          {t('reminder.hour')}
+        </p>
         <div className="grid grid-cols-4 gap-2">
           {hours.map((h) => (
             <Option key={h} active={h === hour} onClick={() => setHour(h)}>
@@ -110,7 +134,9 @@ function TimePicker({ value, onChange }) {
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-medium text-fg-2">دقیقه</p>
+        <p className="mb-2 text-xs font-medium text-fg-2">
+          {t('reminder.minute')}
+        </p>
         <div className="grid grid-cols-4 gap-2">
           {minutes.map((m) => (
             <Option key={m} active={m === minute} onClick={() => setMinute(m)}>
@@ -121,18 +147,20 @@ function TimePicker({ value, onChange }) {
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-medium text-fg-2">نوبت</p>
+        <p className="mb-2 text-xs font-medium text-fg-2">
+          {t('reminder.period')}
+        </p>
         <div className="grid grid-cols-2 gap-2">
-          {['صبح', 'شب'].map((p) => (
+          {['morning', 'night'].map((p) => (
             <Option key={p} active={p === period} onClick={() => setPeriod(p)}>
-              {p}
+              {t(`reminder.${p}`)}
             </Option>
           ))}
         </div>
       </div>
 
       <div className="rounded-2xl border border-primary/25 bg-primary/[0.08] p-4 text-center backdrop-blur-md">
-        <p className="text-xs text-fg-2">زمان یادآوری</p>
+        <p className="text-xs text-fg-2">{t('reminder.displayTime')}</p>
         <p className="mt-1 text-2xl font-extrabold text-primary">
           {formatTime12FromString(value)}
         </p>
@@ -141,7 +169,12 @@ function TimePicker({ value, onChange }) {
   );
 }
 
+/* ============================================================
+   PIN Setup Flow
+   ============================================================ */
+
 function PinSetupFlow({ onDone, onCancel }) {
+  const { t } = useTranslation();
   const [step, setStep] = useState('enter');
   const [firstPin, setFirstPin] = useState('');
   const [pinValue, setPinValue] = useState('');
@@ -168,13 +201,13 @@ function PinSetupFlow({ onDone, onCancel }) {
               await savePinToStorage(next);
               onDone?.();
             } catch (err) {
-              setError(err?.message || 'ذخیره رمز ناموفق بود.');
+              setError(err?.message || t('security.pinSaveFailed'));
               setPinValue('');
               setFirstPin('');
               setStep('enter');
             }
           } else {
-            setError('رمز مطابقت ندارد. دوباره تلاش کنید.');
+            setError(t('security.pinMismatch'));
             setPinValue('');
             setFirstPin('');
             setStep('enter');
@@ -188,10 +221,12 @@ function PinSetupFlow({ onDone, onCancel }) {
   return (
     <div className="flex flex-col items-center">
       <p className="text-md font-bold text-fg-1">
-        {step === 'enter' ? 'رمز جدید را وارد کنید' : 'رمز را دوباره وارد کنید'}
+        {step === 'enter' ? t('security.pinNew') : t('security.pinConfirm')}
       </p>
       <p className="mt-1.5 text-xs text-fg-3">
-        {step === 'enter' ? '۴ رقم دلخواه' : 'برای اطمینان، تکرار کنید'}
+        {step === 'enter'
+          ? t('security.pinEnterHint')
+          : t('security.pinConfirmHint')}
       </p>
 
       <div className="mt-5 flex items-center gap-3" dir="ltr">
@@ -225,11 +260,15 @@ function PinSetupFlow({ onDone, onCancel }) {
         onClick={onCancel}
         className="mt-5 text-sm font-semibold text-fg-2"
       >
-        انصراف
+        {t('common.cancel')}
       </button>
     </div>
   );
 }
+
+/* ============================================================
+   Sheet (Modal wrapper)
+   ============================================================ */
 
 function Sheet({ open, onClose, title, subtitle, children }) {
   useEffect(() => {
@@ -273,7 +312,7 @@ function Sheet({ open, onClose, title, subtitle, children }) {
                   type="button"
                   onClick={onClose}
                   className="kh-close-btn lg:h-10 lg:w-10"
-                  aria-label="بستن"
+                  aria-label="close"
                 >
                   <X size={18} />
                 </button>
@@ -289,6 +328,10 @@ function Sheet({ open, onClose, title, subtitle, children }) {
   );
 }
 
+/* ============================================================
+   Section Title
+   ============================================================ */
+
 function SectionTitle({ children }) {
   return (
     <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-fg-3">
@@ -297,10 +340,61 @@ function SectionTitle({ children }) {
   );
 }
 
+/* ============================================================
+   Currency Change Warning
+   ============================================================ */
+
+function CurrencyChangeWarning({ open, onClose, onConfirm, fromCode, toCode, count }) {
+  const { t } = useTranslation();
+
+  if (!open) return null;
+
+  return (
+    <Sheet
+      open={open}
+      onClose={onClose}
+      title={t('currencyChange.title')}
+      subtitle={t('currencyChange.subtitle')}
+    >
+      <p className="rounded-2xl border border-expense/25 bg-expense/[0.10] p-4 text-sm leading-relaxed text-expense backdrop-blur-md">
+        {t('currencyChange.warningMessage', {
+          from: t(`currencies.${fromCode}.label`),
+          to: t(`currencies.${toCode}.label`),
+          count,
+        })}
+      </p>
+
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={onClose}
+          className="kh-btn kh-btn-ghost py-3.5 text-sm"
+        >
+          {t('currencyChange.cancel')}
+        </button>
+        <button
+          type="button"
+          onClick={onConfirm}
+          className="kh-btn kh-btn-danger flex items-center justify-center gap-2 py-3.5 text-sm"
+        >
+          {t('currencyChange.confirm')}
+        </button>
+      </div>
+    </Sheet>
+  );
+}
+
+/* ============================================================
+   Main Settings Page
+   ============================================================ */
+
 function SettingsPage() {
+  const { t } = useTranslation();
   const dataVersion = useAppStore((s) => s.dataVersion);
   const refreshData = useAppStore((s) => s.refreshData);
   const haptic = useHaptic();
+
+  const currencyLabel = useCurrencyLabel();
 
   const setLocked = useSecurityStore((s) => s.setLocked);
   const resetSecurity = useSecurityStore((s) => s.reset);
@@ -313,7 +407,9 @@ function SettingsPage() {
   const { available: bioAvailable, checking: bioChecking } = useBiometricCheck();
 
   const [userName, setLocalName] = useState('');
-  const [currency, setLocalCurrency] = useState('افغانی');
+  const [language, setLocalLanguage] = useState('fa');
+  const [regionId, setLocalRegionId] = useState('afghan');
+  const [currencyCode, setLocalCurrencyCode] = useState('AFN');
   const [reminderOn, setLocalReminder] = useState(false);
   const [reminderTime, setLocalReminderTime] = useState('21:00');
   const [lockOn, setLocalLock] = useState(false);
@@ -330,20 +426,34 @@ function SettingsPage() {
   const [resetting, setResetting] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [currencyWarning, setCurrencyWarning] = useState(null);
 
   async function loadAll() {
-    const [name, cur, remOn, remTime, lockState, pinState, bioState] =
-      await Promise.all([
-        getUserName(),
-        getCurrencyLabel(),
-        isReminderEnabled(),
-        getReminderTime(),
-        isLockEnabled(),
-        isPinEnabled(),
-        isBiometricEnabled(),
-      ]);
+    const [
+      name,
+      lang,
+      reg,
+      curr,
+      remOn,
+      remTime,
+      lockState,
+      pinState,
+      bioState,
+    ] = await Promise.all([
+      getUserName(),
+      getCurrentLanguage(),
+      getCurrentRegionId(),
+      getCurrentCurrencyCode(),
+      isReminderEnabled(),
+      getReminderTime(),
+      isLockEnabled(),
+      isPinEnabled(),
+      isBiometricEnabled(),
+    ]);
     setLocalName(name);
-    setLocalCurrency(cur);
+    setLocalLanguage(lang);
+    setLocalRegionId(reg);
+    setLocalCurrencyCode(curr);
     setLocalReminder(remOn);
     setLocalReminderTime(remTime);
     setLocalLock(lockState);
@@ -366,27 +476,107 @@ function SettingsPage() {
     await setUserName(clean);
     setLocalName(clean);
     setSheet(null);
-    showToast('پروفایل به‌روزرسانی شد.');
+    showToast(t('profile.saveSuccess'));
     refreshData();
   }
 
-  async function changeCurrency(label) {
-    await setCurrencyLabel(label);
-    setLocalCurrency(label);
+  /* ---------- Language ---------- */
+
+  async function handleChangeLanguage(lang) {
+    if (lang === language) {
+      setSheet(null);
+      return;
+    }
+    await updateLanguage(lang);
+    setLocalLanguage(lang);
     setSheet(null);
-    showToast('واحد پول تغییر کرد.');
+    showToast(t('languageChange.changed'));
+    // reload page to apply font/direction changes fully
+    setTimeout(() => window.location.reload(), 400);
   }
+
+  /* ---------- Region ---------- */
+
+  async function handleChangeRegion(newRegionId) {
+    if (newRegionId === regionId) {
+      setSheet(null);
+      return;
+    }
+    const region = REGIONS[newRegionId];
+    // if currency differs → need backup + reset
+    if (region.currency !== currencyCode) {
+      const count = await countTransactions();
+      setCurrencyWarning({
+        type: 'region',
+        from: currencyCode,
+        to: region.currency,
+        regionId: newRegionId,
+        count,
+      });
+      setSheet(null);
+      return;
+    }
+    await updateRegion(newRegionId);
+    setLocalRegionId(newRegionId);
+    setSheet(null);
+    showToast(t('languageChange.changed'));
+    setTimeout(() => window.location.reload(), 400);
+  }
+
+  /* ---------- Currency ---------- */
+
+  async function handleChangeCurrency(newCode) {
+    if (newCode === currencyCode) {
+      setSheet(null);
+      return;
+    }
+    const count = await countTransactions();
+    setCurrencyWarning({
+      type: 'currency',
+      from: currencyCode,
+      to: newCode,
+      count,
+    });
+    setSheet(null);
+  }
+
+  async function confirmCurrencyChange() {
+    if (!currencyWarning) return;
+    const { to, regionId: newRegionId, type } = currencyWarning;
+    setCurrencyWarning(null);
+    setBusy(true);
+
+    try {
+      if (type === 'region' && newRegionId) {
+        // region change + currency change → do full reset with new currency
+        await changeCurrencyWithReset(to);
+        await updateRegion(newRegionId);
+      } else {
+        await changeCurrencyWithReset(to);
+      }
+      showToast(t('currencyChange.changed'));
+      setTimeout(() => window.location.reload(), 600);
+    } catch (err) {
+      console.error(err);
+      showToast(t('errors.generic'));
+      setBusy(false);
+    }
+  }
+
+  /* ---------- Reminder ---------- */
 
   async function toggleReminder(next) {
     setLocalReminder(next);
     await setReminderEnabled(next);
-    showToast(next ? 'یادآوری فعال شد.' : 'یادآوری غیرفعال شد.');
+    showToast(next ? t('reminder.enabled') : t('reminder.disabled'));
   }
 
   async function changeReminderTime(time) {
     setLocalReminderTime(time);
     await setReminderTime(time);
   }
+
+  /* ---------- Lock ---------- */
 
   async function toggleLock(next) {
     if (next) {
@@ -399,17 +589,17 @@ function SettingsPage() {
       try {
         await setLockEnabled(true);
         setLocalLock(true);
-        showToast('قفل برنامه فعال شد.');
+        showToast(t('security.lockEnabled'));
       } catch {
-        showToast('فعال‌سازی قفل ناموفق بود.');
+        showToast(t('security.lockEnableFailed'));
       }
     } else {
       try {
         await setLockEnabled(false);
         setLocalLock(false);
-        showToast('قفل برنامه غیرفعال شد.');
+        showToast(t('security.lockDisabled'));
       } catch {
-        showToast('غیرفعال‌سازی ناموفق بود.');
+        showToast(t('security.lockDisableFailed'));
       }
     }
   }
@@ -421,7 +611,7 @@ function SettingsPage() {
     setLocalLock(true);
     await setLockEnabled(true);
     setPinEnabledInStore(true);
-    showToast('رمز تعیین شد و قفل فعال شد.');
+    showToast(t('security.pinSetAndLocked'));
     await loadAll();
   }
 
@@ -438,16 +628,14 @@ function SettingsPage() {
     setBusy(true);
     try {
       if (!window.PublicKeyCredential) {
-        throw new Error('مرورگر شما از اثر انگشت پشتیبانی نمی‌کند.');
+        throw new Error(t('security.biometricNotSupported'));
       }
       const available = await window.PublicKeyCredential
         .isUserVerifyingPlatformAuthenticatorAvailable()
         .catch(() => false);
 
       if (!available) {
-        throw new Error(
-          'اثر انگشت روی این دستگاه فعال نیست. در تنظیمات گوشی، قفل صفحه و اثر انگشت را فعال کن.',
-        );
+        throw new Error(t('security.biometricNotAvailable'));
       }
 
       await registerBiometric();
@@ -456,14 +644,14 @@ function SettingsPage() {
       await setLockEnabled(true);
       setBiometricEnabledInStore(true);
       setBiometricAvailableInStore(true);
-      showToast('اثر انگشت فعال شد.');
+      showToast(t('security.biometricEnabled'));
     } catch (err) {
-      let message = err?.message || 'ثبت اثر انگشت ناموفق بود.';
-      if (err?.name === 'NotAllowedError') message = 'لغو شد یا اجازه داده نشد.';
+      let message = err?.message || t('security.biometricRegisterFailed');
+      if (err?.name === 'NotAllowedError') message = t('security.biometricCancelled');
       else if (err?.name === 'NotSupportedError')
-        message = 'این دستگاه از اثر انگشت پشتیبانی نمی‌کند.';
+        message = t('security.biometricDeviceNotSupported');
       else if (err?.name === 'InvalidStateError')
-        message = 'اثر انگشت قبلاً روی این دستگاه ثبت شده است.';
+        message = t('security.biometricAlreadyRegistered');
       showToast(message);
     } finally {
       setBusy(false);
@@ -474,7 +662,7 @@ function SettingsPage() {
     await clearBiometric();
     setLocalBio(false);
     setBiometricEnabledInStore(false);
-    showToast('اثر انگشت حذف شد.');
+    showToast(t('security.biometricRemoved'));
   }
 
   async function handleClearPin() {
@@ -485,7 +673,7 @@ function SettingsPage() {
       await setLockEnabled(false);
       setLocalLock(false);
     }
-    showToast('رمز حذف شد.');
+    showToast(t('security.pinRemoved'));
   }
 
   async function handleExport() {
@@ -502,9 +690,9 @@ function SettingsPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      showToast('فایل پشتیبان دانلود شد.');
+      showToast(t('backup.exportSuccess'));
     } catch {
-      showToast('خروجی ناموفق بود.');
+      showToast(t('backup.exportFailed'));
     }
   }
 
@@ -518,9 +706,9 @@ function SettingsPage() {
       refreshData();
       await loadAll();
       setSheet(null);
-      showToast('بازیابی با موفقیت انجام شد.');
+      showToast(t('backup.importSuccess'));
     } catch (err) {
-      showToast(err?.message || 'فایل نامعتبر است.');
+      showToast(err?.message || t('backup.importInvalid'));
     }
     event.target.value = '';
   }
@@ -534,7 +722,7 @@ function SettingsPage() {
     } catch (err) {
       console.error(err);
       setResetting(false);
-      showToast('شروع مجدد ناموفق بود.');
+      showToast(t('reset.failed'));
     }
   }
 
@@ -556,22 +744,59 @@ function SettingsPage() {
     await forceShowReminder();
   }
 
+  /* ---------- Subscriptions ---------- */
+
+  const currentRegion = REGIONS[regionId];
+
+  const languageRow = (
+    <SettingsButtonRow
+      icon={Languages}
+      title={t('settings.language')}
+      subtitle={t(`languages.${language}`)}
+      onClick={() => setSheet('language')}
+    />
+  );
+
+  const regionRow = (
+    <SettingsButtonRow
+      icon={Globe}
+      title={t('settings.region')}
+      subtitle={t(`regionSelection.${regionId}.title`)}
+      onClick={() => setSheet('region')}
+    />
+  );
+
   const currencyRow = (
     <SettingsButtonRow
       icon={Coins}
-      title="واحد پول"
-      subtitle={currency}
+      title={t('settings.currency')}
+      subtitle={currencyLabel}
       onClick={() => setSheet('currency')}
       isLast
     />
   );
 
+  const loginMethodsSubtitle = () => {
+    if (!pinOn && !bioOn) return t('settings.noLoginMethod');
+    const parts = [];
+    if (pinOn) parts.push(t('settings.loginPin'));
+    if (bioOn) parts.push(t('settings.loginBiometric'));
+    return parts.join(' + ');
+  };
+
+  const lockSubtitle = lockOn ? t('settings.appLockOn') : t('settings.appLockOff');
+  const reminderSubtitle = reminderOn
+    ? t('settings.reminderEveryNight', {
+        time: formatTime12FromString(reminderTime),
+      })
+    : t('common.no');
+
   return (
     <>
       <div className="px-4 pb-6 pt-6 lg:mx-auto lg:max-w-[1100px] lg:px-8 lg:pb-12 lg:pt-8">
         <header>
-          <p className="kh-page-subtitle">شخصی‌سازی برنامه</p>
-          <h1 className="kh-page-title">تنظیمات</h1>
+          <p className="kh-page-subtitle">{t('settings.subtitle')}</p>
+          <h1 className="kh-page-title">{t('settings.title')}</h1>
         </header>
 
         <div className="lg:hidden">
@@ -582,25 +807,23 @@ function SettingsPage() {
           />
 
           <SettingsGroup>
+            {languageRow}
+            {regionRow}
+            {currencyRow}
+          </SettingsGroup>
+
+          <SettingsGroup>
             <SettingsToggleRow
               icon={ShieldCheck}
-              title="قفل برنامه"
-              subtitle={
-                lockOn
-                  ? 'برای باز کردن، رمز یا اثر انگشت لازم است'
-                  : 'غیرفعال'
-              }
+              title={t('settings.appLock')}
+              subtitle={lockSubtitle}
               checked={lockOn}
               onChange={toggleLock}
             />
             <SettingsButtonRow
               icon={Fingerprint}
-              title="روش‌های ورود"
-              subtitle={
-                pinOn || bioOn
-                  ? `${pinOn ? 'رمز' : ''}${pinOn && bioOn ? ' + ' : ''}${bioOn ? 'اثر انگشت' : ''}`
-                  : 'هیچ روشی تنظیم نشده'
-              }
+              title={t('settings.loginMethods')}
+              subtitle={loginMethodsSubtitle()}
               onClick={() => setSheet('lock')}
               isLast
             />
@@ -609,12 +832,8 @@ function SettingsPage() {
           <SettingsGroup>
             <SettingsToggleRow
               icon={Bell}
-              title="یادآوری ثبت روزانه"
-              subtitle={
-                reminderOn
-                  ? `هر شب ساعت ${formatTime12FromString(reminderTime)}`
-                  : 'غیرفعال'
-              }
+              title={t('settings.dailyReminder')}
+              subtitle={reminderSubtitle}
               checked={reminderOn}
               onChange={toggleReminder}
               isLast={!reminderOn}
@@ -622,7 +841,7 @@ function SettingsPage() {
             {reminderOn && (
               <SettingsButtonRow
                 icon={Clock}
-                title="زمان یادآوری"
+                title={t('settings.reminderTime')}
                 subtitle={formatTime12FromString(reminderTime)}
                 onClick={() => setSheet('reminderTime')}
                 isLast
@@ -630,19 +849,17 @@ function SettingsPage() {
             )}
           </SettingsGroup>
 
-          <SettingsGroup>{currencyRow}</SettingsGroup>
-
           <SettingsGroup>
             <SettingsButtonRow
               icon={Database}
-              title="پشتیبان‌گیری"
-              subtitle="خروجی و بازیابی اطلاعات"
+              title={t('settings.backup')}
+              subtitle={t('settings.backupSubtitle')}
               onClick={() => setSheet('backup')}
             />
             <SettingsButtonRow
               icon={RotateCcw}
-              title="پاک‌سازی و شروع مجدد"
-              subtitle="همه‌چیز از صفر — مثل اولین نصب"
+              title={t('settings.resetApp')}
+              subtitle={t('settings.resetAppSubtitle')}
               tone="danger"
               onClick={() => setConfirmReset(true)}
             />
@@ -656,19 +873,23 @@ function SettingsPage() {
               className="glass mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-expense/25 py-3.5 text-base font-semibold text-expense active:scale-[0.98]"
             >
               <LogOut size={17} strokeWidth={2} />
-              خروج از حساب
+              {t('settings.logout')}
             </button>
           )}
 
           <p className="mt-6 text-center text-2xs text-fg-3">
-            خزانه • نسخه {APP_VERSION} • {getTodayShort()}
+            {t('settings.footer', {
+              appName: t('app.name'),
+              version: APP_VERSION,
+              date: getTodayShort(),
+            })}
           </p>
         </div>
 
         {/* Desktop */}
         <div className="mt-8 hidden lg:grid lg:grid-cols-2 lg:items-stretch lg:gap-x-5 lg:gap-y-6">
           <div className="flex flex-col">
-            <SectionTitle>حساب کاربری</SectionTitle>
+            <SectionTitle>{t('settings.accountSection')}</SectionTitle>
             <div className="flex-1 [&>*]:!mt-0 [&>*]:h-full">
               <SettingsProfileCard
                 name={userName}
@@ -678,35 +899,31 @@ function SettingsPage() {
           </div>
 
           <div className="flex flex-col">
-            <SectionTitle>ترجیحات</SectionTitle>
+            <SectionTitle>{t('settings.preferencesSection')}</SectionTitle>
             <div className="flex-1 [&>*]:!mt-0 [&>*]:h-full">
-              <SettingsGroup>{currencyRow}</SettingsGroup>
+              <SettingsGroup>
+                {languageRow}
+                {regionRow}
+                {currencyRow}
+              </SettingsGroup>
             </div>
           </div>
 
           <div className="flex flex-col">
-            <SectionTitle>امنیت</SectionTitle>
+            <SectionTitle>{t('settings.securitySection')}</SectionTitle>
             <div className="flex-1 [&>*]:!mt-0 [&>*]:h-full">
               <SettingsGroup>
                 <SettingsToggleRow
                   icon={ShieldCheck}
-                  title="قفل برنامه"
-                  subtitle={
-                    lockOn
-                      ? 'برای باز کردن، رمز یا اثر انگشت لازم است'
-                      : 'غیرفعال'
-                  }
+                  title={t('settings.appLock')}
+                  subtitle={lockSubtitle}
                   checked={lockOn}
                   onChange={toggleLock}
                 />
                 <SettingsButtonRow
                   icon={Fingerprint}
-                  title="روش‌های ورود"
-                  subtitle={
-                    pinOn || bioOn
-                      ? `${pinOn ? 'رمز' : ''}${pinOn && bioOn ? ' + ' : ''}${bioOn ? 'اثر انگشت' : ''}`
-                      : 'هیچ روشی تنظیم نشده'
-                  }
+                  title={t('settings.loginMethods')}
+                  subtitle={loginMethodsSubtitle()}
                   onClick={() => setSheet('lock')}
                   isLast
                 />
@@ -715,19 +932,19 @@ function SettingsPage() {
           </div>
 
           <div className="flex flex-col">
-            <SectionTitle>داده‌ها</SectionTitle>
+            <SectionTitle>{t('settings.dataSection')}</SectionTitle>
             <div className="flex-1 [&>*]:!mt-0 [&>*]:h-full">
               <SettingsGroup>
                 <SettingsButtonRow
                   icon={Database}
-                  title="پشتیبان‌گیری"
-                  subtitle="خروجی و بازیابی اطلاعات"
+                  title={t('settings.backup')}
+                  subtitle={t('settings.backupSubtitle')}
                   onClick={() => setSheet('backup')}
                 />
                 <SettingsButtonRow
                   icon={RotateCcw}
-                  title="پاک‌سازی و شروع مجدد"
-                  subtitle="همه‌چیز از صفر — مثل اولین نصب"
+                  title={t('settings.resetApp')}
+                  subtitle={t('settings.resetAppSubtitle')}
                   tone="danger"
                   onClick={() => setConfirmReset(true)}
                 />
@@ -737,17 +954,13 @@ function SettingsPage() {
           </div>
 
           <div className="flex flex-col">
-            <SectionTitle>یادآوری</SectionTitle>
+            <SectionTitle>{t('settings.reminderSection')}</SectionTitle>
             <div className="flex-1 [&>*]:!mt-0 [&>*]:h-full">
               <SettingsGroup>
                 <SettingsToggleRow
                   icon={Bell}
-                  title="یادآوری ثبت روزانه"
-                  subtitle={
-                    reminderOn
-                      ? `هر شب ساعت ${formatTime12FromString(reminderTime)}`
-                      : 'غیرفعال'
-                  }
+                  title={t('settings.dailyReminder')}
+                  subtitle={reminderSubtitle}
                   checked={reminderOn}
                   onChange={toggleReminder}
                   isLast={!reminderOn}
@@ -755,7 +968,7 @@ function SettingsPage() {
                 {reminderOn && (
                   <SettingsButtonRow
                     icon={Clock}
-                    title="زمان یادآوری"
+                    title={t('settings.reminderTime')}
                     subtitle={formatTime12FromString(reminderTime)}
                     onClick={() => setSheet('reminderTime')}
                     isLast
@@ -766,7 +979,7 @@ function SettingsPage() {
           </div>
 
           <div className="flex flex-col">
-            <SectionTitle>نصب و خروج</SectionTitle>
+            <SectionTitle>{t('settings.installSection')}</SectionTitle>
             <div className="flex flex-1 flex-col gap-3 [&>*]:!mt-0">
               <InstallCard />
               {lockOn && (
@@ -776,7 +989,7 @@ function SettingsPage() {
                   className="glass flex w-full items-center justify-center gap-2 rounded-2xl border-expense/25 py-3.5 text-base font-semibold text-expense transition-all hover:border-expense/40 active:scale-[0.98]"
                 >
                   <LogOut size={17} strokeWidth={2} />
-                  خروج از حساب
+                  {t('settings.logout')}
                 </button>
               )}
             </div>
@@ -784,28 +997,33 @@ function SettingsPage() {
         </div>
 
         <p className="mt-10 hidden text-center text-2xs text-fg-3 lg:block">
-          خزانه • نسخه {APP_VERSION} • {getTodayShort()}
+          {t('settings.footer', {
+            appName: t('app.name'),
+            version: APP_VERSION,
+            date: getTodayShort(),
+          })}
         </p>
       </div>
 
+      {/* ========== PROFILE SHEET ========== */}
       <Sheet
         open={sheet === 'profile'}
         onClose={() => setSheet(null)}
-        title="پروفایل"
-        subtitle="اطلاعات شخصی"
+        title={t('settings.profile')}
+        subtitle={t('settings.profileSubtitle')}
       >
         <label className="mb-2 block text-xs font-medium text-fg-2">
-          نام نمایشی
+          {t('settings.displayName')}
         </label>
         <input
           value={nameInput}
           onChange={(e) => setNameInput(e.target.value)}
-          placeholder="مثلاً احمد"
+          placeholder={t('settings.displayNamePlaceholder')}
           className="glass-inner w-full rounded-2xl px-4 py-3 text-base text-fg-1 outline-none placeholder:text-fg-3 focus:border-primary/50"
         />
 
         <p className="mt-2 text-2xs leading-relaxed text-fg-3">
-          نام نمایشی برای پیام‌های خوش‌آمدگویی و پروفایل استفاده می‌شود.
+          {t('settings.displayNameHint')}
         </p>
 
         <button
@@ -813,148 +1031,29 @@ function SettingsPage() {
           onClick={saveName}
           className="kh-btn kh-btn-primary mt-4 w-full py-3.5 text-base"
         >
-          ذخیره
+          {t('common.save')}
         </button>
       </Sheet>
 
+      {/* ========== LANGUAGE SHEET ========== */}
       <Sheet
-        open={sheet === 'reminderTime'}
+        open={sheet === 'language'}
         onClose={() => setSheet(null)}
-        title="زمان یادآوری"
-        subtitle="چه ساعتی یادت بیاورم؟"
+        title={t('languageChange.title')}
+        subtitle={t('languageChange.subtitle')}
       >
-        <TimePicker value={reminderTime} onChange={changeReminderTime} />
+        <p className="glass-inner mb-4 rounded-2xl p-3 text-xs leading-relaxed text-fg-2">
+          {t('languageChange.note')}
+        </p>
 
-        <button
-          type="button"
-          onClick={handleTestReminder}
-          className="mt-5 w-full rounded-2xl border border-primary/30 bg-primary/[0.10] py-3 text-sm font-semibold text-primary backdrop-blur-md active:scale-[0.98]"
-        >
-          نمایش آزمایشی یادآوری
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setSheet(null)}
-          className="kh-btn kh-btn-primary mt-3 w-full py-3.5 text-base"
-        >
-          ذخیره
-        </button>
-      </Sheet>
-
-      <Sheet
-        open={sheet === 'lock'}
-        onClose={() => {
-          if (pinSetupOpen) {
-            cancelPinSetup();
-          } else {
-            setSheet(null);
-          }
-        }}
-        title="امنیت"
-        subtitle="قفل برنامه"
-      >
-        {pinSetupOpen ? (
-          <PinSetupFlow onDone={afterPinSet} onCancel={cancelPinSetup} />
-        ) : (
-          <div className="space-y-4">
-            <div className="glass-inner flex items-center gap-3 rounded-2xl p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border-1 bg-fill-1 text-fg-2">
-                <ShieldCheck size={19} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-base font-semibold text-fg-1">
-                  رمز عبور
-                </p>
-                <div className="mt-1">
-                  <StatusBadge active={pinOn} />
-                </div>
-              </div>
-              {pinOn ? (
-                <button
-                  type="button"
-                  onClick={handleClearPin}
-                  className="shrink-0 rounded-xl bg-expense/[0.12] px-3 py-2 text-xs font-semibold text-expense"
-                >
-                  حذف
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPinSetupFromToggle(false);
-                    setPinSetupOpen(true);
-                  }}
-                  className="shrink-0 rounded-xl bg-primary/[0.16] px-3 py-2 text-xs font-semibold text-primary"
-                >
-                  تنظیم
-                </button>
-              )}
-            </div>
-
-            <div className="glass-inner flex items-center gap-3 rounded-2xl p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border-1 bg-fill-1 text-fg-2">
-                <Fingerprint size={19} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-base font-semibold text-fg-1">
-                  اثر انگشت / Face ID
-                </p>
-                <div className="mt-1">
-                  {bioChecking ? (
-                    <span className="text-2xs text-fg-3">در حال بررسی...</span>
-                  ) : (
-                    <StatusBadge
-                      active={bioOn}
-                      inactiveLabel={
-                        bioAvailable === false ? 'پشتیبانی نمی‌شود' : 'غیرفعال'
-                      }
-                    />
-                  )}
-                </div>
-              </div>
-              {bioOn ? (
-                <button
-                  type="button"
-                  onClick={handleClearBiometric}
-                  className="shrink-0 rounded-xl bg-expense/[0.12] px-3 py-2 text-xs font-semibold text-expense"
-                >
-                  حذف
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  disabled={busy || bioChecking}
-                  onClick={handleRegisterBiometric}
-                  className="shrink-0 rounded-xl bg-primary/[0.16] px-3 py-2 text-xs font-semibold text-primary disabled:opacity-40"
-                >
-                  {busy || bioChecking ? '...' : 'فعال‌سازی'}
-                </button>
-              )}
-            </div>
-
-            <p className="pt-1 text-center text-2xs leading-relaxed text-fg-3">
-              همه‌ی اطلاعات فقط روی همین دستگاه ذخیره می‌شود و هیچ‌گاه به سرور
-              فرستاده نمی‌شود.
-            </p>
-          </div>
-        )}
-      </Sheet>
-
-      <Sheet
-        open={sheet === 'currency'}
-        onClose={() => setSheet(null)}
-        title="واحد پول"
-        subtitle="واحد نمایش مبالغ"
-      >
         <div className="space-y-2">
-          {CURRENCY_OPTIONS.map((opt) => {
-            const isActive = opt.label === currency;
+          {['fa', 'en'].map((code) => {
+            const isActive = language === code;
             return (
               <button
-                key={opt.code}
+                key={code}
                 type="button"
-                onClick={() => changeCurrency(opt.label)}
+                onClick={() => handleChangeLanguage(code)}
                 className={[
                   'flex w-full items-center justify-between rounded-2xl border px-4 py-3.5 text-right backdrop-blur-md transition-all',
                   isActive
@@ -963,14 +1062,56 @@ function SettingsPage() {
                 ].join(' ')}
               >
                 <div className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-border-1 bg-fill-1 text-lg font-bold text-primary">
-                    {opt.symbol}
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-border-1 bg-fill-1 text-sm font-bold text-primary">
+                    {code === 'fa' ? 'فا' : 'EN'}
                   </span>
-                  <div>
+                  <p className="text-base font-semibold text-fg-1">
+                    {t(`languages.${code}`)}
+                  </p>
+                </div>
+                {isActive && (
+                  <span className="text-xs font-bold text-primary">✓</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </Sheet>
+
+      {/* ========== REGION SHEET ========== */}
+      <Sheet
+        open={sheet === 'region'}
+        onClose={() => setSheet(null)}
+        title={t('regionSelection.title')}
+        subtitle={t('regionSelection.subtitle')}
+      >
+        <div className="space-y-2">
+          {REGION_ORDER.map((id) => {
+            const isActive = regionId === id;
+            const region = REGIONS[id];
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => handleChangeRegion(id)}
+                className={[
+                  'flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3.5 text-right backdrop-blur-md transition-all',
+                  isActive
+                    ? 'border-primary/40 bg-primary/[0.12]'
+                    : 'border-border-1 bg-fill-1 active:scale-[0.99]',
+                ].join(' ')}
+              >
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border-1 bg-fill-1 text-lg">
+                    {region.flag}
+                  </span>
+                  <div className="min-w-0 flex-1">
                     <p className="text-base font-semibold text-fg-1">
-                      {opt.label}
+                      {t(`regionSelection.${id}.title`)}
                     </p>
-                    <p className="mt-0.5 text-2xs text-fg-3">{opt.code}</p>
+                    <p className="mt-0.5 text-2xs text-fg-3">
+                      {t(`regionSelection.${id}.description`)}
+                    </p>
                   </div>
                 </div>
                 {isActive && (
@@ -982,11 +1123,183 @@ function SettingsPage() {
         </div>
       </Sheet>
 
+      {/* ========== CURRENCY SHEET ========== */}
+      <Sheet
+        open={sheet === 'currency'}
+        onClose={() => setSheet(null)}
+        title={t('settings.currency')}
+        subtitle={t('settings.currencySubtitle')}
+      >
+        <div className="space-y-2">
+          {['AFN', 'IRR', 'USD', 'PKR'].map((code) => {
+            const isActive = currencyCode === code;
+            return (
+              <button
+                key={code}
+                type="button"
+                onClick={() => handleChangeCurrency(code)}
+                className={[
+                  'flex w-full items-center justify-between rounded-2xl border px-4 py-3.5 text-right backdrop-blur-md transition-all',
+                  isActive
+                    ? 'border-primary/40 bg-primary/[0.12]'
+                    : 'border-border-1 bg-fill-1 active:scale-[0.99]',
+                ].join(' ')}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-border-1 bg-fill-1 text-lg font-bold text-primary">
+                    {t(`currencies.${code}.symbol`)}
+                  </span>
+                  <div>
+                    <p className="text-base font-semibold text-fg-1">
+                      {t(`currencies.${code}.label`)}
+                    </p>
+                    <p className="mt-0.5 text-2xs text-fg-3">{code}</p>
+                  </div>
+                </div>
+                {isActive && (
+                  <span className="text-xs font-bold text-primary">✓</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </Sheet>
+
+      {/* ========== REMINDER TIME SHEET ========== */}
+      <Sheet
+        open={sheet === 'reminderTime'}
+        onClose={() => setSheet(null)}
+        title={t('reminder.timeTitle')}
+        subtitle={t('reminder.timeSubtitle')}
+      >
+        <TimePicker value={reminderTime} onChange={changeReminderTime} />
+
+        <button
+          type="button"
+          onClick={handleTestReminder}
+          className="mt-5 w-full rounded-2xl border border-primary/30 bg-primary/[0.10] py-3 text-sm font-semibold text-primary backdrop-blur-md active:scale-[0.98]"
+        >
+          {t('reminder.testReminder')}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setSheet(null)}
+          className="kh-btn kh-btn-primary mt-3 w-full py-3.5 text-base"
+        >
+          {t('common.save')}
+        </button>
+      </Sheet>
+
+      {/* ========== SECURITY SHEET ========== */}
+      <Sheet
+        open={sheet === 'lock'}
+        onClose={() => {
+          if (pinSetupOpen) {
+            cancelPinSetup();
+          } else {
+            setSheet(null);
+          }
+        }}
+        title={t('security.title')}
+        subtitle={t('security.subtitle')}
+      >
+        {pinSetupOpen ? (
+          <PinSetupFlow onDone={afterPinSet} onCancel={cancelPinSetup} />
+        ) : (
+          <div className="space-y-4">
+            <div className="glass-inner flex items-center gap-3 rounded-2xl p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border-1 bg-fill-1 text-fg-2">
+                <ShieldCheck size={19} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-base font-semibold text-fg-1">
+                  {t('security.password')}
+                </p>
+                <div className="mt-1">
+                  <StatusBadge active={pinOn} />
+                </div>
+              </div>
+              {pinOn ? (
+                <button
+                  type="button"
+                  onClick={handleClearPin}
+                  className="shrink-0 rounded-xl bg-expense/[0.12] px-3 py-2 text-xs font-semibold text-expense"
+                >
+                  {t('security.clear')}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPinSetupFromToggle(false);
+                    setPinSetupOpen(true);
+                  }}
+                  className="shrink-0 rounded-xl bg-primary/[0.16] px-3 py-2 text-xs font-semibold text-primary"
+                >
+                  {t('security.set')}
+                </button>
+              )}
+            </div>
+
+            <div className="glass-inner flex items-center gap-3 rounded-2xl p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border-1 bg-fill-1 text-fg-2">
+                <Fingerprint size={19} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-base font-semibold text-fg-1">
+                  {t('security.biometric')}
+                </p>
+                <div className="mt-1">
+                  {bioChecking ? (
+                    <span className="text-2xs text-fg-3">
+                      {t('security.checking')}
+                    </span>
+                  ) : (
+                    <StatusBadge
+                      active={bioOn}
+                      inactiveLabel={
+                        bioAvailable === false
+                          ? t('security.notSupported')
+                          : t('security.inactive')
+                      }
+                    />
+                  )}
+                </div>
+              </div>
+              {bioOn ? (
+                <button
+                  type="button"
+                  onClick={handleClearBiometric}
+                  className="shrink-0 rounded-xl bg-expense/[0.12] px-3 py-2 text-xs font-semibold text-expense"
+                >
+                  {t('security.clear')}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={busy || bioChecking}
+                  onClick={handleRegisterBiometric}
+                  className="shrink-0 rounded-xl bg-primary/[0.16] px-3 py-2 text-xs font-semibold text-primary disabled:opacity-40"
+                >
+                  {busy || bioChecking ? '...' : t('security.enable')}
+                </button>
+              )}
+            </div>
+
+            <p className="pt-1 text-center text-2xs leading-relaxed text-fg-3">
+              {t('security.privacyNote')}
+            </p>
+          </div>
+        )}
+      </Sheet>
+
+      {/* ========== BACKUP SHEET ========== */}
       <Sheet
         open={sheet === 'backup'}
         onClose={() => setSheet(null)}
-        title="پشتیبان‌گیری"
-        subtitle="خروجی و بازیابی"
+        title={t('backup.title')}
+        subtitle={t('backup.subtitle')}
       >
         <div className="space-y-3">
           <button
@@ -999,11 +1312,9 @@ function SettingsPage() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-base font-semibold text-fg-1">
-                خروجی گرفتن
+                {t('backup.export')}
               </p>
-              <p className="mt-1 text-xs text-fg-3">
-                ذخیره‌ی همه‌ی تراکنش‌ها در یک فایل JSON
-              </p>
+              <p className="mt-1 text-xs text-fg-3">{t('backup.exportHint')}</p>
             </div>
           </button>
 
@@ -1013,10 +1324,10 @@ function SettingsPage() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-base font-semibold text-fg-1">
-                بازیابی از فایل
+                {t('backup.import')}
               </p>
               <p className="mt-1 text-xs text-fg-3">
-                ⚠ همه‌ی داده‌های فعلی جایگزین می‌شوند
+                {t('backup.importWarning')}
               </p>
             </div>
             <input
@@ -1029,25 +1340,20 @@ function SettingsPage() {
         </div>
       </Sheet>
 
+      {/* ========== CONFIRM RESET ========== */}
       <Sheet
         open={confirmReset}
         onClose={() => (resetting ? null : setConfirmReset(false))}
-        title="پاک‌سازی و شروع مجدد"
-        subtitle="همه‌چیز مثل اولین نصب"
+        title={t('reset.title')}
+        subtitle={t('reset.subtitle')}
       >
         <p className="rounded-2xl border border-expense/25 bg-expense/[0.10] p-4 text-sm leading-relaxed text-expense backdrop-blur-md">
-          با این کار{' '}
-          <span className="font-bold">
-            همه‌ی تراکنش‌ها، دسته‌بندی‌ها، تنظیمات، پروفایل، قفل، یادآوری‌ها و
-            پشتیبان‌ها
-          </span>{' '}
-          پاک می‌شود و برنامه کاملاً از نو شروع می‌شود.
+          {t('reset.warning')}
         </p>
 
         <div className="glass-inner mt-4 rounded-2xl p-4">
           <p className="text-xs leading-relaxed text-fg-2">
-            بعد از این کار دوباره سؤال‌های اولیه پرسیده می‌شود — دقیقاً انگار
-            همین حالا اپ رو نصب کرده‌ای.
+            {t('reset.hint')}
           </p>
         </div>
 
@@ -1058,7 +1364,7 @@ function SettingsPage() {
             onClick={() => setConfirmReset(false)}
             className="kh-btn kh-btn-ghost py-3.5 text-sm"
           >
-            انصراف
+            {t('common.cancel')}
           </button>
           <button
             type="button"
@@ -1071,24 +1377,26 @@ function SettingsPage() {
             ) : (
               <>
                 <RotateCcw size={14} />
-                بله، شروع مجدد
+                {t('reset.confirm')}
               </>
             )}
           </button>
         </div>
       </Sheet>
 
+      {/* ========== CONFIRM LOGOUT ========== */}
       <Sheet
         open={confirmLogout}
         onClose={() => setConfirmLogout(false)}
-        title="خروج از حساب"
-        subtitle="بعد از خروج باید دوباره وارد شوید"
+        title={t('logout.title')}
+        subtitle={t('logout.subtitle')}
       >
         <p className="glass-inner rounded-2xl p-4 text-sm leading-relaxed text-fg-2">
-          با خروج از حساب، برنامه بلافاصله قفل می‌شود و برای ورود دوباره به{' '}
-          {pinOn ? 'رمز عبور' : ''}
-          {pinOn && bioOn ? ' یا ' : ''}
-          {bioOn ? 'اثر انگشت' : ''} نیاز خواهید داشت.
+          {t('logout.message', {
+            methods: [pinOn && t('settings.loginPin'), bioOn && t('settings.loginBiometric')]
+              .filter(Boolean)
+              .join(' / '),
+          })}
         </p>
         <div className="mt-4 grid grid-cols-2 gap-3">
           <button
@@ -1096,7 +1404,7 @@ function SettingsPage() {
             onClick={() => setConfirmLogout(false)}
             className="kh-btn kh-btn-ghost py-3.5 text-sm"
           >
-            انصراف
+            {t('common.cancel')}
           </button>
           <button
             type="button"
@@ -1104,10 +1412,22 @@ function SettingsPage() {
             className="kh-btn kh-btn-danger flex items-center justify-center gap-2 py-3.5 text-sm"
           >
             <LogOut size={16} />
-            خروج
+            {t('logout.confirm')}
           </button>
         </div>
       </Sheet>
+
+      {/* ========== CURRENCY CHANGE WARNING ========== */}
+      {currencyWarning && (
+        <CurrencyChangeWarning
+          open={!!currencyWarning}
+          onClose={() => setCurrencyWarning(null)}
+          onConfirm={confirmCurrencyChange}
+          fromCode={currencyWarning.from}
+          toCode={currencyWarning.to}
+          count={currencyWarning.count}
+        />
+      )}
 
       <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
 

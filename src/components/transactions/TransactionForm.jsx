@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Plus, X, Trash2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 
 import ConfirmDialog from '../common/ConfirmDialog';
 import {
@@ -22,14 +23,10 @@ import {
   MEMBER_ID,
 } from '../utils/constants';
 import { toEnglishDigits } from '../utils/formatting';
-
-const schema = z.object({
-  amount: z.coerce
-    .number({ invalid_type_error: 'مبلغ را وارد کنید.' })
-    .positive('مبلغ باید بیشتر از صفر باشد.'),
-  note: z.string().max(NOTE_MAX_LENGTH).optional(),
-  categoryId: z.string().min(1, 'دسته‌بندی را انتخاب کنید.'),
-});
+import {
+  getCategoryName,
+  getCategoryPlaceholder,
+} from '../utils/categories';
 
 function TransactionForm({
   type: typeProp = 'expense',
@@ -37,6 +34,7 @@ function TransactionForm({
   prefilledDate = null,
   onSuccess,
 }) {
+  const { t } = useTranslation();
   const refreshData = useAppStore((state) => state.refreshData);
 
   const isEditing = Boolean(editingTransaction);
@@ -65,6 +63,18 @@ function TransactionForm({
     return { amount: '', note: '', categoryId: '' };
   };
 
+  const schema = useMemo(
+    () =>
+      z.object({
+        amount: z.coerce
+          .number({ invalid_type_error: t('errors.amountRequired') })
+          .positive(t('errors.amountPositive')),
+        note: z.string().max(NOTE_MAX_LENGTH).optional(),
+        categoryId: z.string().min(1, t('errors.categoryRequired')),
+      }),
+    [t],
+  );
+
   const {
     register,
     handleSubmit,
@@ -84,9 +94,13 @@ function TransactionForm({
     (c) => c.id === selectedCategory,
   );
 
-  const notePlaceholder =
-    selectedCategoryData?.placeholder ||
-    (isIncome ? 'توضیح این درآمد...' : 'توضیح این مصرف...');
+  const defaultPlaceholderKey = isIncome
+    ? 'transaction.notePlaceholderIncome'
+    : 'transaction.notePlaceholderExpense';
+
+  const notePlaceholder = selectedCategoryData
+    ? getCategoryPlaceholder(selectedCategoryData, defaultPlaceholderKey)
+    : t(defaultPlaceholderKey);
 
   const noteLength = noteValue.length;
   const counterColor =
@@ -106,14 +120,14 @@ function TransactionForm({
         setCategories(data);
       } catch (error) {
         console.error(error);
-        setCategoryError('دریافت دسته‌بندی‌ها ناموفق بود.');
+        setCategoryError(t('errors.loadCategoriesFailed'));
       }
     }
     loadCategories();
     return () => {
       cancelled = true;
     };
-  }, [type]);
+  }, [type, t]);
 
   useEffect(() => {
     if (showNewCategory) {
@@ -130,7 +144,7 @@ function TransactionForm({
   async function addNewCategory() {
     const name = newCategoryName.trim();
     if (!name) {
-      setCategoryError('نام دسته را وارد کنید.');
+      setCategoryError(t('errors.categoryNameRequired'));
       return;
     }
     try {
@@ -142,7 +156,7 @@ function TransactionForm({
       setNewCategoryName('');
       setShowNewCategory(false);
     } catch (error) {
-      setCategoryError(error?.message || 'افزودن دسته‌بندی ناموفق بود.');
+      setCategoryError(error?.message || t('errors.addCategoryFailed'));
     } finally {
       setSaving(false);
     }
@@ -166,7 +180,7 @@ function TransactionForm({
         setValue('note', '', { shouldValidate: false });
       }
     } catch (error) {
-      setCategoryError(error?.message || 'حذف دسته ناموفق بود.');
+      setCategoryError(error?.message || t('errors.deleteCategoryFailed'));
       setTimeout(() => setCategoryError(''), 3500);
     } finally {
       setDeletingId(null);
@@ -205,17 +219,17 @@ function TransactionForm({
       onSuccess?.();
     } catch (error) {
       console.error('Transaction save failed:', error);
-      setSubmitError(error?.message || 'ذخیره تراکنش انجام نشد.');
+      setSubmitError(error?.message || t('errors.saveTransactionFailed'));
     } finally {
       setSaving(false);
     }
   }
 
   const submitLabel = isEditing
-    ? 'ذخیره تغییرات'
+    ? t('common.save')
     : isIncome
-      ? 'ثبت درآمد'
-      : 'ثبت مصرف';
+      ? t('transaction.addIncome')
+      : t('transaction.addExpense');
 
   const submitTone = isIncome ? 'kh-btn-primary' : 'kh-btn-danger';
 
@@ -228,7 +242,9 @@ function TransactionForm({
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-4">
           <div>
             <label className="mb-1.5 block text-xs font-medium text-fg-2">
-              مبلغ ({isIncome ? 'درآمد' : 'مصرف'})
+              {isIncome
+                ? t('transaction.amountIncome')
+                : t('transaction.amountExpense')}
             </label>
             <input
               {...register('amount')}
@@ -247,7 +263,7 @@ function TransactionForm({
           <div>
             <div className="mb-1.5 flex items-center justify-between">
               <label className="text-xs font-medium text-fg-2">
-                دسته‌بندی
+                {t('transaction.categoryLabel')}
               </label>
               <button
                 type="button"
@@ -258,7 +274,9 @@ function TransactionForm({
                 className="flex min-h-[28px] items-center gap-1 rounded-lg border border-primary/30 bg-primary/15 px-2.5 text-2xs font-semibold text-primary active:scale-95"
               >
                 {showNewCategory ? <X size={12} /> : <Plus size={12} />}
-                {showNewCategory ? 'انصراف' : 'دسته جدید'}
+                {showNewCategory
+                  ? t('common.cancel')
+                  : t('transaction.newCategory')}
               </button>
             </div>
 
@@ -267,6 +285,7 @@ function TransactionForm({
                 const active = selectedCategory === category.id;
                 const canDelete = !category.isDefault;
                 const isDeleting = deletingId === category.id;
+                const displayName = getCategoryName(category);
 
                 return (
                   <div key={category.id} className="relative">
@@ -290,7 +309,7 @@ function TransactionForm({
                       ].join(' ')}
                     >
                       <span className="text-center text-xs font-semibold leading-tight">
-                        {category.name}
+                        {displayName || category.name}
                       </span>
                     </button>
 
@@ -302,7 +321,7 @@ function TransactionForm({
                           setConfirmDelete(category);
                         }}
                         disabled={isDeleting}
-                        aria-label="حذف دسته"
+                        aria-label={t('transaction.deleteCategory')}
                         className="absolute left-1 top-1 z-10 flex h-[22px] w-[22px] items-center justify-center rounded-full bg-black/40 text-expense/70 backdrop-blur-md transition-all hover:bg-expense/25 hover:text-expense active:scale-90"
                       >
                         <Trash2 size={11} strokeWidth={2.2} />
@@ -326,7 +345,7 @@ function TransactionForm({
             {showNewCategory && (
               <div className="mt-2.5 rounded-xl border border-primary/25 bg-primary/[0.08] p-2.5 backdrop-blur-md">
                 <p className="mb-1.5 text-2xs font-semibold text-primary">
-                  نام دسته جدید
+                  {t('transaction.newCategoryName')}
                 </p>
 
                 <input
@@ -337,7 +356,7 @@ function TransactionForm({
                     setCategoryError('');
                   }}
                   onKeyDown={handleNewCategoryKeyDown}
-                  placeholder="مثلاً اینترنت"
+                  placeholder={t('transaction.newCategoryPlaceholder')}
                   enterKeyHint="done"
                   className="glass-inner w-full rounded-lg px-3 py-2.5 text-sm text-fg-1 outline-none placeholder:text-fg-3 focus:border-primary/50"
                 />
@@ -348,7 +367,7 @@ function TransactionForm({
                   disabled={saving || !newCategoryName.trim()}
                   className="kh-btn kh-btn-primary mt-2 w-full py-2.5 text-sm"
                 >
-                  {saving ? 'در حال ذخیره...' : 'ذخیره دسته'}
+                  {saving ? t('common.saving') : t('transaction.saveCategory')}
                 </button>
               </div>
             )}
@@ -358,7 +377,7 @@ function TransactionForm({
             <div>
               <div className="mb-1.5 flex items-center justify-between">
                 <label className="text-xs font-medium text-fg-2">
-                  توضیحات (اختیاری)
+                  {t('transaction.noteOptional')}
                 </label>
                 <span
                   className={[
@@ -396,7 +415,7 @@ function TransactionForm({
             disabled={saving}
             className={['kh-btn w-full py-3.5 text-base', submitTone].join(' ')}
           >
-            {saving ? 'در حال ذخیره...' : submitLabel}
+            {saving ? t('common.saving') : submitLabel}
           </button>
         </div>
       </form>
@@ -406,19 +425,16 @@ function TransactionForm({
         onClose={() => setConfirmDelete(null)}
         icon={Trash2}
         iconTone="danger"
-        title="حذف دسته‌بندی"
+        title={t('transaction.deleteCategory')}
         description={
-          confirmDelete ? (
-            <>
-              آیا مطمئنی می‌خواهی دسته‌ی
-              <span className="mx-1 font-bold text-primary">
-                «{confirmDelete.name}»
-              </span>
-              را حذف کنی؟
-            </>
-          ) : null
+          confirmDelete
+            ? t('transaction.deleteCategoryConfirm', {
+                name: getCategoryName(confirmDelete) || confirmDelete.name,
+              })
+            : null
         }
-        confirmLabel="حذف کن"
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
         onConfirm={() => handleDeleteCategory(confirmDelete)}
       />
     </>

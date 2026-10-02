@@ -1,19 +1,32 @@
+// ============================================================
+// Validation utilities — i18n-aware
+// ============================================================
+
 import { z } from 'zod';
+import i18n from '../../i18n';
 
-export const transactionSchema = z.object({
-  amount: z.coerce
-    .number({ invalid_type_error: 'مبلغ را وارد کنید.' })
-    .positive('مبلغ باید بیشتر از صفر باشد.'),
-  note: z.string().optional(),
-  categoryId: z.string().min(1, 'دسته‌بندی را انتخاب کنید.'),
-});
+const t = (key, opts = {}) => i18n.t(key, opts);
 
-export const categorySchema = z.object({
-  name: z.string().trim().min(1, 'نام دسته الزامی است.'),
-});
+export function getTransactionSchema() {
+  return z.object({
+    amount: z.coerce
+      .number({ invalid_type_error: t('errors.amountRequired') })
+      .positive(t('errors.amountPositive')),
+    note: z.string().optional(),
+    categoryId: z.string().min(1, t('errors.categoryRequired')),
+  });
+}
 
-export const pinSchema = z
-  .string()
-  .min(4, 'رمز باید حداقل ۴ رقم باشد.')
-  .max(6, 'رمز حداکثر ۶ رقم است.')
-  .regex(/^\d+$/, 'رمز فقط شامل اعداد باشد.');
+export function getCategorySchema() {
+  return z.object({
+    name: z.string().trim().min(1, t('errors.categoryNameRequired')),
+  });
+}
+
+export function getPinSchema() {
+  return z
+    .string()
+    .min(4, t('errors.pinLength'))
+    .max(6, t('errors.pinLength'))
+    .regex(/^\d+$/, t('errors.pinLength'));
+}

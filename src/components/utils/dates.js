@@ -1,46 +1,18 @@
-import {
-  format,
-  startOfWeek as dfStartOfWeek,
-  endOfWeek as dfEndOfWeek,
-  startOfMonth as dfStartOfMonth,
-  endOfMonth as dfEndOfMonth,
-  startOfYear as dfStartOfYear,
-  endOfYear as dfEndOfYear,
-  addMonths,
-} from 'date-fns-jalali';
-
-const WEEK_OPTIONS = { weekStartsOn: 6 };
-
-const PERSIAN_DAYS = [
-  'یکشنبه',
-  'دوشنبه',
-  'سه‌شنبه',
-  'چهارشنبه',
-  'پنجشنبه',
-  'جمعه',
-  'شنبه',
-];
-
-const AFGHAN_MONTHS = [
-  'حمل',
-  'ثور',
-  'جوزا',
-  'سرطان',
-  'اسد',
-  'سنبله',
-  'میزان',
-  'عقرب',
-  'قوس',
-  'جدی',
-  'دلو',
-  'حوت',
-];
-
-const FA_NUM = new Intl.NumberFormat('fa-AF');
-
 // ============================================================
-// Helpers
+// Dates utilities — calendar-aware + i18n-aware
+// Location: src/components/utils/dates.js
 // ============================================================
+
+import i18n from '../../i18n';
+import { getCalendar } from '../../utils/calendar';
+import { formatNumberLocale } from '../../utils/locale';
+
+const t = (key, opts = {}) => i18n.t(key, opts);
+const fmtN = (n) => formatNumberLocale(n);
+
+/* ============================================================
+   Day / Week boundaries
+   ============================================================ */
 
 export function startOfDay(date) {
   const d = new Date(date);
@@ -55,19 +27,20 @@ export function endOfDay(date) {
 }
 
 export function startOfWeek(date = new Date()) {
-  return dfStartOfWeek(date, WEEK_OPTIONS);
+  return getCalendar().startOfWeek(date);
 }
 
 export function endOfWeek(date = new Date()) {
-  return dfEndOfWeek(date, WEEK_OPTIONS);
+  return getCalendar().endOfWeek(date);
 }
 
-// ============================================================
-// ⭐ ناوبری عمومی دوره‌ها (daily / weekly / monthly / yearly)
-// ============================================================
+/* ============================================================
+   Period navigation
+   ============================================================ */
 
 export function getPeriodBaseDate(period, offset = 0) {
   const d = new Date();
+  const cal = getCalendar();
 
   if (period === 'daily') {
     d.setDate(d.getDate() + offset);
@@ -80,12 +53,11 @@ export function getPeriodBaseDate(period, offset = 0) {
   }
 
   if (period === 'monthly') {
-    return addMonths(d, offset);
+    return cal.addMonths(d, offset);
   }
 
   if (period === 'yearly') {
-    d.setFullYear(d.getFullYear() + offset);
-    return d;
+    return cal.addYears(d, offset);
   }
 
   return d;
@@ -99,47 +71,45 @@ export function getMaxOffset(period) {
   return 0;
 }
 
-// ============================================================
-// برچسب‌های دوره
-// ============================================================
+/* ============================================================
+   Period labels
+   ============================================================ */
 
 export function getPeriodOffsetLabel(period, offset = 0) {
   if (offset === 0) {
-    if (period === 'daily') return 'امروز';
-    if (period === 'weekly') return 'این هفته';
-    if (period === 'monthly') return 'این ماه';
-    if (period === 'yearly') return 'امسال';
+    if (period === 'daily') return t('periods.today');
+    if (period === 'weekly') return t('periods.weekly');
+    if (period === 'monthly') return t('periods.monthly');
+    if (period === 'yearly') return t('periods.yearly');
   }
 
   if (period === 'daily') {
-    if (offset === -1) return 'دیروز';
-    if (offset === 1) return 'فردا';
+    if (offset === -1) return t('periods.yesterday');
+    if (offset === 1) return t('periods.tomorrow');
     const n = Math.abs(offset);
-    return offset < 0
-      ? `${FA_NUM.format(n)} روز پیش`
-      : `${FA_NUM.format(n)} روز بعد`;
+    const suffix = offset < 0 ? t('periods.daysAgo') : t('periods.daysLater');
+    return `${fmtN(n)} ${suffix}`;
   }
 
   if (period === 'weekly') {
-    if (offset === -1) return 'هفته‌ی گذشته';
-    if (offset === 1) return 'هفته‌ی بعد';
+    if (offset === -1) return t('periods.lastWeek');
+    if (offset === 1) return t('periods.nextWeek');
     const n = Math.abs(offset);
-    return offset < 0
-      ? `${FA_NUM.format(n)} هفته پیش`
-      : `${FA_NUM.format(n)} هفته بعد`;
+    const suffix = offset < 0 ? t('periods.weeksAgo') : t('periods.weeksLater');
+    return `${fmtN(n)} ${suffix}`;
   }
 
   if (period === 'monthly') {
     const d = getPeriodBaseDate('monthly', offset);
-    const monthIdx = Number(format(d, 'M')) - 1;
-    const year = format(d, 'yyyy');
-    const monthName = AFGHAN_MONTHS[monthIdx] || '';
+    const cal = getCalendar();
+    const monthName = cal.getMonthName(d);
+    const year = cal.getYear(d);
     return `${monthName} ${year}`;
   }
 
   if (period === 'yearly') {
     const d = getPeriodBaseDate('yearly', offset);
-    return format(d, 'yyyy');
+    return String(getCalendar().getYear(d));
   }
 
   return '';
@@ -147,52 +117,50 @@ export function getPeriodOffsetLabel(period, offset = 0) {
 
 export function getPeriodSubLabel(period, offset = 0) {
   const baseDate = getPeriodBaseDate(period, offset);
+  const cal = getCalendar();
 
   if (period === 'daily') {
     return formatShortDate(baseDate);
   }
 
   if (period === 'weekly') {
-    const start = startOfWeek(baseDate);
-    const end = endOfWeek(baseDate);
+    const start = cal.startOfWeek(baseDate);
+    const end = cal.endOfWeek(baseDate);
     return formatWeekRange(start, end);
   }
 
   if (period === 'monthly') {
-    const start = dfStartOfMonth(baseDate);
-    const nextMonth = addMonths(start, 1);
+    const start = cal.startOfMonth(baseDate);
+    const nextMonth = cal.addMonths(start, 1);
     const end = new Date(nextMonth.getTime() - 1);
     return formatWeekRange(start, end);
   }
 
-  // yearly — خود برچسب سال کافیه
   return null;
 }
 
-// ============================================================
-// دوره → بازه
-// ============================================================
+/* ============================================================
+   Period ranges
+   ============================================================ */
 
 export function getRange(period = 'weekly', date = new Date()) {
+  const cal = getCalendar();
+
   if (period === 'daily') {
     return { start: startOfDay(date), end: endOfDay(date) };
   }
-
   if (period === 'weekly') {
-    return { start: startOfWeek(date), end: endOfWeek(date) };
+    return { start: cal.startOfWeek(date), end: cal.endOfWeek(date) };
   }
-
   if (period === 'monthly') {
-    const start = dfStartOfMonth(date);
-    const nextMonth = addMonths(start, 1);
+    const start = cal.startOfMonth(date);
+    const nextMonth = cal.addMonths(start, 1);
     const end = new Date(nextMonth.getTime() - 1);
     return { start, end };
   }
-
   if (period === 'yearly') {
-    return { start: dfStartOfYear(date), end: dfEndOfYear(date) };
+    return { start: cal.startOfYear(date), end: cal.endOfYear(date) };
   }
-
   return { start: startOfDay(date), end: endOfDay(date) };
 }
 
@@ -201,82 +169,44 @@ export function getPeriodRange(period, offset = 0) {
   return { ...getRange(period, baseDate), baseDate };
 }
 
-// ============================================================
-// ⭐ متن توصیفی مقایسه
-// ============================================================
-
-export function getComparisonLabel(period, offset = 0) {
-  if (period === 'daily') {
-    if (offset === 0) return 'امروز نسبت به دیروز';
-    if (offset === -1) return 'دیروز نسبت به امروز';
-    const n = Math.abs(offset);
-    return `${FA_NUM.format(n)} روز پیش نسبت به امروز`;
-  }
-
-  if (period === 'weekly') {
-    if (offset === 0) return 'این هفته نسبت به هفته‌ی گذشته';
-    if (offset === -1) return 'هفته‌ی گذشته نسبت به این هفته';
-    const n = Math.abs(offset);
-    return `${FA_NUM.format(n)} هفته پیش نسبت به این هفته`;
-  }
-
-  if (period === 'monthly') {
-    if (offset === 0) return 'این ماه نسبت به ماه گذشته';
-    if (offset === -1) return 'ماه گذشته نسبت به این ماه';
-    const n = Math.abs(offset);
-    return `${FA_NUM.format(n)} ماه پیش نسبت به این ماه`;
-  }
-
-  if (period === 'yearly') {
-    if (offset === 0) return 'امسال نسبت به سال گذشته';
-    if (offset === -1) return 'سال گذشته نسبت به امسال';
-    const n = Math.abs(offset);
-    return `${FA_NUM.format(n)} سال پیش نسبت به امسال`;
-  }
-
-  return '';
-}
-
-// ============================================================
-// ⭐ دوره‌ی قبل (برای حالت این دوره / دوره‌ی گذشته)
-// ============================================================
+/* ============================================================
+   Previous period
+   ============================================================ */
 
 export function getPreviousPeriodDate(period, baseDate) {
   const d = new Date(baseDate || new Date());
+  const cal = getCalendar();
 
   if (period === 'daily') {
     d.setDate(d.getDate() - 1);
     return d;
   }
-
   if (period === 'weekly') {
     d.setDate(d.getDate() - 7);
     return d;
   }
-
   if (period === 'monthly') {
-    return addMonths(d, -1);
+    return cal.addMonths(d, -1);
   }
-
   if (period === 'yearly') {
-    d.setFullYear(d.getFullYear() - 1);
-    return d;
+    return cal.addYears(d, -1);
   }
-
   return d;
 }
 
-// ============================================================
-// روزهای هفته / ماه / سال
-// ============================================================
+/* ============================================================
+   Days / Months / Years arrays
+   ============================================================ */
 
 export function getWeekDays(date = new Date()) {
-  const weekStart = startOfDay(startOfWeek(date));
+  const cal = getCalendar();
+  const weekStart = startOfDay(cal.startOfWeek(date));
   const days = [];
+
   for (let i = 0; i < 7; i += 1) {
     const d = new Date(weekStart);
     d.setDate(weekStart.getDate() + i);
-    const dayName = PERSIAN_DAYS[d.getDay()] || '';
+    const dayName = cal.getDayName(d);
     days.push({
       date: d,
       label: dayName,
@@ -287,19 +217,15 @@ export function getWeekDays(date = new Date()) {
   return days;
 }
 
-export function getDaysInJalaliMonth(date = new Date()) {
-  const start = dfStartOfMonth(date);
-  const nextMonth = addMonths(start, 1);
-  const diffMs = nextMonth.getTime() - start.getTime();
-  return Math.round(diffMs / (1000 * 60 * 60 * 24));
-}
-
 export function getMonthDays(date = new Date()) {
-  const start = dfStartOfMonth(date);
-  const totalDays = getDaysInJalaliMonth(date);
+  const cal = getCalendar();
+  const start = cal.startOfMonth(date);
+  const nextMonth = cal.addMonths(start, 1);
+  const diffMs = nextMonth.getTime() - start.getTime();
+  const totalDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
   const days = [];
   const cursor = new Date(start);
-
   for (let i = 0; i < totalDays; i += 1) {
     days.push({
       date: new Date(cursor),
@@ -312,98 +238,93 @@ export function getMonthDays(date = new Date()) {
 }
 
 export function getYearMonths(date = new Date()) {
-  const startYear = dfStartOfYear(date);
+  const cal = getCalendar();
+  const startYear = cal.startOfYear(date);
 
   return Array.from({ length: 12 }, (_, i) => {
-    const monthStart = addMonths(startYear, i);
-    const nextMonthStart = addMonths(monthStart, 1);
+    const monthStart = cal.addMonths(startYear, i);
+    const nextMonthStart = cal.addMonths(monthStart, 1);
     const monthEnd = new Date(nextMonthStart.getTime() - 1);
     return {
-      startDate: dfStartOfMonth(monthStart),
+      startDate: cal.startOfMonth(monthStart),
       endDate: monthEnd,
-      label: AFGHAN_MONTHS[i],
-      key: format(monthStart, 'yyyy-MM'),
+      label: cal.getMonthName(monthStart),
+      key: `${cal.getYear(monthStart)}-${i + 1}`,
     };
   });
 }
 
-// ============================================================
-// برچسب‌های امروز
-// ============================================================
+/* ============================================================
+   Today labels
+   ============================================================ */
 
 export function getTodayLabel() {
   const d = new Date();
-  const dayName = PERSIAN_DAYS[d.getDay()];
-  const dayNum = format(d, 'd');
-  const monthIdx = Number(format(d, 'M')) - 1;
-  const monthName = AFGHAN_MONTHS[monthIdx] || '';
-  const year = format(d, 'yyyy');
-  return `${dayName} ${dayNum} ${monthName} ${year}`;
+  const cal = getCalendar();
+  return `${cal.getDayName(d)} ${cal.getDayNumber(d)} ${cal.getMonthName(d)} ${cal.getYear(d)}`;
 }
 
 export function getTodayShort() {
   const d = new Date();
-  const dayName = PERSIAN_DAYS[d.getDay()];
-  const dayNum = format(d, 'd');
-  const monthIdx = Number(format(d, 'M')) - 1;
-  const monthName = AFGHAN_MONTHS[monthIdx] || '';
-  return `${dayName} ${dayNum} ${monthName}`;
+  const cal = getCalendar();
+  return `${cal.getDayName(d)} ${cal.getDayNumber(d)} ${cal.getMonthName(d)}`;
 }
+
+/* ============================================================
+   Date formatting
+   ============================================================ */
 
 export function formatShortDate(dateInput) {
   const d = new Date(dateInput);
-  const dayName = PERSIAN_DAYS[d.getDay()];
-  const dayNum = format(d, 'd');
-  const monthIdx = Number(format(d, 'M')) - 1;
-  const monthName = AFGHAN_MONTHS[monthIdx] || '';
-  return `${dayName} ${dayNum} ${monthName}`;
+  const cal = getCalendar();
+  return `${cal.getDayName(d)} ${cal.getDayNumber(d)} ${cal.getMonthName(d)}`;
 }
 
 export function formatFullDate(dateInput) {
   const d = new Date(dateInput);
-  const dayName = PERSIAN_DAYS[d.getDay()];
-  const dayNum = format(d, 'd');
-  const monthIdx = Number(format(d, 'M')) - 1;
-  const monthName = AFGHAN_MONTHS[monthIdx] || '';
-  const year = format(d, 'yyyy');
-  return `${dayName} ${dayNum} ${monthName} ${year}`;
+  const cal = getCalendar();
+  return `${cal.getDayName(d)} ${cal.getDayNumber(d)} ${cal.getMonthName(d)} ${cal.getYear(d)}`;
 }
 
 export function formatWeekRange(start, end) {
-  const sDay = Number(format(start, 'd'));
-  const eDay = Number(format(end, 'd'));
-  const sMonthIdx = Number(format(start, 'M')) - 1;
-  const eMonthIdx = Number(format(end, 'M')) - 1;
-  const sMonth = AFGHAN_MONTHS[sMonthIdx] || '';
-  const eMonth = AFGHAN_MONTHS[eMonthIdx] || '';
+  const cal = getCalendar();
+  const sDay = cal.getDayNumber(start);
+  const eDay = cal.getDayNumber(end);
+  const sMonthIdx = cal.getMonthIndex(start);
+  const eMonthIdx = cal.getMonthIndex(end);
+  const sMonth = cal.getMonthName(start);
+  const eMonth = cal.getMonthName(end);
 
   if (sMonthIdx === eMonthIdx) {
-    return `${FA_NUM.format(sDay)} - ${FA_NUM.format(eDay)} ${sMonth}`;
+    return `${fmtN(sDay)} - ${fmtN(eDay)} ${sMonth}`;
   }
-  return `${FA_NUM.format(sDay)} ${sMonth} - ${FA_NUM.format(eDay)} ${eMonth}`;
+  return `${fmtN(sDay)} ${sMonth} - ${fmtN(eDay)} ${eMonth}`;
 }
 
-// ============================================================
-// ساعت
-// ============================================================
+/* ============================================================
+   Time formatting
+   ============================================================ */
 
 export function formatTime12(dateInput) {
   const d = new Date(dateInput);
   const h24 = d.getHours();
   const m = d.getMinutes();
-  const period = h24 < 12 ? 'صبح' : 'عصر';
+  const periodKey = h24 < 12 ? 'time.am' : 'time.pm';
   let h12 = h24 % 12;
   if (h12 === 0) h12 = 12;
-  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+
+  const hStr = fmtN(h12);
+  const mStr = String(m).padStart(2, '0');
+  return `${hStr}:${mStr} ${t(periodKey)}`;
 }
 
 export function formatFullDateTime(dateInput) {
   return `${formatFullDate(dateInput)} • ${formatTime12(dateInput)}`;
 }
 
-// ============================================================
-// فرمت تاریخ تراکنش
-// ============================================================
+/* ============================================================
+   Transaction date (relative)
+   ============================================================ */
 
 export function formatTransactionDate(dateInput) {
   const d = new Date(dateInput);
@@ -416,15 +337,15 @@ export function formatTransactionDate(dateInput) {
 
   const timePart = formatTime12(d);
 
-  if (diffDays === 0) return `امروز • ${timePart}`;
-  if (diffDays === 1) return `دیروز • ${timePart}`;
+  if (diffDays === 0) return `${t('periods.today')} • ${timePart}`;
+  if (diffDays === 1) return `${t('periods.yesterday')} • ${timePart}`;
 
-  const dayName = PERSIAN_DAYS[d.getDay()];
-  const dayNum = format(d, 'd');
-  const monthIdx = Number(format(d, 'M')) - 1;
-  const monthName = AFGHAN_MONTHS[monthIdx] || '';
-  const year = format(d, 'yyyy');
-  const currentYear = format(now, 'yyyy');
+  const cal = getCalendar();
+  const dayName = cal.getDayName(d);
+  const dayNum = cal.getDayNumber(d);
+  const monthName = cal.getMonthName(d);
+  const year = cal.getYear(d);
+  const currentYear = cal.getYear(now);
 
   if (year === currentYear) {
     return `${dayName} ${dayNum} ${monthName} • ${timePart}`;
@@ -433,11 +354,10 @@ export function formatTransactionDate(dateInput) {
   return `${dayName} ${dayNum} ${monthName} ${year}`;
 }
 
-/**
- * برچسب دوره‌ی مبنا (baseline)
- *   offset = 0  → مبنا: دوره‌ی قبل («دیروز» / «هفته‌ی گذشته» / ...)
- *   offset < 0  → مبنا: این دوره («امروز» / «این هفته» / ...)
- */
+/* ============================================================
+   Baseline label
+   ============================================================ */
+
 export function getBaselineLabel(period, offset = 0) {
   const baselineOffset = offset < 0 ? 0 : -1;
   return getPeriodOffsetLabel(period, baselineOffset);

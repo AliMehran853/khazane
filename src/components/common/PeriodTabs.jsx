@@ -1,19 +1,24 @@
 import { useState, useRef, useEffect } from 'react';
 import { Check, ChevronDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useAppStore } from '../store/appStore';
 import { useIsDesktop } from '../hooks/useIsDesktop';
-import { PERIODS, PERIOD_SHORT } from '../utils/constants';
-
-const ITEMS = PERIODS.map((id) => ({ id, label: PERIOD_SHORT[id] }));
+import { PERIODS } from '../utils/constants';
 
 function MobileTabs() {
+  const { t } = useTranslation();
   const period = useAppStore((s) => s.period);
   const setPeriod = useAppStore((s) => s.setPeriod);
 
+  const items = PERIODS.map((id) => ({
+    id,
+    label: t(`periods.${id}Short`),
+  }));
+
   return (
     <div className="kh-tab-bar">
-      {ITEMS.map((item) => {
+      {items.map((item) => {
         const isActive = period === item.id;
         return (
           <button
@@ -32,12 +37,18 @@ function MobileTabs() {
 }
 
 function DesktopDropdown() {
+  const { t } = useTranslation();
   const period = useAppStore((s) => s.period);
   const setPeriod = useAppStore((s) => s.setPeriod);
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
-  const current = ITEMS.find((p) => p.id === period) || ITEMS[0];
+  const items = PERIODS.map((id) => ({
+    id,
+    label: t(`periods.${id}Short`),
+  }));
+
+  const current = items.find((p) => p.id === period) || items[0];
 
   useEffect(() => {
     if (!open) return;
@@ -64,7 +75,9 @@ function DesktopDropdown() {
         className="glass flex h-full w-full items-center justify-between gap-3 rounded-3xl px-5 py-4 transition-all duration-200 hover:border-primary/30 active:scale-[0.98]"
       >
         <span className="flex min-w-0 flex-col items-start">
-          <span className="text-2xs font-medium text-fg-3">دوره‌ی نمایش</span>
+          <span className="text-2xs font-medium text-fg-3">
+            {t('periods.displayPeriod')}
+          </span>
           <span className="mt-1 text-lg font-extrabold text-primary">
             {current.label}
           </span>
@@ -82,7 +95,7 @@ function DesktopDropdown() {
 
       {open && (
         <div className="glass-strong absolute right-0 top-[calc(100%+8px)] z-50 w-full overflow-hidden rounded-2xl">
-          {ITEMS.map((item) => {
+          {items.map((item) => {
             const isActive = period === item.id;
             return (
               <button

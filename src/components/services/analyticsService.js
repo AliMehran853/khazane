@@ -1,3 +1,7 @@
+// ============================================================
+// Analytics Service — calendar-aware (no hardcoded text)
+// ============================================================
+
 import db from '../db/database';
 import {
   getRange,

@@ -1,25 +1,17 @@
-// ============================================================
-// پالت مشترک برای رنگ‌دهی به دسته‌بندی‌ها
-// هماهنگ با تم فیروزه‌ای/رز اپ
-// ============================================================
+import i18n from '../../i18n';
+import { getCategoryName } from './categories';
 
 export const CATEGORY_PALETTE = [
-  '#00D1A7', // فیروزه‌ای (اصلی)
-  '#F43F5E', // رز-سرخ (مصرف)
-  '#3B82F6', // آبی
-  '#8B5CF6', // بنفش
-  '#F59E0B', // نارنجی/انبر
-  '#64748B', // خاکستری برای «سایر»
+  '#00D1A7',
+  '#F43F5E',
+  '#3B82F6',
+  '#8B5CF6',
+  '#F59E0B',
+  '#64748B',
 ];
 
-// چند دسته‌ی برتر مستقیم نشان داده شوند
 export const CATEGORY_TOP_COUNT = 5;
 
-/**
- * دسته‌ها را برای نمایش آماده می‌کند:
- * - اگر تعداد ≤ TOP_COUNT باشد: همه با رنگ‌های متفاوت
- * - اگر بیشتر باشد: TOP_COUNT دسته‌ی اول + یک برش «سایر»
- */
 export function prepareCategoryChartData(categories = []) {
   const sorted = [...categories].sort(
     (a, b) => (b.total || 0) - (a.total || 0),
@@ -28,7 +20,7 @@ export function prepareCategoryChartData(categories = []) {
   if (sorted.length <= CATEGORY_TOP_COUNT) {
     return sorted.map((c, index) => ({
       id: c.id,
-      name: c.name,
+      name: getCategoryName(c) || c.name,
       total: c.total || 0,
       color: CATEGORY_PALETTE[index % CATEGORY_PALETTE.length],
     }));
@@ -41,13 +33,13 @@ export function prepareCategoryChartData(categories = []) {
   return [
     ...top.map((c, index) => ({
       id: c.id,
-      name: c.name,
+      name: getCategoryName(c) || c.name,
       total: c.total || 0,
       color: CATEGORY_PALETTE[index],
     })),
     {
       id: '__other__',
-      name: 'سایر',
+      name: i18n.t('charts.other'),
       total: otherTotal,
       color: CATEGORY_PALETTE[CATEGORY_TOP_COUNT],
     },

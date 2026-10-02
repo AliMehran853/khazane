@@ -1,17 +1,14 @@
 import { MessageCircle, Phone } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const PHONE_LOCAL = '0778765853';
 const PHONE_INTL = '93778765853';
 
-const WHATSAPP_MESSAGE = encodeURIComponent(
-  'سلام علی جان! 👋\n' +
-    'از اپلیکیشن «خزانه» استفاده می‌کنم و یه پیشنهاد/نظر داشتم:\n\n' +
-    '_______________________\n\n' +
-    'ممنون از وقتی که گذاشتی 🙏',
-);
-
 export default function ContactCard() {
-  const waLink = `https://wa.me/${PHONE_INTL}?text=${WHATSAPP_MESSAGE}`;
+  const { t } = useTranslation();
+
+  const waMessage = t('about.whatsappMessage');
+  const waLink = `https://wa.me/${PHONE_INTL}?text=${encodeURIComponent(waMessage)}`;
 
   return (
     <div className="space-y-2.5">
@@ -26,14 +23,16 @@ export default function ContactCard() {
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="text-base font-bold text-fg-1">واتساپ</p>
+          <p className="text-base font-bold text-fg-1">
+            {t('about.whatsapp')}
+          </p>
           <p className="mt-0.5 text-xs text-fg-2" dir="ltr">
             {PHONE_LOCAL}
           </p>
         </div>
 
         <span className="shrink-0 text-2xs font-semibold text-whatsapp">
-          گفتگو ←
+          {t('about.whatsappChat')}
         </span>
       </a>
 
@@ -46,7 +45,9 @@ export default function ContactCard() {
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="text-base font-bold text-fg-1">تماس مستقیم</p>
+          <p className="text-base font-bold text-fg-1">
+            {t('about.directCall')}
+          </p>
           <p className="mt-0.5 text-xs text-fg-2" dir="ltr">
             +{PHONE_INTL}
           </p>

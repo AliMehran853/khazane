@@ -1,8 +1,9 @@
 // ============================================================
-// App constants — single source of truth
+// App constants — only numeric/config values
+// All user-facing text lives in i18n locales
 // ============================================================
 
-export const APP_NAME = 'خزانه';
+export const APP_NAME = 'Khazane';
 export const APP_VERSION = '1.1.0';
 export const APP_BUILD_DATE = '1405/06';
 
@@ -12,46 +13,10 @@ export const MEMBER_ID = 'self';
 
 export const PERIODS = ['daily', 'weekly', 'monthly', 'yearly'];
 
-export const PERIOD_LABELS = {
-  daily: 'امروز',
-  weekly: 'این هفته',
-  monthly: 'این ماه',
-  yearly: 'امسال',
-};
-
-export const PERIOD_SHORT = {
-  daily: 'روزانه',
-  weekly: 'هفتگی',
-  monthly: 'ماهانه',
-  yearly: 'سالانه',
-};
-
-/* ---------- Transaction types ---------- */
-
-export const TRANSACTION_TYPES = {
-  income: 'درآمد',
-  expense: 'مصرف',
-};
-
 /* ---------- Security ---------- */
 
 export const PIN_LENGTH = 4;
 export const MAX_PIN_ATTEMPTS = 5;
-
-/* ---------- Currency ---------- */
-
-export const CURRENCY = {
-  code: 'AFN',
-  label: 'افغانی',
-  symbol: '؋',
-};
-
-export const CURRENCY_OPTIONS = [
-  { code: 'AFN', label: 'افغانی', symbol: '؋' },
-  { code: 'USD', label: 'دالر', symbol: '$' },
-  { code: 'PKR', label: 'کلدار', symbol: '₨' },
-  { code: 'IRR', label: 'تومان', symbol: '﷼' },
-];
 
 /* ---------- Routes ---------- */
 
@@ -87,43 +52,5 @@ export const STORAGE_KEYS = {
   greetingsShown: 'khazane_greetings_shown',
   greetingsCounter: 'khazane_greetings_counter',
   installDismissed: 'khazane_install_dismissed_at',
+  language: 'khazane_language',
 };
-
-/* ---------- Changelog ---------- */
-
-export const CHANGELOG = [
-  {
-    version: '1.1.0',
-    date: '1405/06/25',
-    items: [
-      'طراحی کامل شیشه‌ای با تم سبز',
-      'پالت رنگی تازه با رنگ سبز',
-      'بهبود سایه‌ها و عمق کارت‌ها',
-      'پشتیبانی از حالت روشن و تاریک',
-      'آیکون‌های جدید اپ',
-      'بهبود خوانایی متن‌ها',
-      'ناوبری هفته — مشاهده‌ی هفته‌های گذشته',
-      'انتخاب تاریخ هنگام ثبت در هفته‌های گذشته',
-      'نمایش تاریخ کامل روی هر تراکنش',
-      'پنل جزئیات سریع برای هر تراکنش',
-      'مقایسه‌ی عددی بین دوره‌ها',
-      'لودینگ نرم با Skeleton',
-      'انیمیشن اعداد',
-      'بازخورد لمسی روی موبایل',
-      'موجودی منفی با رنگ قرمز',
-    ],
-  },
-  {
-    version: '1.0.0',
-    date: '1405/06/01',
-    items: [
-      'انتشار اولیه',
-      'ثبت درآمد و مصارف',
-      'نمودارها و دسته‌بندی‌ها',
-      'قفل با رمز و اثر انگشت',
-      'پشتیبان‌گیری و بازیابی',
-      'یادآوری روزانه',
-      'حالت آفلاین کامل',
-    ],
-  },
-];

@@ -1,172 +1,152 @@
 import db from './database';
+import i18n from '../../i18n';
 
-const defaultCategories = [
-  // ---------------------------------------------------------
-  // Income
-  // ---------------------------------------------------------
-  {
-    id: 'salary',
+const t = (key) => i18n.t(key);
+
+function buildDefaultCategories() {
+  const now = Date.now();
+
+  const income = [
+    {
+      id: 'salary',
+      nameKey: 'categories.salary',
+      placeholderKey: 'categories.salaryPlaceholder',
+      icon: 'WalletCards',
+      color: '#4FD1BE',
+      sortOrder: 1,
+    },
+    {
+      id: 'business',
+      nameKey: 'categories.business',
+      placeholderKey: 'categories.businessPlaceholder',
+      icon: 'BriefcaseBusiness',
+      color: '#4FD1BE',
+      sortOrder: 2,
+    },
+    {
+      id: 'freelance',
+      nameKey: 'categories.freelance',
+      placeholderKey: 'categories.freelancePlaceholder',
+      icon: 'Laptop',
+      color: '#4FD1BE',
+      sortOrder: 3,
+    },
+    {
+      id: 'gift-income',
+      nameKey: 'categories.giftIncome',
+      placeholderKey: 'categories.giftIncomePlaceholder',
+      icon: 'Gift',
+      color: '#4FD1BE',
+      sortOrder: 4,
+    },
+    {
+      id: 'investment-income',
+      nameKey: 'categories.investment',
+      placeholderKey: 'categories.investmentPlaceholder',
+      icon: 'TrendingUp',
+      color: '#4FD1BE',
+      sortOrder: 5,
+    },
+    {
+      id: 'other-income',
+      nameKey: 'categories.otherIncome',
+      placeholderKey: 'categories.otherIncomePlaceholder',
+      icon: 'CircleDollarSign',
+      color: '#4FD1BE',
+      sortOrder: 6,
+    },
+  ];
+
+  const expense = [
+    {
+      id: 'food',
+      nameKey: 'categories.food',
+      placeholderKey: 'categories.foodPlaceholder',
+      icon: 'Utensils',
+      color: '#E2574C',
+      sortOrder: 1,
+    },
+    {
+      id: 'transport',
+      nameKey: 'categories.transport',
+      placeholderKey: 'categories.transportPlaceholder',
+      icon: 'CarFront',
+      color: '#E2574C',
+      sortOrder: 2,
+    },
+    {
+      id: 'housing',
+      nameKey: 'categories.housing',
+      placeholderKey: 'categories.housingPlaceholder',
+      icon: 'House',
+      color: '#E2574C',
+      sortOrder: 3,
+    },
+    {
+      id: 'bills',
+      nameKey: 'categories.bills',
+      placeholderKey: 'categories.billsPlaceholder',
+      icon: 'ReceiptText',
+      color: '#E2574C',
+      sortOrder: 4,
+    },
+    {
+      id: 'shopping',
+      nameKey: 'categories.shopping',
+      placeholderKey: 'categories.shoppingPlaceholder',
+      icon: 'ShoppingBag',
+      color: '#E2574C',
+      sortOrder: 5,
+    },
+    {
+      id: 'health',
+      nameKey: 'categories.health',
+      placeholderKey: 'categories.healthPlaceholder',
+      icon: 'HeartPulse',
+      color: '#E2574C',
+      sortOrder: 6,
+    },
+    {
+      id: 'education',
+      nameKey: 'categories.education',
+      placeholderKey: 'categories.educationPlaceholder',
+      icon: 'GraduationCap',
+      color: '#E2574C',
+      sortOrder: 7,
+    },
+    {
+      id: 'other-expense',
+      nameKey: 'categories.otherExpense',
+      placeholderKey: 'categories.otherExpensePlaceholder',
+      icon: 'MoreHorizontal',
+      color: '#E2574C',
+      sortOrder: 8,
+    },
+  ];
+
+  return [...income, ...expense].map((cat) => ({
+    ...cat,
     memberId: 'self',
-    type: 'income',
-    name: 'معاش',
-    icon: 'WalletCards',
-    color: '#4FD1BE',
+    type: cat.id.endsWith('income') || income.find((i) => i.id === cat.id)
+      ? 'income'
+      : 'expense',
+    // name و placeholder به عنوان fallback ذخیره می‌شوند
+    name: t(cat.nameKey),
+    placeholder: t(cat.placeholderKey),
     isDefault: true,
-    sortOrder: 1,
-    placeholder: 'مثلاً معاش این ماه',
-  },
-  {
-    id: 'business',
-    memberId: 'self',
-    type: 'income',
-    name: 'کار و تجارت',
-    icon: 'BriefcaseBusiness',
-    color: '#4FD1BE',
-    isDefault: true,
-    sortOrder: 2,
-    placeholder: 'مثلاً فروش اجناس، درآمد دکان',
-  },
-  {
-    id: 'freelance',
-    memberId: 'self',
-    type: 'income',
-    name: 'فریلنس',
-    icon: 'Laptop',
-    color: '#4FD1BE',
-    isDefault: true,
-    sortOrder: 3,
-    placeholder: 'مثلاً پروژه‌ی طراحی، ترجمه، برنامه‌نویسی',
-  },
-  {
-    id: 'gift-income',
-    memberId: 'self',
-    type: 'income',
-    name: 'هدیه',
-    icon: 'Gift',
-    color: '#4FD1BE',
-    isDefault: true,
-    sortOrder: 4,
-    placeholder: 'از طرف چه کسی، به چه مناسبتی',
-  },
-  {
-    id: 'investment-income',
-    memberId: 'self',
-    type: 'income',
-    name: 'سود سرمایه',
-    icon: 'TrendingUp',
-    color: '#4FD1BE',
-    isDefault: true,
-    sortOrder: 5,
-    placeholder: 'سود بانکی، سود فروش ملک',
-  },
-  {
-    id: 'other-income',
-    memberId: 'self',
-    type: 'income',
-    name: 'سایر درآمدها',
-    icon: 'CircleDollarSign',
-    color: '#4FD1BE',
-    isDefault: true,
-    sortOrder: 6,
-    placeholder: 'توضیح این درآمد...',
-  },
-  // ---------------------------------------------------------
-  // Expense
-  // ---------------------------------------------------------
-  {
-    id: 'food',
-    memberId: 'self',
-    type: 'expense',
-    name: 'خوراک',
-    icon: 'Utensils',
-    color: '#E2574C',
-    isDefault: true,
-    sortOrder: 1,
-    placeholder: 'مثلاً نهار برنج، شام، صبحانه',
-  },
-  {
-    id: 'transport',
-    memberId: 'self',
-    type: 'expense',
-    name: 'کرایه موتر',
-    icon: 'CarFront',
-    color: '#E2574C',
-    isDefault: true,
-    sortOrder: 2,
-    placeholder: 'کرایه، پطرول، پارکینگ',
-  },
-  {
-    id: 'housing',
-    memberId: 'self',
-    type: 'expense',
-    name: 'خانه',
-    icon: 'House',
-    color: '#E2574C',
-    isDefault: true,
-    sortOrder: 3,
-    placeholder: 'کرایه خانه، تعمیرات، برق',
-  },
-  {
-    id: 'bills',
-    memberId: 'self',
-    type: 'expense',
-    name: 'قبض‌ها',
-    icon: 'ReceiptText',
-    color: '#E2574C',
-    isDefault: true,
-    sortOrder: 4,
-    placeholder: 'برق، آب، انترنت، موبایل',
-  },
-  {
-    id: 'shopping',
-    memberId: 'self',
-    type: 'expense',
-    name: 'خرید',
-    icon: 'ShoppingBag',
-    color: '#E2574C',
-    isDefault: true,
-    sortOrder: 5,
-    placeholder: 'لباس، لوازم خانه، موبایل',
-  },
-  {
-    id: 'health',
-    memberId: 'self',
-    type: 'expense',
-    name: 'سلامتی',
-    icon: 'HeartPulse',
-    color: '#E2574C',
-    isDefault: true,
-    sortOrder: 6,
-    placeholder: 'دوا، دکتر، آزمایش',
-  },
-  {
-    id: 'education',
-    memberId: 'self',
-    type: 'expense',
-    name: 'تحصیل',
-    icon: 'GraduationCap',
-    color: '#E2574C',
-    isDefault: true,
-    sortOrder: 7,
-    placeholder: 'فیس، کتاب، کورس',
-  },
-  {
-    id: 'other-expense',
-    memberId: 'self',
-    type: 'expense',
-    name: 'سایر مصارف',
-    icon: 'MoreHorizontal',
-    color: '#E2574C',
-    isDefault: true,
-    sortOrder: 8,
-    placeholder: 'توضیح این مصرف...',
-  },
-];
+    createdAt: now,
+    updatedAt: now,
+  }));
+}
 
 const defaultSettings = [
   { key: 'currency', value: 'AFN' },
   { key: 'currencyLabel', value: 'افغانی' },
+  { key: 'currencyCode', value: 'AFN' },
   { key: 'locale', value: 'fa-AF' },
+  { key: 'language', value: 'fa' },
+  { key: 'calendarId', value: 'afghan' },
+  { key: 'regionId', value: 'afghan' },
   { key: 'memberId', value: 'self' },
   { key: 'userName', value: '' },
   { key: 'defaultPeriod', value: 'weekly' },
@@ -189,13 +169,7 @@ export async function seedDatabase() {
       const categoryCount = await db.categories.count();
 
       if (categoryCount === 0) {
-        await db.categories.bulkAdd(
-          defaultCategories.map((category) => ({
-            ...category,
-            createdAt: now,
-            updatedAt: now,
-          })),
-        );
+        await db.categories.bulkAdd(buildDefaultCategories());
       }
 
       for (const setting of defaultSettings) {

@@ -1,18 +1,13 @@
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { useAppStore } from '../store/appStore';
 import { useHaptic } from './useHaptic';
 import { getPeriodBaseDate } from '../utils/dates';
 import { ROUTES } from '../utils/constants';
 
-/**
- * منطق مشترک ثبت تراکنش — بین FAB و Sidebar
- * - daily:    مستقیم sheet را باز می‌کند با تاریخ روز
- * - weekly:   اول DateChoiceModal را باز می‌کند
- * - monthly:  قفل است و toast نشان می‌دهد
- * - yearly:   قفل است و toast نشان می‌دهد
- */
 export function useRecordTransaction() {
+  const { t } = useTranslation();
   const location = useLocation();
   const haptic = useHaptic();
 
@@ -23,7 +18,10 @@ export function useRecordTransaction() {
   const periodOffset = useAppStore((s) => s.periodOffset);
 
   const type = location.pathname === ROUTES.income ? 'income' : 'expense';
-  const buttonLabel = type === 'income' ? 'ثبت درآمد' : 'ثبت مصرف';
+  const buttonLabel =
+    type === 'income'
+      ? t('transaction.addIncome')
+      : t('transaction.addExpense');
   const isDisabled = period === 'monthly' || period === 'yearly';
 
   function trigger() {

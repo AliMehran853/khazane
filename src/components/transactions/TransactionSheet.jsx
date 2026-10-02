@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import TransactionForm from './TransactionForm';
 import { getTodayShort, formatShortDate } from '../utils/dates';
@@ -13,6 +14,8 @@ function TransactionSheet({
   prefilledDate,
   onClose,
 }) {
+  const { t } = useTranslation();
+
   const isEditing = Boolean(editingTransaction);
   const effectiveType = isEditing ? editingTransaction.type : type;
   const isIncome = effectiveType === 'income';
@@ -23,16 +26,16 @@ function TransactionSheet({
   }, [open]);
 
   const subtitle = isEditing
-    ? 'ویرایش تراکنش'
+    ? t('transaction.editTransaction')
     : isIncome
-      ? 'ثبت درآمد جدید'
-      : 'ثبت مصرف جدید';
+      ? t('transaction.addNewIncome')
+      : t('transaction.addNewExpense');
 
   const title = isEditing
-    ? 'ویرایش تراکنش'
+    ? t('transaction.editTransaction')
     : isIncome
-      ? 'ثبت درآمد'
-      : 'ثبت مصرف';
+      ? t('transaction.addIncome')
+      : t('transaction.addExpense');
 
   const displayDate = prefilledDate
     ? formatShortDate(prefilledDate)
@@ -77,7 +80,7 @@ function TransactionSheet({
                   type="button"
                   onClick={onClose}
                   className="kh-close-btn lg:h-10 lg:w-10"
-                  aria-label="بستن"
+                  aria-label={t('common.close')}
                 >
                   <X size={18} />
                 </button>

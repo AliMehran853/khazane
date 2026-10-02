@@ -27,6 +27,8 @@ function GreetingHost() {
 }
 
 function AppShell() {
+  // ⭐ useTranslation حذف شد — اصلاً استفاده نمی‌شد و باعث
+  //    re-render کل درخت اپ در هر تغییر زبان می‌شد
   const location = useLocation();
   const { locked, checking } = useAppLock();
   const { visible: reminderVisible, dismiss: dismissReminder } =
@@ -102,7 +104,7 @@ function AppShell() {
     <div className="relative min-h-dvh text-fg-1">
       <Sidebar />
 
-      <main className="mx-auto w-full max-w-[420px] pb-24 lg:max-w-none lg:pb-12 lg:pr-[260px]">
+      <main className="mx-auto w-full max-w-[420px] pb-24 lg:max-w-none lg:pb-12 rtl:lg:pr-[260px] ltr:lg:pl-[260px]">
         <div className="lg:mx-auto lg:max-w-[1200px] lg:px-8 lg:pt-2">
           <div key={location.pathname}>
             <Outlet />

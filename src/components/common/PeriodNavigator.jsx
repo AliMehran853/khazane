@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useAppStore } from '../store/appStore';
 import {
@@ -6,9 +7,9 @@ import {
   getPeriodSubLabel,
   getMaxOffset,
 } from '../utils/dates';
-import { PERIOD_LABELS } from '../utils/constants';
 
 export default function PeriodNavigator() {
+  const { t } = useTranslation();
   const period = useAppStore((s) => s.period);
   const offset = useAppStore((s) => s.periodOffset);
   const setOffset = useAppStore((s) => s.setPeriodOffset);
@@ -20,20 +21,26 @@ export default function PeriodNavigator() {
   const canGoBack = offset > maxOffset;
   const canGoForward = offset < 0;
   const isCurrent = offset === 0;
-  const resetLabel = PERIOD_LABELS[period] || 'حالا';
+
+  const resetLabel = t(`periods.${period}`);
 
   return (
     <div className="glass rounded-2xl px-2 py-2">
       <div className="flex items-center justify-between gap-2">
+        {/* دکمه‌ی دوره‌ی قبل — در RTL سمت راست، در LTR سمت چپ */}
         <button
           type="button"
-          disabled={!canGoForward}
-          onClick={() => setOffset(offset + 1)}
-          aria-label="بعدی"
-          data-disabled={!canGoForward}
+          disabled={!canGoBack}
+          onClick={() => setOffset(offset - 1)}
+          aria-label={t('common.previous')}
+          data-disabled={!canGoBack}
           className="kh-nav-btn"
         >
-          <ChevronRight size={18} strokeWidth={2.2} />
+          <ChevronRight
+            size={18}
+            strokeWidth={2.2}
+            className="ltr:rotate-180"
+          />
         </button>
 
         <div className="min-w-0 flex-1 text-center">
@@ -52,15 +59,20 @@ export default function PeriodNavigator() {
           )}
         </div>
 
+        {/* دکمه‌ی دوره‌ی بعد — در RTL سمت چپ، در LTR سمت راست */}
         <button
           type="button"
-          disabled={!canGoBack}
-          onClick={() => setOffset(offset - 1)}
-          aria-label="قبلی"
-          data-disabled={!canGoBack}
+          disabled={!canGoForward}
+          onClick={() => setOffset(offset + 1)}
+          aria-label={t('common.next')}
+          data-disabled={!canGoForward}
           className="kh-nav-btn"
         >
-          <ChevronLeft size={18} strokeWidth={2.2} />
+          <ChevronLeft
+            size={18}
+            strokeWidth={2.2}
+            className="ltr:rotate-180"
+          />
         </button>
       </div>
 
@@ -71,7 +83,7 @@ export default function PeriodNavigator() {
           className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-primary/30 bg-primary/10 py-1.5 text-2xs font-semibold text-primary transition-all hover:bg-primary/15 active:scale-[0.98]"
         >
           <RotateCcw size={11} strokeWidth={2.2} />
-          بازگشت به {resetLabel}
+          {t('periods.backTo', { label: resetLabel })}
         </button>
       )}
     </div>

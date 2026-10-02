@@ -1,5 +1,14 @@
+// ============================================================
+// Settings Service — i18n-aware
+// ============================================================
+
 import db from '../db/database';
+import i18n from '../../i18n';
 import { seedDatabase } from '../db/seed';
+
+const t = (key, opts = {}) => i18n.t(key, opts);
+
+/* ---------- Generic ---------- */
 
 export async function getSetting(key, fallback = null) {
   const row = await db.settings.get(key);
@@ -17,6 +26,8 @@ export async function getAllSettings() {
   return result;
 }
 
+/* ---------- Profile ---------- */
+
 export async function getUserName() {
   return getSetting('userName', '');
 }
@@ -30,12 +41,15 @@ export async function getFirstName() {
 export async function setFirstName(name) {
   return setSetting('firstName', String(name || '').trim());
 }
+
 export async function getLastName() {
   return getSetting('lastName', '');
 }
 export async function setLastName(name) {
   return setSetting('lastName', String(name || '').trim());
 }
+
+/* ---------- Onboarding ---------- */
 
 export async function isOnboardingCompleted() {
   return Boolean(await getSetting('onboardingCompleted', false));
@@ -50,6 +64,8 @@ export async function setOnboardingStep(step) {
   return setSetting('onboardingStep', Number(step) || 0);
 }
 
+/* ---------- Welcome ---------- */
+
 export async function hasSeenWelcome() {
   const seen = await getSetting('welcomeGreetingSeenAt', null);
   return Boolean(seen);
@@ -58,12 +74,23 @@ export async function markWelcomeSeen() {
   return setSetting('welcomeGreetingSeenAt', Date.now());
 }
 
+/* ---------- Currency ---------- */
+
 export async function getCurrencyLabel() {
   return getSetting('currencyLabel', 'افغانی');
 }
 export async function setCurrencyLabel(label) {
   return setSetting('currencyLabel', label);
 }
+
+export async function getCurrencyCode() {
+  return getSetting('currencyCode', 'AFN');
+}
+export async function setCurrencyCode(code) {
+  return setSetting('currencyCode', code);
+}
+
+/* ---------- Reminder ---------- */
 
 export async function isReminderEnabled() {
   return Boolean(await getSetting('reminderEnabled', false));
@@ -77,6 +104,8 @@ export async function getReminderTime() {
 export async function setReminderTime(time) {
   return setSetting('reminderTime', time);
 }
+
+/* ---------- Backup / Restore ---------- */
 
 export async function exportAllData() {
   const [transactions, categories, settings] = await Promise.all([
@@ -103,7 +132,7 @@ export async function importAllData(data) {
     !Array.isArray(data.categories) ||
     !Array.isArray(data.settings)
   ) {
-    throw new Error('فایل پشتیبان نامعتبر است.');
+    throw new Error(t('errors.backupInvalid'));
   }
 
   await db.transaction(
@@ -116,7 +145,8 @@ export async function importAllData(data) {
       await db.categories.clear();
       await db.settings.clear();
 
-      if (data.transactions.length) await db.transactions.bulkAdd(data.transactions);
+      if (data.transactions.length)
+        await db.transactions.bulkAdd(data.transactions);
       if (data.categories.length) await db.categories.bulkAdd(data.categories);
       if (data.settings.length) await db.settings.bulkAdd(data.settings);
     },
@@ -141,6 +171,7 @@ const LOCAL_KEYS = [
   'khazane_greetings_shown',
   'khazane_greetings_counter',
   'khazane_install_dismissed_at',
+  'khazane_language',
 ];
 
 export async function resetApp() {

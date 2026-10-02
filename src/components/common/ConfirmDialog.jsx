@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 import { lockBody } from '../utils/scrollLock';
 
@@ -10,23 +11,30 @@ export default function ConfirmDialog({
   iconTone = 'danger',
   title,
   description,
-  confirmLabel = 'تایید',
-  cancelLabel = 'انصراف',
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   loading = false,
-  loadingLabel = '...',
+  loadingLabel,
 }) {
+  const { t } = useTranslation();
+
   useEffect(() => {
     if (!open) return;
     return lockBody();
   }, [open]);
+
+  const finalConfirmLabel = confirmLabel || t('common.confirm');
+  const finalCancelLabel = cancelLabel || t('common.cancel');
+  const finalLoadingLabel = loadingLabel || t('common.saving');
 
   const iconClass =
     iconTone === 'danger'
       ? 'text-expense border-expense/25 bg-expense/15'
       : 'text-primary border-primary/25 bg-primary/15';
 
-  const confirmClass = iconTone === 'danger' ? 'kh-btn-danger' : 'kh-btn-primary';
+  const confirmClass =
+    iconTone === 'danger' ? 'kh-btn-danger' : 'kh-btn-primary';
 
   return (
     <AnimatePresence>
@@ -46,7 +54,6 @@ export default function ConfirmDialog({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 8 }}
             transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
-            dir="rtl"
             className="glass-strong relative z-10 w-full max-w-[320px] rounded-3xl p-5"
           >
             {Icon && (
@@ -79,7 +86,7 @@ export default function ConfirmDialog({
                 onClick={onClose}
                 className="kh-btn kh-btn-ghost py-2.5 text-sm"
               >
-                {cancelLabel}
+                {finalCancelLabel}
               </button>
               <button
                 type="button"
@@ -87,7 +94,7 @@ export default function ConfirmDialog({
                 onClick={onConfirm}
                 className={['kh-btn py-2.5 text-sm', confirmClass].join(' ')}
               >
-                {loading ? loadingLabel : confirmLabel}
+                {loading ? finalLoadingLabel : finalConfirmLabel}
               </button>
             </div>
           </motion.div>

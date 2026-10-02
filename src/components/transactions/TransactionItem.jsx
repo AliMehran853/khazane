@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import ConfirmDialog from '../common/ConfirmDialog';
 import { getCategoryIcon } from '../utils/categoryIcons';
+import { getCategoryName } from '../utils/categories';
 import {
   formatTransactionDate,
   formatFullDate,
@@ -14,6 +16,7 @@ import { useAppStore } from '../store/appStore';
 import { deleteTransaction } from '../services/transactionService';
 
 export default function TransactionItem({ transaction, category }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -35,6 +38,8 @@ export default function TransactionItem({ transaction, category }) {
   const dateTimeText = formatTransactionDate(transaction.date);
   const fullDateText = formatFullDate(transaction.date);
   const timeText = formatTime12(transaction.date);
+
+  const displayName = getCategoryName(category) || t('transaction.uncategorized');
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -92,7 +97,7 @@ export default function TransactionItem({ transaction, category }) {
 
           <div className="min-w-0 flex-1">
             <p className="truncate text-base font-semibold text-fg-1 lg:text-md">
-              {category?.name || 'بدون دسته'}
+              {displayName}
             </p>
 
             {note && (
@@ -120,7 +125,7 @@ export default function TransactionItem({ transaction, category }) {
             <button
               type="button"
               onClick={() => setExpanded((v) => !v)}
-              aria-label="جزئیات بیشتر"
+              aria-label="details"
               aria-expanded={expanded}
               className="-mr-1 flex h-6 w-6 items-center justify-center rounded-lg text-fg-3/70 transition-colors hover:bg-fill-2 hover:text-fg-2 active:scale-90"
             >
@@ -138,7 +143,7 @@ export default function TransactionItem({ transaction, category }) {
               <button
                 type="button"
                 onClick={() => setMenuOpen((v) => !v)}
-                aria-label="گزینه‌ها"
+                aria-label="options"
                 aria-expanded={menuOpen}
                 className="-mr-1 flex h-6 w-6 items-center justify-center rounded-lg text-fg-3/70 transition-colors hover:bg-fill-2 hover:text-fg-2 active:scale-90"
               >
@@ -146,17 +151,14 @@ export default function TransactionItem({ transaction, category }) {
               </button>
 
               {menuOpen && (
-                <div
-                  className="glass-strong absolute left-0 top-[calc(100%+4px)] z-50 min-w-[130px] overflow-hidden rounded-xl py-1 shadow-2xl"
-                  dir="rtl"
-                >
+                <div className="glass-strong absolute left-0 top-[calc(100%+4px)] z-50 min-w-[130px] overflow-hidden rounded-xl py-1 shadow-2xl">
                   <button
                     type="button"
                     onClick={handleEdit}
                     className="flex w-full items-center gap-2 px-3 py-2 text-right text-sm font-semibold text-fg-1 transition-colors hover:bg-fill-1"
                   >
                     <Pencil size={14} strokeWidth={2} className="text-primary" />
-                    ویرایش
+                    {t('common.edit')}
                   </button>
 
                   <div className="mx-2 h-px bg-border-1" />
@@ -167,7 +169,7 @@ export default function TransactionItem({ transaction, category }) {
                     className="flex w-full items-center gap-2 px-3 py-2 text-right text-sm font-semibold text-expense transition-colors hover:bg-expense/10"
                   >
                     <Trash2 size={14} strokeWidth={2} />
-                    حذف
+                    {t('common.delete')}
                   </button>
                 </div>
               )}
@@ -185,12 +187,22 @@ export default function TransactionItem({ transaction, category }) {
               className="overflow-hidden"
             >
               <div className="space-y-2 bg-fill-1 px-4 py-3 backdrop-blur-md lg:px-5">
-                <DetailRow label="یادداشت" value={note || '—'} />
-                <DetailRow label="تاریخ" value={fullDateText} />
-                <DetailRow label="ساعت" value={timeText} />
+                <DetailRow label={t('transaction.note')} value={note || '—'} />
                 <DetailRow
-                  label="نوع"
-                  value={isIncome ? 'درآمد' : 'مصرف'}
+                  label={t('transaction.date')}
+                  value={fullDateText}
+                />
+                <DetailRow
+                  label={t('transaction.time')}
+                  value={timeText}
+                />
+                <DetailRow
+                  label={t('transaction.type')}
+                  value={
+                    isIncome
+                      ? t('transaction.income')
+                      : t('transaction.expense')
+                  }
                   valueClass={isIncome ? 'text-primary' : 'text-expense'}
                 />
               </div>
@@ -204,16 +216,11 @@ export default function TransactionItem({ transaction, category }) {
         onClose={() => setConfirmDelete(false)}
         icon={Trash2}
         iconTone="danger"
-        title="حذف تراکنش"
-        description={
-          <>
-            آیا مطمئنی می‌خواهی این تراکنش را حذف کنی؟
-            <br />
-            این عملیات قابل بازگشت نیست.
-          </>
-        }
-        confirmLabel="حذف کن"
-        loadingLabel="در حال حذف..."
+        title={t('transaction.deleteTransaction')}
+        description={t('transaction.deleteTransactionConfirm')}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
+        loadingLabel={t('common.deleting')}
         loading={deleting}
         onConfirm={handleConfirmDelete}
       />

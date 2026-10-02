@@ -1,4 +1,5 @@
 import { Delete } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const KEYS = [
   ['1', '2', '3'],
@@ -8,6 +9,8 @@ const KEYS = [
 ];
 
 export default function PinPad({ onKey, onBackspace, onClear }) {
+  const { t } = useTranslation();
+
   return (
     <div className="grid grid-cols-3 gap-2.5 lg:gap-3" dir="ltr">
       {KEYS.flat().map((key) => {
@@ -19,7 +22,7 @@ export default function PinPad({ onKey, onBackspace, onClear }) {
               onClick={onClear}
               className="kh-pin-action"
             >
-              پاک
+              {t('security.lockScreen.clear')}
             </button>
           );
         }
@@ -31,6 +34,7 @@ export default function PinPad({ onKey, onBackspace, onClear }) {
               type="button"
               onClick={onBackspace}
               className="kh-pin-action"
+              aria-label="backspace"
             >
               <Delete size={22} strokeWidth={1.8} />
             </button>

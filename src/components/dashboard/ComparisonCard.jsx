@@ -1,48 +1,52 @@
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { formatNumber } from '../utils/formatting';
-
-function getPrevLabel(period, weekOffset) {
-  if (period === 'weekly') {
-    if (weekOffset === 0) return 'هفته‌ی گذشته';
-    if (weekOffset === -1) return '۲ هفته پیش';
-    return `${formatNumber(Math.abs(weekOffset - 1))} هفته پیش`;
-  }
-  if (period === 'monthly') return 'ماه گذشته';
-  if (period === 'yearly') return 'سال گذشته';
-  return '';
-}
 
 export default function ComparisonCard({
   comparison,
   period = 'weekly',
   weekOffset = 0,
 }) {
+  const { t } = useTranslation();
+
   if (!comparison) return null;
 
   const { previous, incomeChange, expenseChange } = comparison;
 
-  // اگه دوره‌ی قبل هیچ تراکنشی نداشت، این کارت بی‌معنیه
   if (previous.income === 0 && previous.expense === 0) return null;
 
-  const prevLabel = getPrevLabel(period, weekOffset);
+  const prevLabel = t(`comparison.previous.${period}`, {
+    defaultValue: t('comparison.previous.weekly'),
+  });
 
   return (
     <section className="mt-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-fg-1">مقایسه</h2>
-        <span className="text-2xs text-fg-3">با {prevLabel}</span>
+        <h2 className="text-lg font-bold text-fg-1">{t('comparison.title')}</h2>
+        <span className="text-2xs text-fg-3">
+          {t('comparison.with', { label: prevLabel })}
+        </span>
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <CompareItem label="درآمد" tone="income" change={incomeChange} />
-        <CompareItem label="مصرف" tone="expense" change={expenseChange} />
+        <CompareItem
+          label={t('balance.income')}
+          tone="income"
+          change={incomeChange}
+        />
+        <CompareItem
+          label={t('balance.expense')}
+          tone="expense"
+          change={expenseChange}
+        />
       </div>
     </section>
   );
 }
 
 function CompareItem({ label, tone, change }) {
+  const { t } = useTranslation();
   const isIncome = tone === 'income';
   const hasValue = change !== null && change !== undefined;
   const isUp = hasValue && change > 0.5;
@@ -52,9 +56,7 @@ function CompareItem({ label, tone, change }) {
 
   let Icon = Minus;
   let colorClass = 'text-fg-3';
-  let borderClass = isIncome
-    ? 'border-primary/10'
-    : 'border-expense/10';
+  let borderClass = isIncome ? 'border-primary/10' : 'border-expense/10';
 
   if (isUp) {
     Icon = TrendingUp;
@@ -79,21 +81,22 @@ function CompareItem({ label, tone, change }) {
       {hasValue ? (
         <div className="mt-2 flex items-baseline gap-1.5">
           <span
-            className={[
-              'text-xl font-extrabold tabular-nums',
-              colorClass,
-            ].join(' ')}
+            className={['text-xl font-extrabold tabular-nums', colorClass].join(
+              ' ',
+            )}
           >
             {isZero ? '—' : `${formatNumber(absVal)}٪`}
           </span>
           {!isZero && (
             <span className="text-2xs font-semibold text-fg-3">
-              {isUp ? 'بیشتر' : 'کمتر'}
+              {isUp ? t('comparison.more') : t('comparison.less')}
             </span>
           )}
         </div>
       ) : (
-        <p className="mt-2 text-xs font-semibold text-fg-3">بدون سابقه</p>
+        <p className="mt-2 text-xs font-semibold text-fg-3">
+          {t('comparison.noHistory')}
+        </p>
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ListChecks } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import TransactionList from '../transactions/TransactionList';
 import { formatNumber } from '../utils/formatting';
@@ -17,6 +18,7 @@ export default function RecentTransactions({
   showNavigateButton = true,
   navigateTo = ROUTES.expenses,
 }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
 
@@ -40,10 +42,12 @@ export default function RecentTransactions({
     <section className="mt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold text-fg-1 lg:text-xl">
-          تراکنش‌های اخیر
+          {t('transaction.recent')}
         </h2>
         <span className="text-xs text-fg-3 lg:text-sm">
-          {formatNumber(total)} تراکنش
+          {t('transaction.transactionCount', {
+            count: formatNumber(total),
+          })}
         </span>
       </div>
 
@@ -51,6 +55,8 @@ export default function RecentTransactions({
         <TransactionList
           transactions={visible}
           categoriesMap={categoriesMap}
+          emptyTitle={t('transaction.noTransactions')}
+          emptyHint={t('transaction.noTransactionsHint')}
         />
 
         {hasMore && !expanded && (
@@ -60,7 +66,9 @@ export default function RecentTransactions({
             className="glass mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-primary transition-all hover:border-primary/30 active:scale-[0.98]"
           >
             <ListChecks size={16} strokeWidth={2} />
-            نمایش همه ({formatNumber(total - visible.length)} مورد دیگر)
+            {t('transaction.showAll', {
+              count: formatNumber(total - visible.length),
+            })}
           </button>
         )}
 
@@ -70,8 +78,12 @@ export default function RecentTransactions({
             onClick={() => setExpanded(false)}
             className="glass mt-3 flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-fg-2 transition-all hover:border-primary/30 active:scale-[0.98]"
           >
-            <ChevronLeft size={16} strokeWidth={2} className="rotate-90" />
-            بستن
+            <ChevronLeft
+              size={16}
+              strokeWidth={2}
+              className="rotate-90 rtl:block ltr:rotate-90"
+            />
+            {t('common.close')}
           </button>
         )}
       </div>

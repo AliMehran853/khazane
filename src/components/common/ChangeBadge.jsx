@@ -1,6 +1,8 @@
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { formatNumber } from '../utils/formatting';
+import { useCurrencyLabel } from '../hooks/useCurrencyLabel';
 
 export function computeChange(current, previous) {
   const c = Number(current) || 0;
@@ -18,8 +20,10 @@ export default function ChangeBadge({
   previous,
   tone = 'income',
   size = 'sm',
-  currency = 'افغانی',
 }) {
+  const { t } = useTranslation();
+  const currencyLabel = useCurrencyLabel();
+
   const change = computeChange(current, previous);
   if (change.type === 'none') return null;
 
@@ -54,13 +58,13 @@ export default function ChangeBadge({
       <Icon size={isSm ? 10 : 12} strokeWidth={2.6} />
 
       {change.type === 'flat' ? (
-        <span>ثابت</span>
+        <span>{t('comparison.flat')}</span>
       ) : (
         <>
           <span>{amount}</span>
-          <span className="opacity-70">{currency}</span>
+          <span className="opacity-70">{currencyLabel}</span>
           <span className="opacity-70">
-            {change.type === 'up' ? 'بیشتر' : 'کمتر'}
+            {change.type === 'up' ? t('comparison.more') : t('comparison.less')}
           </span>
         </>
       )}

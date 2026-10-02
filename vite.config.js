@@ -11,9 +11,13 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
 
+      // ⭐ در حالت dev کاملاً غیرفعال است — هیچ SW register نمی‌شود
       devOptions: {
         enabled: false,
       },
+
+      // ⭐ لینک manifest به صورت خودکار در build تزریق می‌شود
+      injectRegister: 'auto',
 
       includeAssets: ['192.png', '512.png', 'fonts/*.ttf'],
 
@@ -39,7 +43,6 @@ export default defineConfig({
 
         categories: ['finance', 'productivity'],
 
-        // ⭐ مهم برای Chrome جدید: پیشنهاد نصب اپ native نده
         prefer_related_applications: false,
 
         icons: [
@@ -55,7 +58,6 @@ export default defineConfig({
             type: 'image/png',
             purpose: 'any',
           },
-          // ⭐ یک entry برای هر دو purpose (روش استاندارد)
           {
             src: '/512.png',
             sizes: '512x512',
@@ -74,8 +76,10 @@ export default defineConfig({
 
         navigateFallbackDenylist: [/^\/api/, /\.pdf$/],
 
-        // ⭐ اجازه بده صفحه اصلی کش بشه
         navigateFallback: '/index.html',
+
+        // ⭐ در حالت dev این logها را خاموش می‌کند
+        cleanupOutdatedCaches: true,
       },
     }),
   ],

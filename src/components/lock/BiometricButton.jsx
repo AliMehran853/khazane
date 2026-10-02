@@ -1,7 +1,10 @@
 import { motion } from 'framer-motion';
 import { Fingerprint } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function BiometricButton({ onPress, disabled = false }) {
+  const { t } = useTranslation();
+
   return (
     <motion.button
       type="button"
@@ -9,7 +12,7 @@ export default function BiometricButton({ onPress, disabled = false }) {
       disabled={disabled}
       whileTap={{ scale: 0.94 }}
       className="kh-bio-btn glass-strong"
-      aria-label="ورود با اثر انگشت"
+      aria-label={t('security.lockScreen.loginBiometric')}
     >
       <motion.div
         className="kh-bio-ring"

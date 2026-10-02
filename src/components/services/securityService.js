@@ -1,4 +1,11 @@
+// ============================================================
+// Security Service — i18n-aware
+// ============================================================
+
 import db from '../db/database';
+import i18n from '../../i18n';
+
+const t = (key, opts = {}) => i18n.t(key, opts);
 
 const KEYS = {
   LOCK_ENABLED: 'lockEnabled',
@@ -54,6 +61,8 @@ async function derivePinHash(pin, saltBytes) {
   return bufferToHex(derivedBits);
 }
 
+/* ---------- Lock state ---------- */
+
 export async function isLockEnabled() {
   return Boolean(await getSetting(KEYS.LOCK_ENABLED));
 }
@@ -79,10 +88,12 @@ export async function hasPin() {
   return Boolean(hash);
 }
 
+/* ---------- PIN ---------- */
+
 export async function setPin(pin) {
   const clean = String(pin).trim();
   if (!/^\d{4,6}$/.test(clean)) {
-    throw new Error('رمز باید بین ۴ تا ۶ رقم باشد.');
+    throw new Error(t('errors.pinLength'));
   }
 
   const saltBytes = crypto.getRandomValues(new Uint8Array(16));
@@ -108,6 +119,8 @@ export async function clearPin() {
   await db.settings.delete(KEYS.PIN_SALT);
   await setSetting(KEYS.PIN_ENABLED, false);
 }
+
+/* ---------- Biometric ---------- */
 
 export function isWebAuthnSupported() {
   return (
@@ -139,12 +152,12 @@ export async function hasBiometricCredential() {
 
 export async function registerBiometric() {
   if (!isWebAuthnSupported()) {
-    throw new Error('دستگاه شما از اثر انگشت پشتیبانی نمی‌کند.');
+    throw new Error(t('security.biometricNotSupported'));
   }
 
   const available = await isBiometricAvailable();
   if (!available) {
-    throw new Error('اثر انگشت روی این دستگاه فعال نیست.');
+    throw new Error(t('security.biometricNotAvailable'));
   }
 
   const challenge = crypto.getRandomValues(new Uint8Array(32));
@@ -156,7 +169,7 @@ export async function registerBiometric() {
       publicKey: {
         challenge,
         rp: {
-          name: 'خزانه',
+          name: t('app.name'),
           ...(window.location.hostname !== 'localhost' &&
             window.location.hostname !== '127.0.0.1' && {
               id: window.location.hostname,
@@ -165,7 +178,7 @@ export async function registerBiometric() {
         user: {
           id: userId,
           name: 'khazane-user',
-          displayName: 'کاربر خزانه',
+          displayName: t('settings.userDefault'),
         },
         pubKeyCredParams: [
           { type: 'public-key', alg: -7 },
@@ -182,11 +195,11 @@ export async function registerBiometric() {
     });
   } catch (err) {
     console.error('WebAuthn register failed:', err);
-    throw new Error('ثبت اثر انگشت لغو شد یا ناموفق بود.');
+    throw new Error(t('security.biometricCancelled'));
   }
 
   if (!credential) {
-    throw new Error('ثبت اثر انگشت ناموفق بود.');
+    throw new Error(t('security.biometricRegisterFailed'));
   }
 
   const credentialId = bufferToHex(credential.rawId);
@@ -198,11 +211,11 @@ export async function registerBiometric() {
 export async function verifyBiometric() {
   const credentialIdHex = await getSetting(KEYS.CREDENTIAL_ID);
   if (!credentialIdHex) {
-    throw new Error('اثر انگشتی ثبت نشده است.');
+    throw new Error(t('security.biometricRegisterFailed'));
   }
 
   if (!isWebAuthnSupported()) {
-    throw new Error('دستگاه شما از اثر انگشت پشتیبانی نمی‌کند.');
+    throw new Error(t('security.biometricNotSupported'));
   }
 
   const challenge = crypto.getRandomValues(new Uint8Array(32));

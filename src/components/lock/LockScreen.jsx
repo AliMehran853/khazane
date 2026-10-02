@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 import AppLogo from '../common/AppLogo';
 import BiometricButton from './BiometricButton';
@@ -12,6 +13,7 @@ import { verifyPin, verifyBiometric } from '../services/securityService';
 import { PIN_LENGTH } from '../utils/constants';
 
 function LockScreen() {
+  const { t } = useTranslation();
   const isDesktop = useIsDesktop();
 
   const method = useSecurityStore((s) => s.method);
@@ -56,7 +58,7 @@ function LockScreen() {
     autoTriedRef.current = true;
 
     let cancelled = false;
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       try {
         const ok = await verifyBiometric();
         if (cancelled) return;
@@ -68,7 +70,7 @@ function LockScreen() {
 
     return () => {
       cancelled = true;
-      clearTimeout(t);
+      clearTimeout(timer);
     };
   }, [method, biometricEnabled, biometricAvailable, isDesktop]);
 
@@ -92,13 +94,13 @@ function LockScreen() {
           reset();
           handleUnlocked();
         } else {
-          setPinError('رمز اشتباه است.');
+          setPinError(t('security.lockScreen.pinWrong'));
           triggerShake();
           clearPinBuffer();
         }
       } catch (err) {
         console.error(err);
-        setPinError('خطا در بررسی رمز.');
+        setPinError(t('security.lockScreen.pinError'));
         triggerShake();
         clearPinBuffer();
       } finally {
@@ -110,7 +112,7 @@ function LockScreen() {
       cancelled = true;
       verifyingRef.current = false;
     };
-  }, [pinBuffer, method, setPinError, clearPinBuffer, reset, isDesktop]);
+  }, [pinBuffer, method, setPinError, clearPinBuffer, reset, isDesktop, t]);
 
   async function handleBiometric() {
     try {
@@ -177,7 +179,7 @@ function LockScreen() {
           transition={{ delay: 0.12, duration: 0.4 }}
           className="mt-5 text-3xl font-extrabold text-fg-1 lg:mt-4 lg:text-2xl"
         >
-          خزانه
+          {t('security.lockScreen.appName')}
         </motion.h1>
 
         <motion.p
@@ -186,9 +188,9 @@ function LockScreen() {
           transition={{ delay: 0.18, duration: 0.4 }}
           className="mt-2 max-w-[260px] text-center text-sm leading-relaxed text-fg-2 lg:max-w-[300px] lg:text-base"
         >
-          مدیریت درآمد و مصارف روزانه‌ات
+          {t('security.lockScreen.tagline1')}
           <br />
-          ساده، دقیق و کاملاً آفلاین
+          {t('security.lockScreen.tagline2')}
         </motion.p>
 
         <div className="mt-10 w-full max-w-[320px] lg:mt-7">
@@ -205,10 +207,10 @@ function LockScreen() {
                 <BiometricButton onPress={handleBiometric} />
 
                 <p className="mt-5 text-base font-semibold text-fg-1">
-                  ورود با اثر انگشت
+                  {t('security.lockScreen.loginBiometric')}
                 </p>
                 <p className="mt-1.5 text-center text-xs leading-relaxed text-fg-3">
-                  برای باز کردن، دستت را روی سنسور نگهدار
+                  {t('security.lockScreen.biometricHint')}
                 </p>
 
                 {pinEnabled && (
@@ -221,7 +223,7 @@ function LockScreen() {
                     }}
                     className="mt-10 text-sm font-semibold text-primary"
                   >
-                    ورود با رمز عبور
+                    {t('security.lockScreen.loginWithPin')}
                   </button>
                 )}
               </motion.div>
@@ -237,7 +239,7 @@ function LockScreen() {
                 className="flex flex-col items-center"
               >
                 <p className="text-base font-semibold text-fg-1 lg:text-md">
-                  رمز عبور را وارد کنید
+                  {t('security.lockScreen.enterPin')}
                 </p>
 
                 <motion.div
@@ -301,7 +303,7 @@ function LockScreen() {
                     }}
                     className="mt-6 text-sm font-semibold text-primary"
                   >
-                    ورود با اثر انگشت
+                    {t('security.lockScreen.loginWithBiometric')}
                   </button>
                 )}
               </motion.div>
@@ -315,7 +317,7 @@ function LockScreen() {
                 transition={{ duration: 0.35, delay: 0.25 }}
                 className="text-center text-sm text-fg-3"
               >
-                در حال آماده‌سازی...
+                {t('security.lockScreen.preparing')}
               </motion.p>
             )}
           </AnimatePresence>

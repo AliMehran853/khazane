@@ -1,0 +1,697 @@
+{
+  "app": {
+    "name": "Khazane",
+    "tagline": "Personal Finance Manager",
+    "version": "Version",
+    "offline": "Fully Offline",
+    "builtWith": "Built with",
+    "inCountry": "in Afghanistan"
+  },
+
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "confirm": "Confirm",
+    "done": "Done",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "deleting": "Deleting...",
+    "search": "Search",
+    "none": "—",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "error": "Error",
+    "warning": "Warning",
+    "success": "Success",
+    "continue": "Continue",
+    "skip": "Later",
+    "select": "Select"
+  },
+
+  "nav": {
+    "home": "Home",
+    "income": "Income",
+    "expenses": "Expenses",
+    "settings": "Settings"
+  },
+
+  "time": {
+    "am": "AM",
+    "pm": "PM"
+  },
+
+  "periods": {
+    "daily": "Today",
+    "weekly": "This week",
+    "monthly": "This month",
+    "yearly": "This year",
+    "allTime": "All time",
+    "dailyShort": "Daily",
+    "weeklyShort": "Weekly",
+    "monthlyShort": "Monthly",
+    "yearlyShort": "Yearly",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow",
+    "lastWeek": "Last week",
+    "nextWeek": "Next week",
+    "daysAgo": "days ago",
+    "daysLater": "days later",
+    "weeksAgo": "weeks ago",
+    "weeksLater": "weeks later",
+    "displayPeriod": "Display period",
+    "backTo": "Back to {{label}}"
+  },
+
+  "transaction": {
+    "income": "Income",
+    "expense": "Expense",
+    "addIncome": "Add income",
+    "addExpense": "Add expense",
+    "addNewIncome": "Add new income",
+    "addNewExpense": "Add new expense",
+    "editTransaction": "Edit transaction",
+    "amount": "Amount",
+    "amountIncome": "Amount (income)",
+    "amountExpense": "Amount (expense)",
+    "category": "Category",
+    "categoryLabel": "Category",
+    "note": "Note",
+    "noteOptional": "Note (optional)",
+    "notePlaceholderIncome": "Note for this income...",
+    "notePlaceholderExpense": "Note for this expense...",
+    "newCategory": "New category",
+    "newCategoryName": "New category name",
+    "newCategoryPlaceholder": "e.g. Internet",
+    "saveCategory": "Save category",
+    "deleteCategory": "Delete category",
+    "deleteCategoryConfirm": "Are you sure you want to delete \"{{name}}\"?",
+    "deleteTransaction": "Delete transaction",
+    "deleteTransactionConfirm": "Are you sure you want to delete this transaction? This action cannot be undone.",
+    "uncategorized": "Uncategorized",
+    "type": "Type",
+    "date": "Date",
+    "time": "Time",
+    "recent": "Recent transactions",
+    "showAll": "Show all ({{count}} more)",
+    "transactionCount": "{{count}} transactions",
+    "itemCount": "{{count}} items",
+    "noTransactions": "No transactions yet",
+    "noTransactionsHint": "Tap + to record your first transaction.",
+    "noIncomeInPeriod": "No income recorded in this period",
+    "noIncomeHint": "Tap + to record income.",
+    "noExpenseInPeriod": "No expenses recorded in this period",
+    "noExpenseHint": "Tap + to record an expense.",
+    "sidebarHint": "Use the + button in the sidebar."
+  },
+
+  "categories": {
+    "salary": "Salary",
+    "salaryPlaceholder": "e.g. This month's salary",
+    "business": "Business",
+    "businessPlaceholder": "e.g. Sales, shop income",
+    "freelance": "Freelance",
+    "freelancePlaceholder": "e.g. Design project, translation, coding",
+    "giftIncome": "Gift",
+    "giftIncomePlaceholder": "From whom, for what occasion",
+    "investment": "Investment",
+    "investmentPlaceholder": "Bank interest, property sale profit",
+    "otherIncome": "Other income",
+    "otherIncomePlaceholder": "Note for this income...",
+    "food": "Food",
+    "foodPlaceholder": "e.g. Lunch, dinner, breakfast",
+    "transport": "Transport",
+    "transportPlaceholder": "Fare, fuel, parking",
+    "housing": "Housing",
+    "housingPlaceholder": "Rent, repairs, electricity",
+    "bills": "Bills",
+    "billsPlaceholder": "Electricity, water, internet, mobile",
+    "shopping": "Shopping",
+    "shoppingPlaceholder": "Clothes, home items, phone",
+    "health": "Health",
+    "healthPlaceholder": "Medicine, doctor, lab test",
+    "education": "Education",
+    "educationPlaceholder": "Fees, books, course",
+    "otherExpense": "Other expenses",
+    "otherExpensePlaceholder": "Note for this expense..."
+  },
+
+  "dateChoice": {
+    "subtitle": "Choose the recording date",
+    "title": "Where to record?",
+    "pickToday": "Record today",
+    "orPickFromWeek": "Or pick a day from this week",
+    "onlyThisWeek": "Only days of this week are available. For older dates, use the arrows to change the week first."
+  },
+
+  "balance": {
+    "balanceOf": "Balance for {{period}}",
+    "income": "Income",
+    "expense": "Expense",
+    "shortage": "Shortage",
+    "summaryAllPeriods": "Summary of all periods",
+    "clickForSummary": "Click to see all periods summary",
+    "balanceFromStart": "Total balance",
+    "summaryTitle": "Summary of all periods",
+    "summaryHint": "Click to view"
+  },
+
+  "summary": {
+    "financial": "Financial Summary",
+    "incomeTitle": "Income Summary",
+    "expenseTitle": "Expense Summary",
+    "financialSubtitle": "Overview of all periods",
+    "incomeSubtitle": "Income in all periods",
+    "expenseSubtitle": "Expenses in all periods",
+    "balance": "Balance",
+    "totalIncome": "Total income",
+    "totalExpense": "Total expenses",
+    "resetTo": "Back to {{label}}"
+  },
+
+  "comparison": {
+    "title": "Comparison",
+    "with": "with {{label}}",
+    "previous": {
+      "daily": "Yesterday",
+      "weekly": "Last week",
+      "monthly": "Last month",
+      "yearly": "Last year",
+      "allTime": ""
+    },
+    "noHistory": "No history",
+    "flat": "Flat",
+    "more": "more",
+    "less": "less"
+  },
+
+  "sentence": {
+    "unchanged": "{{period}} unchanged compared to {{baseline}}",
+    "changed": "{{period}} had {{amount}} {{currency}} {{direction}} {{type}} compared to {{baseline}}"
+  },
+
+  "charts": {
+    "financialTrend": "Financial trend",
+    "incomeTrend": "Income trend",
+    "expenseTrend": "Expense trend",
+    "categoryBreakdown": "Expense categories",
+    "categories": "Categories",
+    "total": "Total",
+    "income": "Income",
+    "expense": "Expense",
+    "other": "Other",
+    "noCategoryData": "No expenses recorded in this period",
+    "noCategoryHint": "The category chart will appear after you record expenses."
+  },
+
+  "search": {
+    "title": "Search transactions",
+    "placeholder": "Search by category, note, or amount...",
+    "hintTitle": "Search transactions",
+    "hintText": "Type the category name, note, or amount to find the transaction you're looking for.",
+    "noResults": "No results found",
+    "noResultsHint": "Try another search term or change the filter.",
+    "resultCount": "{{count}} results",
+    "filters": {
+      "all": "All",
+      "income": "Income",
+      "expense": "Expenses"
+    }
+  },
+
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Customize the app",
+    "profile": "Profile",
+    "profileSubtitle": "Personal information",
+    "displayName": "Display name",
+    "displayNamePlaceholder": "e.g. Ahmad",
+    "displayNameHint": "The display name is used for greetings and your profile.",
+    "userDefault": "Khazane User",
+    "localAccount": "Local account on this device",
+    "accountSection": "Account",
+    "preferencesSection": "Preferences",
+    "securitySection": "Security",
+    "dataSection": "Data",
+    "reminderSection": "Reminder",
+    "installSection": "Install & Logout",
+    "language": "Language",
+    "languageSubtitle": "App interface language",
+    "region": "Region",
+    "regionSubtitle": "Calendar and currency",
+    "currency": "Currency",
+    "currencySubtitle": "Display unit for amounts",
+    "appLock": "App lock",
+    "appLockOn": "PIN or biometric required to unlock",
+    "appLockOff": "Disabled",
+    "loginMethods": "Login methods",
+    "noLoginMethod": "No method configured",
+    "loginPin": "PIN",
+    "loginBiometric": "Biometric",
+    "dailyReminder": "Daily recording reminder",
+    "reminderEveryNight": "Every night at {{time}}",
+    "reminderTime": "Reminder time",
+    "backup": "Backup",
+    "backupSubtitle": "Export and restore data",
+    "resetApp": "Reset and start over",
+    "resetAppSubtitle": "Everything from scratch — like first install",
+    "aboutApp": "About Khazane",
+    "aboutAppSubtitle": "App info and contact",
+    "logout": "Log out",
+    "footer": "{{appName}} • Version {{version}} • {{date}}"
+  },
+
+  "security": {
+    "title": "Security",
+    "subtitle": "App lock",
+    "password": "Password",
+    "biometric": "Fingerprint / Face ID",
+    "active": "Active",
+    "inactive": "Inactive",
+    "notSupported": "Not supported",
+    "checking": "Checking...",
+    "set": "Set",
+    "enable": "Enable",
+    "clear": "Remove",
+    "pinNew": "Enter new PIN",
+    "pinConfirm": "Confirm your PIN",
+    "pinEnterHint": "4 digits of your choice",
+    "pinConfirmHint": "Re-enter to confirm",
+    "pinMismatch": "PINs don't match. Please try again.",
+    "pinSaveFailed": "Failed to save PIN.",
+    "pinSetAndLocked": "PIN set and lock enabled.",
+    "pinRemoved": "PIN removed.",
+    "lockEnabled": "App lock enabled.",
+    "lockDisabled": "App lock disabled.",
+    "lockEnableFailed": "Failed to enable lock.",
+    "lockDisableFailed": "Failed to disable lock.",
+    "biometricEnabled": "Biometric enabled.",
+    "biometricRemoved": "Biometric removed.",
+    "biometricRegisterFailed": "Failed to register biometric.",
+    "biometricNotSupported": "Your browser does not support biometrics.",
+    "biometricNotAvailable": "Biometric is not enabled on this device. Please enable screen lock and fingerprint in device settings.",
+    "biometricCancelled": "Cancelled or not allowed.",
+    "biometricDeviceNotSupported": "This device does not support biometrics.",
+    "biometricAlreadyRegistered": "Biometric already registered on this device.",
+    "privacyNote": "All data is stored only on this device and is never sent to any server.",
+    "lockScreen": {
+      "appName": "Khazane",
+      "tagline1": "Manage your daily income and expenses",
+      "tagline2": "Simple, accurate, fully offline",
+      "enterPin": "Enter your PIN",
+      "loginBiometric": "Login with fingerprint",
+      "biometricHint": "Hold your finger on the sensor to unlock",
+      "loginWithPin": "Login with PIN",
+      "loginWithBiometric": "Login with fingerprint",
+      "preparing": "Preparing...",
+      "pinWrong": "Wrong PIN.",
+      "pinError": "Error verifying PIN.",
+      "clear": "Clear"
+    }
+  },
+
+  "logout": {
+    "title": "Log out",
+    "subtitle": "You'll need to log in again",
+    "message": "Logging out will lock the app immediately. You'll need {{methods}} to log in again.",
+    "confirm": "Log out"
+  },
+
+  "backup": {
+    "title": "Backup",
+    "subtitle": "Export and restore",
+    "export": "Export data",
+    "exportHint": "Save all transactions in a JSON file",
+    "import": "Restore from file",
+    "importWarning": "⚠ All current data will be replaced",
+    "exportSuccess": "Backup file downloaded.",
+    "exportFailed": "Export failed.",
+    "importSuccess": "Restore completed successfully.",
+    "importInvalid": "Invalid file."
+  },
+
+  "reset": {
+    "title": "Reset and start over",
+    "subtitle": "Everything like first install",
+    "warning": "This will erase all transactions, categories, settings, profile, lock, reminders, and backups. The app will start completely fresh.",
+    "hint": "After this, the onboarding questions will appear again — as if you just installed the app.",
+    "confirm": "Yes, reset",
+    "failed": "Reset failed."
+  },
+
+  "reminder": {
+    "timeTitle": "Reminder time",
+    "timeSubtitle": "What time should I remind you?",
+    "hour": "Hour",
+    "minute": "Minute",
+    "period": "Period",
+    "morning": "AM",
+    "night": "PM",
+    "displayTime": "Reminder time",
+    "testReminder": "Test reminder",
+    "enabled": "Reminder enabled.",
+    "disabled": "Reminder disabled.",
+    "modalTitle": "Don't forget to record today",
+    "modalText": "It's been more than 24 hours since your last recording. Did you record a new income or expense?",
+    "modalYes": "Yes, I recorded",
+    "modalNo": "No, record now",
+    "modalHint": "This reminder appears only once a day."
+  },
+
+  "profile": {
+    "saveSuccess": "Profile updated.",
+    "firstName": "First name",
+    "firstNamePlaceholder": "e.g. Ali",
+    "lastName": "Last name",
+    "lastNamePlaceholder": "e.g. Mehran"
+  },
+
+  "currencyChange": {
+    "title": "Change currency",
+    "subtitle": "Important warning",
+    "warningTitle": "You are about to change the currency",
+    "warningMessage": "You are changing the currency from \"{{from}}\" to \"{{to}}\". All {{count}} previous transactions were recorded in \"{{from}}\". To prevent issues in charts and calculations, a backup will be downloaded automatically and then the data will be erased. Continue?",
+    "backupDownloaded": "Backup downloaded. Data will be erased and restarted...",
+    "confirm": "Yes, change",
+    "cancel": "Cancel",
+    "changed": "Currency changed and data restarted."
+  },
+
+  "regionChange": {
+    "title": "Change region",
+    "subtitle": "Important warning",
+    "warningTitle": "You are about to change the region",
+    "warningMessage": "Changing region will update language, calendar, and currency. If currency changes, a backup will be downloaded automatically and data will be erased to prevent chart errors. Continue?",
+    "sameCurrencyNote": "Currency stays the same, so data will be preserved.",
+    "confirm": "Yes, change",
+    "cancel": "Cancel"
+  },
+
+  "languageChange": {
+    "title": "Change language",
+    "subtitle": "App interface language",
+    "note": "Data is preserved and only the app text changes.",
+    "changed": "Language changed."
+  },
+
+  "onboarding": {
+    "welcomeTitle": "Welcome to Khazane",
+    "welcomeText": "A simple companion to manage your daily income and expenses. Fully offline, secure, ad-free.",
+    "featureChart": "Clear expense charts",
+    "featureLock": "Lock with PIN and biometric",
+    "featureOffline": "Fully offline and fast",
+    "getStarted": "Let's go",
+    "regionTitle": "Choose your region",
+    "regionText": "This sets your language, calendar, and default currency. You can change it later in settings.",
+    "nameTitle": "What's your name?",
+    "nameText": "Khazane will use this name in greetings and daily messages.",
+    "nameFirstName": "First name",
+    "nameLastName": "Last name",
+    "nameOptional": "(optional)",
+    "nameContinue": "Continue",
+    "incomeTitle": "Did you have income today?",
+    "incomeText": "If yes, record it now — it's quick. If not, you can skip and record it later.",
+    "incomeAdd": "Add income",
+    "incomeSkip": "Later",
+    "expenseTitle": "Did you have any expenses today?",
+    "expenseText": "Record them now so you can feel in control from day one.",
+    "expenseAdd": "Add expense",
+    "expenseSkip": "Later",
+    "doneTitle": "All set!",
+    "doneText": "Use the + button for quick recording, and settings to personalize.",
+    "doneTip1": "You'll get a small daily message",
+    "doneTip2": "You can set a lock in settings",
+    "doneTip3": "All data stays on your phone",
+    "doneButton": "Let's start"
+  },
+
+  "greeting": {
+    "welcome": "Welcome",
+    "welcomeMessage": "This is your first day with Khazane. We'll send you a small message every day — for motivation or as a reminder.",
+    "periods": {
+      "dawn": "Good dawn",
+      "morning": "Good morning",
+      "forenoon": "Good forenoon",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening",
+      "night": "Good night"
+    },
+    "messages": {
+      "dawn": [
+        "You woke up before everyone — amazing!",
+        "Dawn is the best time to plan your day",
+        "Start your day with a good intention",
+        "Be an early riser, be successful",
+        "What do you want to achieve today?",
+        "Start with calm, continue with power",
+        "Dawn is another chance to be better",
+        "May your day be fruitful",
+        "Wake up with positive energy",
+        "Catch the dawn, it's gold"
+      ],
+      "morning": [
+        "Be full of energy!",
+        "A cup of tea and a good plan",
+        "What do you want to achieve today?",
+        "Check Khazane, don't forget breakfast",
+        "Mornings are golden opportunities",
+        "A good start is half the way",
+        "Start today by controlling expenses",
+        "Another day, a new opportunity",
+        "Move forward with motivation",
+        "May your day be fruitful"
+      ],
+      "forenoon": [
+        "How's your day?",
+        "Half the day passed, keep going",
+        "Time for tea and a deep breath",
+        "How far have you come?",
+        "Check your Khazane",
+        "Keep going, you're close to the goal",
+        "A good time to review expenses",
+        "Tired? Take a short break",
+        "Continue with energy",
+        "There's still half the day left"
+      ],
+      "afternoon": [
+        "How's your day going?",
+        "Afternoon tea, time to rest",
+        "How did today go?",
+        "How's your Khazane?",
+        "You still have time, try harder",
+        "Finish the day with a plan",
+        "Time to review tasks",
+        "A short break refreshes your mind",
+        "Big goal, continuous effort",
+        "Continue with calm"
+      ],
+      "evening": [
+        "How was your day?",
+        "Fill your Khazane today",
+        "Time to review today's tasks",
+        "Night is near, take a deep breath",
+        "What did you learn today?",
+        "Time with family",
+        "Was your day full of success?",
+        "A small record, a big habit",
+        "Time to wrap up",
+        "Look at yourself with calm"
+      ],
+      "night": [
+        "Take a rest",
+        "Today is done, tomorrow is a new day",
+        "Check your Khazane before sleep",
+        "Be calm at night",
+        "Good sleep, energetic tomorrow",
+        "Did you have a good day?",
+        "Sweet dreams",
+        "Tomorrow is a new day, a new chance",
+        "Khazane says goodbye to you",
+        "Rest tonight"
+      ]
+    }
+  },
+
+  "install": {
+    "installed": "Installed on device",
+    "installedHint": "Khazane is on your home screen as an app.",
+    "inAppTitle": "Open in browser to install",
+    "inAppText": "This page is opened inside an app (like Instagram or Telegram). Copy the link and open it in Chrome or Safari to install.",
+    "copyLink": "Copy link",
+    "copied": "Copied!",
+    "iosTitle": "Install Khazane on iPhone / iPad",
+    "iosText": "On iOS, PWA installation is manual:",
+    "iosStep1": "Tap the Share button in Safari",
+    "iosStep2": "Select Add to Home Screen",
+    "iosStep3": "Confirm the name \"Khazane\" and tap Add",
+    "iosNote": "Note: You must use Safari. Chrome on iOS does not support PWA installation.",
+    "androidTitle": "Install Khazane on device",
+    "androidText": "Follow these steps to install:",
+    "androidStep1": "Open this page in Chrome",
+    "androidStep2": "Tap the top-right menu",
+    "androidStep3": "Select Add to Home screen or Install app",
+    "androidChromeGo": "Note: It looks like you're using Chrome Go which does not support automatic installation. You can install manually with the steps above.",
+    "androidChromeHint": "If Chrome doesn't show the option, don't use the default browser. Try an updated Chrome.",
+    "installButton": "Install Khazane on home screen",
+    "installButtonHint": "Quick access, no browser, fully offline"
+  },
+
+  "about": {
+    "title": "About Khazane",
+    "version": "Version {{version}}",
+    "description": "A personal income and expense manager, crafted with care for simplicity and performance. Fully offline, fast, and secure — all data stays only on your device.",
+    "features": {
+      "charts": "Charts",
+      "security": "Security",
+      "offline": "Offline"
+    },
+    "creator": "Creator",
+    "creatorName": "Ali Mehran",
+    "creatorRole": "Frontend Developer",
+    "creatorBio1": "I build simple, delightful user experiences. I designed this app with React and Tailwind to make personal finance management easy and enjoyable for everyone.",
+    "creatorBio2": "If you have suggestions or ideas, I'd love to hear them.",
+    "changelog": "Version history",
+    "changelogVersion": "Version {{version}}",
+    "contact": "Contact",
+    "madeWith": "Made with",
+    "whatsapp": "WhatsApp",
+    "whatsappChat": "Chat →",
+    "directCall": "Direct call",
+    "whatsappMessage": "Hi Ali! 👋\nI'm using the \"Khazane\" app and I have a suggestion/feedback:\n\n_______________________\n\nThanks for your time 🙏"
+  },
+
+  "regionSelection": {
+    "title": "Choose your region",
+    "subtitle": "Language, calendar, and currency",
+    "afghan": {
+      "title": "Afghanistan",
+      "description": "Persian, Afghan solar calendar, Afghani (AFN)"
+    },
+    "iranian": {
+      "title": "Iran",
+      "description": "Persian, Iranian solar calendar, Toman (IRR)"
+    },
+    "international": {
+      "title": "International",
+      "description": "English, Gregorian calendar, USD"
+    },
+    "changeRegion": "Change region",
+    "changeWarning": "Changing region updates language, calendar, and default currency."
+  },
+
+  "languages": {
+    "fa": "فارسی",
+    "en": "English"
+  },
+
+  "calendars": {
+    "afghan": "Afghan Solar",
+    "iranian": "Iranian Solar",
+    "gregorian": "Gregorian"
+  },
+
+  "currencies": {
+    "AFN": { "label": "Afghani", "symbol": "؋" },
+    "IRR": { "label": "Toman", "symbol": "﷼" },
+    "USD": { "label": "Dollar", "symbol": "$" },
+    "PKR": { "label": "Rupee", "symbol": "₨" }
+  },
+
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "networkError": "No internet connection.",
+    "amountRequired": "Please enter an amount.",
+    "amountPositive": "Amount must be greater than zero.",
+    "categoryRequired": "Please select a category.",
+    "categoryNameRequired": "Please enter a category name.",
+    "categoryNameExists": "This category already exists.",
+    "categoryNameEmpty": "Category name is required.",
+    "categoryTypeInvalid": "Invalid category type.",
+    "categoryNotFound": "Category not found.",
+    "categoryDefaultNotDeletable": "Default categories cannot be deleted.",
+    "categoryInUse": "This category is used in {{count}} transactions and cannot be deleted.",
+    "transactionTypeInvalid": "Invalid transaction type.",
+    "transactionDateInvalid": "Invalid transaction date.",
+    "transactionNotFound": "Transaction not found.",
+    "loadTransactionsFailed": "Failed to load transactions.",
+    "loadCategoriesFailed": "Failed to load categories.",
+    "saveTransactionFailed": "Failed to save transaction.",
+    "addCategoryFailed": "Failed to add category.",
+    "deleteCategoryFailed": "Failed to delete category.",
+    "deleteTransactionFailed": "Failed to delete transaction.",
+    "exportPdfFailed": "PDF export failed.",
+    "backupInvalid": "Invalid backup file.",
+    "noTransactionInPeriod": "No transactions in this period.",
+    "periodLocked": "Recording is not available in this period",
+    "periodLockedHint": "To record a transaction, use daily or weekly mode.",
+    "pinLength": "PIN must be 4 to 6 digits.",
+    "pinWrong": "Wrong PIN.",
+    "pinVerifyError": "Error verifying PIN."
+  },
+
+  "weekNavigator": {
+    "nextWeek": "Next week",
+    "previousWeek": "Previous week",
+    "backToThisWeek": "Back to this week"
+  },
+
+  "pdf": {
+    "income": "Income",
+    "expense": "Expense",
+    "category": "Category",
+    "note": "Note",
+    "type": "Type",
+    "amount": "Amount",
+    "date": "Date",
+    "noTransactions": "No transactions found",
+    "reportTitle": "Report",
+    "expenseReport": "Expense Report",
+    "incomeReport": "Income Report",
+    "fullReport": "Full Financial Report",
+    "footer": "Made with Khazane • Personal Income & Expense Manager"
+  },
+
+  "changelog": [
+    {
+      "version": "1.1.0",
+      "date": "2026/09/16",
+      "items": [
+        "Complete glass design with green theme",
+        "Fresh color palette with green",
+        "Improved shadows and card depth",
+        "Light and dark mode support",
+        "New app icons",
+        "Improved text readability",
+        "Week navigation — view past weeks",
+        "Date picker when recording in past weeks",
+        "Full date display on each transaction",
+        "Quick details panel for each transaction",
+        "Numeric comparison between periods",
+        "Smooth loading with Skeleton",
+        "Number animations",
+        "Haptic feedback on mobile",
+        "Negative balance in red"
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026/08/23",
+      "items": [
+        "Initial release",
+        "Income and expense recording",
+        "Charts and categories",
+        "PIN and biometric lock",
+        "Backup and restore",
+        "Daily reminder",
+        "Full offline mode"
+      ]
+    }
+  ]
+}

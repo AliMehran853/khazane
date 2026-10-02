@@ -1,10 +1,12 @@
 import { Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import Toast from './Toast';
 import { useAppStore } from '../store/appStore';
 import { PERIOD_LOCK_TOAST_DURATION } from '../utils/constants';
 
 export default function PeriodLockToast() {
+  const { t } = useTranslation();
   const open = useAppStore((s) => s.periodLockToastOpen);
   const hideToast = useAppStore((s) => s.hidePeriodLockToast);
 
@@ -13,13 +15,11 @@ export default function PeriodLockToast() {
       open={open}
       onClose={hideToast}
       icon={<Info size={22} strokeWidth={2} />}
-      title="امکان ثبت در این دوره نیست"
+      title={t('errors.periodLocked')}
       duration={PERIOD_LOCK_TOAST_DURATION}
       zIndex={200}
     >
-      برای ثبت تراکنش، از حالت{' '}
-      <span className="font-bold text-primary">روزانه</span> یا{' '}
-      <span className="font-bold text-primary">هفتگی</span> استفاده کن.
+      {t('errors.periodLockedHint')}
     </Toast>
   );
 }

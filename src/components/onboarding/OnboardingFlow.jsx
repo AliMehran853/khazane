@@ -8,6 +8,7 @@ import {
   User,
   Wallet,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import AppLogo from '../common/AppLogo';
 import { useAppStore } from '../store/appStore';
@@ -22,10 +23,15 @@ import {
   getOnboardingStep,
 } from '../services/settingsService';
 
-const TOTAL_STEPS = 5;
+import { updateRegion } from '../../services/regionService';
+import { REGIONS, REGION_ORDER } from '../../config/regions';
+
+const TOTAL_STEPS = 6;
 
 export default function OnboardingFlow({ onComplete }) {
+  const { t } = useTranslation();
   const [step, setStep] = useState(0);
+  const [selectedRegion, setSelectedRegion] = useState('afghan');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [saving, setSaving] = useState(false);
@@ -60,6 +66,17 @@ export default function OnboardingFlow({ onComplete }) {
   function back() {
     haptic.tap();
     if (step > 0) setStep(step - 1);
+  }
+
+  async function handleRegionSelect(regionId) {
+    setSelectedRegion(regionId);
+    haptic.tap();
+  }
+
+  async function handleRegionNext() {
+    haptic.success();
+    await updateRegion(selectedRegion);
+    next();
   }
 
   async function handleNameNext() {
@@ -133,14 +150,14 @@ export default function OnboardingFlow({ onComplete }) {
               <motion.button
                 type="button"
                 onClick={back}
-                aria-label="بازگشت"
-                initial={{ opacity: 0, x: 8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 8 }}
+                aria-label={t('common.back')}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="glass-inner absolute right-6 top-16 z-10 flex h-10 w-10 items-center justify-center rounded-xl text-fg-2 active:scale-95 lg:right-12 lg:top-20"
+                className="glass-inner absolute start-6 top-16 z-10 flex h-10 w-10 items-center justify-center rounded-xl text-fg-2 active:scale-95 lg:start-12 lg:top-20"
               >
-                <ArrowRight size={18} />
+                <ArrowRight size={18} className="ltr:rotate-180" />
               </motion.button>
             )}
           </AnimatePresence>
@@ -154,6 +171,16 @@ export default function OnboardingFlow({ onComplete }) {
               )}
 
               {step === 1 && (
+                <StepWrap key="region">
+                  <RegionStep
+                    selectedRegion={selectedRegion}
+                    onSelect={handleRegionSelect}
+                    onNext={handleRegionNext}
+                  />
+                </StepWrap>
+              )}
+
+              {step === 2 && (
                 <StepWrap key="name">
                   <NameStep
                     firstName={firstName}
@@ -166,7 +193,7 @@ export default function OnboardingFlow({ onComplete }) {
                 </StepWrap>
               )}
 
-              {step === 2 && (
+              {step === 3 && (
                 <StepWrap key="income">
                   <IncomeStep
                     onAdd={handleAddIncome}
@@ -176,7 +203,7 @@ export default function OnboardingFlow({ onComplete }) {
                 </StepWrap>
               )}
 
-              {step === 3 && (
+              {step === 4 && (
                 <StepWrap key="expense">
                   <ExpenseStep
                     onAdd={handleAddExpense}
@@ -186,7 +213,7 @@ export default function OnboardingFlow({ onComplete }) {
                 </StepWrap>
               )}
 
-              {step === 4 && (
+              {step === 5 && (
                 <StepWrap key="done">
                   <DoneStep onFinish={finish} saving={saving} />
                 </StepWrap>
@@ -214,6 +241,14 @@ function StepWrap({ children }) {
 }
 
 function WelcomeStep({ onNext }) {
+  const { t } = useTranslation();
+
+  const features = [
+    { emoji: '📊', text: t('onboarding.featureChart') },
+    { emoji: '🔒', text: t('onboarding.featureLock') },
+    { emoji: '⚡', text: t('onboarding.featureOffline') },
+  ];
+
   return (
     <div className="flex flex-col items-center text-center">
       <motion.div
@@ -229,18 +264,17 @@ function WelcomeStep({ onNext }) {
       </motion.div>
 
       <h1 className="mt-8 text-3xl font-extrabold leading-tight text-fg-1 lg:text-4xl">
-        به خزانه خوش آمدی
+        {t('onboarding.welcomeTitle')}
       </h1>
 
       <p className="mt-3 max-w-[320px] text-base leading-relaxed text-fg-2 lg:text-md">
-        یه همراه ساده برای مدیریت درآمد و مصارف روزانه‌ات. کاملاً آفلاین، امن و
-        بدون تبلیغ.
+        {t('onboarding.welcomeText')}
       </p>
 
       <div className="mt-8 w-full max-w-[320px] space-y-2.5">
-        <FeatureRow emoji="📊" text="نمودارهای واضح از مصارف" />
-        <FeatureRow emoji="🔒" text="قفل با رمز و اثر انگشت" />
-        <FeatureRow emoji="⚡" text="کاملاً آفلاین و سریع" />
+        {features.map((f, i) => (
+          <FeatureRow key={i} emoji={f.emoji} text={f.text} />
+        ))}
       </div>
 
       <button
@@ -248,7 +282,7 @@ function WelcomeStep({ onNext }) {
         onClick={onNext}
         className="kh-btn kh-btn-primary mt-10 w-full max-w-[320px] py-3.5 text-md"
       >
-        بزن بریم
+        {t('onboarding.getStarted')}
       </button>
     </div>
   );
@@ -263,6 +297,80 @@ function FeatureRow({ emoji, text }) {
   );
 }
 
+function RegionStep({ selectedRegion, onSelect, onNext }) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="w-full">
+      <div className="flex flex-col items-center text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/25 bg-primary/[0.16] text-primary">
+          <Sparkles size={26} strokeWidth={1.9} />
+        </div>
+        <h2 className="mt-5 text-2xl font-extrabold text-fg-1 lg:text-3xl">
+          {t('onboarding.regionTitle')}
+        </h2>
+        <p className="mt-2 max-w-[340px] text-sm leading-relaxed text-fg-2">
+          {t('onboarding.regionText')}
+        </p>
+      </div>
+
+      <div className="mt-8 space-y-3">
+        {REGION_ORDER.map((id) => {
+          const region = REGIONS[id];
+          const isActive = selectedRegion === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onSelect(id)}
+              className={[
+                'flex w-full items-center gap-3 rounded-2xl border p-4 text-right backdrop-blur-md transition-all active:scale-[0.98]',
+                isActive
+                  ? 'border-primary/50 bg-primary/[0.12] shadow-[0_0_0_1px_rgba(0,209,167,0.30)]'
+                  : 'border-border-1 bg-fill-1',
+              ].join(' ')}
+            >
+              <div
+                className={[
+                  'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border text-2xl',
+                  isActive
+                    ? 'border-primary/30 bg-primary/20'
+                    : 'border-border-1 bg-fill-1',
+                ].join(' ')}
+              >
+                {region.flag}
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p className="text-base font-bold text-fg-1">
+                  {t(`regionSelection.${id}.title`)}
+                </p>
+                <p className="mt-0.5 text-2xs leading-relaxed text-fg-3">
+                  {t(`regionSelection.${id}.description`)}
+                </p>
+              </div>
+
+              {isActive && (
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary">
+                  <CheckCircle2 size={16} strokeWidth={2.4} />
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <button
+        type="button"
+        onClick={onNext}
+        className="kh-btn kh-btn-primary mt-8 w-full py-3.5 text-md"
+      >
+        {t('common.continue')}
+      </button>
+    </div>
+  );
+}
+
 function NameStep({
   firstName,
   lastName,
@@ -271,6 +379,7 @@ function NameStep({
   onNext,
   saving,
 }) {
+  const { t } = useTranslation();
   const canNext = firstName.trim().length > 0;
 
   return (
@@ -280,23 +389,23 @@ function NameStep({
           <User size={26} strokeWidth={1.9} />
         </div>
         <h2 className="mt-5 text-2xl font-extrabold text-fg-1 lg:text-3xl">
-          اسمت رو بگو
+          {t('onboarding.nameTitle')}
         </h2>
         <p className="mt-2 max-w-[300px] text-sm leading-relaxed text-fg-2">
-          با این اسم، خزانه تو رو صدا می‌زنه و پیام‌های روزانه‌ات شخصی‌تر می‌شه.
+          {t('onboarding.nameText')}
         </p>
       </div>
 
       <div className="mt-8 space-y-3">
         <div>
           <label className="mb-1.5 block text-right text-xs font-medium text-fg-2">
-            اسم
+            {t('onboarding.nameFirstName')}
           </label>
           <input
             type="text"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            placeholder="مثلاً علی"
+            placeholder={t('profile.firstNamePlaceholder')}
             autoFocus
             className="glass-inner w-full rounded-2xl px-4 py-3.5 text-center text-lg font-semibold text-fg-1 outline-none placeholder:text-fg-3 focus:border-primary/50"
           />
@@ -304,14 +413,16 @@ function NameStep({
 
         <div>
           <label className="mb-1.5 block text-right text-xs font-medium text-fg-2">
-            تخلص{' '}
-            <span className="font-normal text-fg-3">(اختیاری)</span>
+            {t('onboarding.nameLastName')}{' '}
+            <span className="font-normal text-fg-3">
+              {t('onboarding.nameOptional')}
+            </span>
           </label>
           <input
             type="text"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            placeholder="مثلاً مهران"
+            placeholder={t('profile.lastNamePlaceholder')}
             className="glass-inner w-full rounded-2xl px-4 py-3.5 text-center text-lg font-semibold text-fg-1 outline-none placeholder:text-fg-3 focus:border-primary/50"
           />
         </div>
@@ -323,13 +434,15 @@ function NameStep({
         disabled={!canNext || saving}
         className="kh-btn kh-btn-primary mt-8 w-full py-3.5 text-md"
       >
-        {saving ? '...' : 'ادامه'}
+        {saving ? '...' : t('onboarding.nameContinue')}
       </button>
     </div>
   );
 }
 
 function IncomeStep({ onAdd, onSkip, waiting }) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col items-center text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-3xl border border-primary/25 bg-primary/[0.16] text-primary">
@@ -337,12 +450,11 @@ function IncomeStep({ onAdd, onSkip, waiting }) {
       </div>
 
       <h2 className="mt-5 text-2xl font-extrabold text-fg-1 lg:text-3xl">
-        امروز درآمد داشتی؟
+        {t('onboarding.incomeTitle')}
       </h2>
 
       <p className="mt-3 max-w-[300px] text-sm leading-relaxed text-fg-2">
-        اگه داشتی، همین الان ثبتش کن — خیلی سریع. اگه نه، می‌تونی Skip کنی و
-        بعداً ثبت کنی.
+        {t('onboarding.incomeText')}
       </p>
 
       <div className="mt-10 w-full max-w-[320px] space-y-3">
@@ -353,7 +465,7 @@ function IncomeStep({ onAdd, onSkip, waiting }) {
           className="kh-btn kh-btn-primary w-full py-3.5 text-md"
         >
           <Wallet size={16} strokeWidth={2.2} />
-          {waiting ? '...' : 'ثبت درآمد'}
+          {waiting ? '...' : t('onboarding.incomeAdd')}
         </button>
 
         <button
@@ -362,7 +474,7 @@ function IncomeStep({ onAdd, onSkip, waiting }) {
           disabled={waiting}
           className="glass-inner w-full rounded-2xl py-3.5 text-base font-semibold text-fg-2 active:scale-[0.98] disabled:opacity-40"
         >
-          بعداً
+          {t('onboarding.incomeSkip')}
         </button>
       </div>
     </div>
@@ -370,6 +482,8 @@ function IncomeStep({ onAdd, onSkip, waiting }) {
 }
 
 function ExpenseStep({ onAdd, onSkip, waiting }) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col items-center text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-3xl border border-expense/25 bg-expense/[0.16] text-expense">
@@ -377,11 +491,11 @@ function ExpenseStep({ onAdd, onSkip, waiting }) {
       </div>
 
       <h2 className="mt-5 text-2xl font-extrabold text-fg-1 lg:text-3xl">
-        امروز مصرف داشتی؟
+        {t('onboarding.expenseTitle')}
       </h2>
 
       <p className="mt-3 max-w-[300px] text-sm leading-relaxed text-fg-2">
-        اگه داشتی، ثبتش کن تا از همون روز اول حس کنترل و آگاهی رو تجربه کنی.
+        {t('onboarding.expenseText')}
       </p>
 
       <div className="mt-10 w-full max-w-[320px] space-y-3">
@@ -392,7 +506,7 @@ function ExpenseStep({ onAdd, onSkip, waiting }) {
           className="kh-btn kh-btn-danger w-full py-3.5 text-md"
         >
           <ShoppingBag size={16} strokeWidth={2.2} />
-          {waiting ? '...' : 'ثبت مصرف'}
+          {waiting ? '...' : t('onboarding.expenseAdd')}
         </button>
 
         <button
@@ -401,7 +515,7 @@ function ExpenseStep({ onAdd, onSkip, waiting }) {
           disabled={waiting}
           className="glass-inner w-full rounded-2xl py-3.5 text-base font-semibold text-fg-2 active:scale-[0.98] disabled:opacity-40"
         >
-          بعداً
+          {t('onboarding.expenseSkip')}
         </button>
       </div>
     </div>
@@ -409,6 +523,14 @@ function ExpenseStep({ onAdd, onSkip, waiting }) {
 }
 
 function DoneStep({ onFinish, saving }) {
+  const { t } = useTranslation();
+
+  const tips = [
+    t('onboarding.doneTip1'),
+    t('onboarding.doneTip2'),
+    t('onboarding.doneTip3'),
+  ];
+
   return (
     <div className="flex flex-col items-center text-center">
       <motion.div
@@ -424,18 +546,17 @@ function DoneStep({ onFinish, saving }) {
       </motion.div>
 
       <h2 className="mt-8 text-3xl font-extrabold text-fg-1 lg:text-4xl">
-        همه چیز آماده‌ست
+        {t('onboarding.doneTitle')}
       </h2>
 
       <p className="mt-3 max-w-[300px] text-base leading-relaxed text-fg-2">
-        از دکمه‌ی <span className="font-bold text-primary">+</span> برای ثبت
-        سریع استفاده کن، و از تنظیمات برای شخصی‌سازی.
+        {t('onboarding.doneText')}
       </p>
 
       <div className="mt-8 w-full max-w-[320px] space-y-2.5">
-        <TipRow text="هر روز پیام‌های کوچیک برات داریم" />
-        <TipRow text="می‌تونی از تنظیمات قفل بذاری" />
-        <TipRow text="همه‌ی داده‌ها فقط روی موبایل توئه" />
+        {tips.map((tip, i) => (
+          <TipRow key={i} text={tip} />
+        ))}
       </div>
 
       <button
@@ -445,7 +566,7 @@ function DoneStep({ onFinish, saving }) {
         className="kh-btn kh-btn-primary mt-10 flex w-full max-w-[320px] items-center justify-center gap-2 py-3.5 text-md"
       >
         <Sparkles size={16} />
-        {saving ? '...' : 'بریم شروع کنیم'}
+        {saving ? '...' : t('onboarding.doneButton')}
       </button>
     </div>
   );

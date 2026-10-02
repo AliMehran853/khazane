@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   createTransaction,
@@ -7,6 +8,7 @@ import {
 } from '../services/transactionService';
 
 export function useTransactions({ type, categoryId, periodRange } = {}) {
+  const { t } = useTranslation();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -26,11 +28,11 @@ export function useTransactions({ type, categoryId, periodRange } = {}) {
       setTransactions(data);
     } catch (err) {
       console.error(err);
-      setError('دریافت تراکنش‌ها ناموفق بود.');
+      setError(t('errors.loadTransactionsFailed'));
     } finally {
       setLoading(false);
     }
-  }, [type, categoryId, periodRange]);
+  }, [type, categoryId, periodRange, t]);
 
   useEffect(() => {
     loadTransactions();

@@ -1,7 +1,9 @@
 import Chart from 'react-apexcharts';
+import { useTranslation } from 'react-i18next';
 
 import { useChartAutoScroll } from '../hooks/useChartAutoScroll';
 import { useIsDesktop } from '../hooks/useIsDesktop';
+import { useCurrencyLabel } from '../hooks/useCurrencyLabel';
 import { useAppStore } from '../store/appStore';
 import { getChartTheme, alpha } from '../utils/chartTheme';
 import { formatNumber } from '../utils/formatting';
@@ -19,17 +21,27 @@ function getChartLayout(period, dataLength) {
   };
 }
 
+function getAxisLabel(label, isDesktop) {
+  if (isDesktop || !label) return label;
+  if (/^[A-Za-z]/.test(label) && label.length > 3) {
+    return label.slice(0, 3);
+  }
+  return label;
+}
+
 export default function ExpenseTrendChart({
   data = [],
   period = 'weekly',
   periodOffset = 0,
   fixedHeight,
 }) {
+  const { t } = useTranslation();
+  const currencyLabel = useCurrencyLabel();
   const isDesktop = useIsDesktop();
   const theme = useAppStore((s) => s.theme);
-  const t = getChartTheme();
+  const tChart = getChartTheme();
 
-  const categories = data.map((item) => item.label);
+  const categories = data.map((item) => getAxisLabel(item.label, isDesktop));
   const isDaily = period === 'daily';
   const isMonthly = period === 'monthly';
   const isBar = isDaily || isMonthly;
@@ -37,16 +49,17 @@ export default function ExpenseTrendChart({
   const { shouldScroll, chartWidth } = getChartLayout(period, data.length);
   const scrollRef = useChartAutoScroll(data, period, shouldScroll);
 
-  const expenseDim = alpha(t.expense, 0.3);
+  const expenseDim = alpha(tChart.expense, 0.3);
+  const expenseLabel = t('charts.expense');
 
   const series = [
     {
-      name: 'مصرف',
+      name: expenseLabel,
       data: isDaily
         ? data.map((item) => ({
-            x: item.label,
+            x: getAxisLabel(item.label, isDesktop),
             y: item.expense || 0,
-            fillColor: item.isCurrent ? t.expense : expenseDim,
+            fillColor: item.isCurrent ? tChart.expense : expenseDim,
           }))
         : data.map((item) => item.expense || 0),
     },
@@ -58,7 +71,7 @@ export default function ExpenseTrendChart({
       toolbar: { show: false },
       zoom: { enabled: false },
       background: 'transparent',
-      fontFamily: t.fontFamily,
+      fontFamily: tChart.fontFamily,
       parentHeightOffset: 0,
       redrawOnParentResize: false,
       redrawOnWindowResize: false,
@@ -69,7 +82,7 @@ export default function ExpenseTrendChart({
         dynamicAnimation: { enabled: true, speed: 350 },
       },
     },
-    colors: [t.expense],
+    colors: [tChart.expense],
 
     ...(!isBar && {
       stroke: { curve: 'smooth', width: 2.2 },
@@ -105,11 +118,11 @@ export default function ExpenseTrendChart({
         hideOverlappingLabels: false,
         trim: false,
         style: {
-          colors: t.text3,
+          colors: tChart.text3,
           fontSize: isMonthly
             ? isDesktop
               ? '10px'
-              : '7px'
+              : '8px'
             : isDaily
               ? isDesktop
                 ? '11px'
@@ -117,7 +130,7 @@ export default function ExpenseTrendChart({
               : isDesktop
                 ? '12px'
                 : '10px',
-          fontFamily: t.fontFamily,
+          fontFamily: tChart.fontFamily,
         },
       },
       axisBorder: { show: false },
@@ -126,23 +139,23 @@ export default function ExpenseTrendChart({
     yaxis: {
       labels: {
         style: {
-          colors: t.text3,
+          colors: tChart.text3,
           fontSize: isDesktop ? '11px' : '9px',
-          fontFamily: t.fontFamily,
+          fontFamily: tChart.fontFamily,
         },
         formatter: (value) => formatNumber(value),
       },
     },
     grid: {
-      borderColor: t.grid,
+      borderColor: tChart.grid,
       strokeDashArray: 4,
       xaxis: { lines: { show: false } },
       padding: { left: 2, right: 2 },
     },
     tooltip: {
-      theme: t.isLight ? 'light' : 'dark',
-      rtl: true,
-      y: { formatter: (value) => `${formatNumber(value)} افغانی` },
+      theme: tChart.isLight ? 'light' : 'dark',
+      rtl: tChart.isRTL,
+      y: { formatter: (value) => `${formatNumber(value)} ${currencyLabel}` },
     },
   };
 
@@ -165,7 +178,7 @@ export default function ExpenseTrendChart({
           }
         >
           <Chart
-            key={`exp-${period}-${periodOffset}-${data.length}-${shouldScroll}-${isDesktop}-${fixedHeight || 'auto'}-${theme}`}
+            key={`exp-${period}-${periodOffset}-${data.length}-${shouldScroll}-${isDesktop}-${fixedHeight || 'auto'}-${theme}-${currencyLabel}`}
             options={options}
             series={series}
             type={isBar ? 'bar' : 'area'}

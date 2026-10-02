@@ -8,9 +8,11 @@ import {
   ChevronLeft,
   Sparkles,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import AnimatedNumber from '../common/AnimatedNumber';
 import ChangeBadge from '../common/ChangeBadge';
+import { useCurrencyLabel } from '../hooks/useCurrencyLabel';
 import { getPeriodOffsetLabel, getBaselineLabel } from '../utils/dates';
 import { formatNumber } from '../utils/formatting';
 
@@ -22,6 +24,7 @@ export default function BalanceHero({
   variant = 'mobile',
   onOpenSummary,
 }) {
+  const { t } = useTranslation();
   const isDesktop = variant === 'desktop';
   const isNegative = (summary.balance || 0) < 0;
   const periodLabel = getPeriodOffsetLabel(period, periodOffset);
@@ -49,7 +52,7 @@ export default function BalanceHero({
       <div className="relative">
         <div className="flex items-center justify-between">
           <p className="kh-hero-text-shadow text-xs font-medium tracking-wide text-fg-2">
-            موجودی {periodLabel}
+            {t('balance.balanceOf', { period: periodLabel })}
           </p>
           <div className="flex h-7 w-7 items-center justify-center rounded-full border border-primary/30 bg-primary/15 backdrop-blur-md">
             <Sparkles size={13} strokeWidth={2} className="text-primary" />
@@ -65,14 +68,12 @@ export default function BalanceHero({
           >
             <AnimatedNumber value={summary.balance} duration={750} />
           </p>
-          <span className="kh-hero-text-shadow mb-1 text-sm font-semibold text-fg-2">
-            افغانی
-          </span>
+          <CurrencyLabel />
         </div>
 
         {isNegative && (
           <span className="mt-2 inline-block rounded-full border border-expense/40 bg-expense/20 px-2.5 py-0.5 text-2xs font-bold text-expense backdrop-blur-md">
-            کمبود
+            {t('balance.shortage')}
           </span>
         )}
 
@@ -85,7 +86,7 @@ export default function BalanceHero({
         <div className="mt-4 space-y-2.5">
           <CompareRow
             icon={ArrowDownLeft}
-            label="درآمد"
+            label={t('balance.income')}
             tone="income"
             value={summary.income}
             current={comparison?.current?.income}
@@ -95,7 +96,7 @@ export default function BalanceHero({
           />
           <CompareRow
             icon={ArrowUpRight}
-            label="مصرف"
+            label={t('balance.expense')}
             tone="expense"
             value={summary.expense}
             current={comparison?.current?.expense}
@@ -113,17 +114,26 @@ export default function BalanceHero({
           >
             <span className="flex items-center gap-2 text-sm font-semibold text-primary">
               <BarChart3 size={15} strokeWidth={2.2} />
-              خلاصه‌ی همه‌ی دوره‌ها
+              {t('balance.summaryAllPeriods')}
             </span>
             <ChevronLeft
               size={16}
               strokeWidth={2}
-              className="text-primary transition-transform group-hover:-translate-x-0.5"
+              className="text-primary transition-transform group-hover:-translate-x-0.5 rtl:block ltr:rotate-180"
             />
           </button>
         )}
       </div>
     </section>
+  );
+}
+
+function CurrencyLabel() {
+  const currencyLabel = useCurrencyLabel();
+  return (
+    <span className="kh-hero-text-shadow mb-1 text-sm font-semibold text-fg-2">
+      {currencyLabel}
+    </span>
   );
 }
 
@@ -135,6 +145,8 @@ function DesktopHero({
   periodLabel,
   isNegative,
 }) {
+  const { t } = useTranslation();
+  const currencyLabel = useCurrencyLabel();
   const hasComparison = Boolean(comparison);
 
   return (
@@ -146,7 +158,7 @@ function DesktopHero({
       <div className="relative flex shrink-0 flex-col">
         <div className="flex items-center gap-2">
           <p className="kh-hero-text-shadow text-base font-medium tracking-wide text-fg-2">
-            موجودی {periodLabel}
+            {t('balance.balanceOf', { period: periodLabel })}
           </p>
           <div className="flex h-6 w-6 items-center justify-center rounded-full border border-primary/30 bg-primary/15 backdrop-blur-md">
             <Sparkles size={11} strokeWidth={2} className="text-primary" />
@@ -164,11 +176,11 @@ function DesktopHero({
 
         <div className="mt-3 flex items-center gap-2">
           <p className="kh-hero-text-shadow text-sm font-semibold text-fg-2">
-            افغانی
+            {currencyLabel}
           </p>
           {isNegative && (
             <span className="rounded-full border border-expense/40 bg-expense/20 px-2.5 py-0.5 text-2xs font-bold text-expense backdrop-blur-md">
-              کمبود
+              {t('balance.shortage')}
             </span>
           )}
         </div>
@@ -182,7 +194,7 @@ function DesktopHero({
         <div className="relative grid min-w-0 flex-1 grid-cols-2 gap-3">
           <CompareCard
             icon={ArrowDownLeft}
-            label="درآمد"
+            label={t('balance.income')}
             tone="income"
             value={summary.income}
             current={comparison.current.income}
@@ -192,7 +204,7 @@ function DesktopHero({
           />
           <CompareCard
             icon={ArrowUpRight}
-            label="مصرف"
+            label={t('balance.expense')}
             tone="expense"
             value={summary.expense}
             current={comparison.current.expense}
@@ -206,7 +218,7 @@ function DesktopHero({
   );
 }
 
-function buildSentence({ tone, current, previous, period, periodOffset }) {
+function buildSentence({ tone, current, previous, period, periodOffset, t, currencyLabel }) {
   const c = Number(current) || 0;
   const p = Number(previous) || 0;
 
@@ -216,23 +228,35 @@ function buildSentence({ tone, current, previous, period, periodOffset }) {
   const diff = c - p;
   const absDiff = Math.abs(Math.round(diff));
   const amountText = formatNumber(absDiff);
-  const typeLabel = tone === 'income' ? 'درآمد' : 'مصرف';
+  const typeLabel =
+    tone === 'income' ? t('balance.income') : t('balance.expense');
 
   const periodLabel = getPeriodOffsetLabel(period, periodOffset);
   const baselineLabel = getBaselineLabel(period, periodOffset);
 
   if (diff === 0) {
     return {
-      text: `${periodLabel} نسبت به ${baselineLabel} بدون تغییر مانده`,
+      text: t('sentence.unchanged', {
+        period: periodLabel,
+        baseline: baselineLabel,
+      }),
       color: 'text-fg-2',
     };
   }
 
-  const direction = diff > 0 ? 'بیشتر' : 'کمتر';
-  const isGood = tone === 'income' ? diff > 0 : diff < 0;
+  const isUp = diff > 0;
+  const direction = isUp ? t('comparison.more') : t('comparison.less');
+  const isGood = tone === 'income' ? isUp : !isUp;
 
   return {
-    text: `${periodLabel} نسبت به ${baselineLabel} ${amountText} افغانی ${typeLabel} ${direction} بوده`,
+    text: t('sentence.changed', {
+      period: periodLabel,
+      baseline: baselineLabel,
+      amount: amountText,
+      currency: currencyLabel,
+      type: typeLabel,
+      direction,
+    }),
     color: isGood ? 'text-primary' : 'text-expense',
   };
 }
@@ -247,6 +271,8 @@ function CompareRow({
   period,
   periodOffset,
 }) {
+  const { t } = useTranslation();
+  const currencyLabel = useCurrencyLabel();
   const [expanded, setExpanded] = useState(false);
 
   const isIncome = tone === 'income';
@@ -257,7 +283,15 @@ function CompareRow({
 
   const showComparison = current !== undefined && previous !== undefined;
   const sentence = showComparison
-    ? buildSentence({ tone, current, previous, period, periodOffset })
+    ? buildSentence({
+        tone,
+        current,
+        previous,
+        period,
+        periodOffset,
+        t,
+        currencyLabel,
+      })
     : null;
   const clickable = Boolean(sentence);
 
@@ -360,6 +394,8 @@ function CompareCard({
   period,
   periodOffset,
 }) {
+  const { t } = useTranslation();
+  const currencyLabel = useCurrencyLabel();
   const [expanded, setExpanded] = useState(false);
 
   const isIncome = tone === 'income';
@@ -370,7 +406,15 @@ function CompareCard({
 
   const showComparison = current !== undefined && previous !== undefined;
   const sentence = showComparison
-    ? buildSentence({ tone, current, previous, period, periodOffset })
+    ? buildSentence({
+        tone,
+        current,
+        previous,
+        period,
+        periodOffset,
+        t,
+        currencyLabel,
+      })
     : null;
   const clickable = Boolean(sentence);
 

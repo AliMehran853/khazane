@@ -9,10 +9,12 @@ import {
   Check,
   AlertCircle,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useInstallPrompt } from '../hooks/useInstallPrompt';
 
 function InstalledCard() {
+  const { t } = useTranslation();
   return (
     <div className="mt-3 flex items-center gap-3 rounded-2xl border border-primary/25 bg-primary/[0.08] px-4 py-3.5 backdrop-blur-md lg:mt-4 lg:px-5 lg:py-4">
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary/[0.16] text-primary">
@@ -20,10 +22,10 @@ function InstalledCard() {
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-base font-semibold text-primary lg:text-md">
-          نصب شده روی دستگاه
+          {t('install.installed')}
         </p>
         <p className="mt-0.5 text-xs text-fg-3 lg:text-sm">
-          خزانه به‌صورت اپ روی صفحه‌ی خانه‌ی شماست.
+          {t('install.installedHint')}
         </p>
       </div>
     </div>
@@ -31,6 +33,7 @@ function InstalledCard() {
 }
 
 function InAppBrowserCard() {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   async function copyLink() {
@@ -51,11 +54,10 @@ function InAppBrowserCard() {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-base font-bold text-fg-1 lg:text-md">
-            برای نصب، در مرورگر باز کن
+            {t('install.inAppTitle')}
           </p>
           <p className="mt-1 text-xs leading-relaxed text-fg-2 lg:text-sm">
-            این صفحه داخل یک اپ (مثل اینستاگرام یا تلگرام) باز شده. برای نصب،
-            لینک را کپی کن و در Chrome یا Safari باز کن.
+            {t('install.inAppText')}
           </p>
 
           <button
@@ -64,7 +66,7 @@ function InAppBrowserCard() {
             className="mt-3 flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/[0.12] px-3.5 py-2.5 text-sm font-semibold text-primary backdrop-blur-md active:scale-95"
           >
             {copied ? <Check size={14} /> : <Copy size={14} />}
-            {copied ? 'کپی شد!' : 'کپی لینک'}
+            {copied ? t('install.copied') : t('install.copyLink')}
           </button>
         </div>
       </div>
@@ -73,6 +75,8 @@ function InAppBrowserCard() {
 }
 
 function IOSInstructionsCard() {
+  const { t } = useTranslation();
+
   return (
     <div className="glass-strong mt-3 rounded-2xl border-primary/25 p-4 lg:mt-4 lg:p-5">
       <div className="flex items-start gap-3">
@@ -81,10 +85,10 @@ function IOSInstructionsCard() {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-md font-bold text-fg-1">
-            نصب خزانه روی iPhone / iPad
+            {t('install.iosTitle')}
           </p>
           <p className="mt-1 text-xs leading-relaxed text-fg-2">
-            در iOS، نصب PWA دستی انجام می‌شود:
+            {t('install.iosText')}
           </p>
 
           <ol className="mt-3 space-y-2.5">
@@ -93,12 +97,7 @@ function IOSInstructionsCard() {
                 ۱
               </span>
               <p className="text-xs leading-relaxed text-fg-1">
-                دکمه‌ی{' '}
-                <span className="inline-flex items-center gap-1 rounded-md border border-border-1 bg-fill-2 px-1.5 py-0.5 text-xs font-semibold text-primary">
-                  <Share2 size={11} strokeWidth={2.2} />
-                  Share
-                </span>{' '}
-                پایین Safari را بزن
+                {t('install.iosStep1')}
               </p>
             </li>
             <li className="flex items-start gap-2.5">
@@ -106,10 +105,7 @@ function IOSInstructionsCard() {
                 ۲
               </span>
               <p className="text-xs leading-relaxed text-fg-1">
-                <span className="rounded-md border border-border-1 bg-fill-2 px-1.5 py-0.5 text-xs font-semibold text-primary">
-                  Add to Home Screen
-                </span>{' '}
-                را انتخاب کن
+                {t('install.iosStep2')}
               </p>
             </li>
             <li className="flex items-start gap-2.5">
@@ -117,11 +113,7 @@ function IOSInstructionsCard() {
                 ۳
               </span>
               <p className="text-xs leading-relaxed text-fg-1">
-                اسم «خزانه» را تایید کن و{' '}
-                <span className="rounded-md border border-border-1 bg-fill-2 px-1.5 py-0.5 text-xs font-semibold text-primary">
-                  Add
-                </span>{' '}
-                بزن
+                {t('install.iosStep3')}
               </p>
             </li>
           </ol>
@@ -133,9 +125,7 @@ function IOSInstructionsCard() {
               strokeWidth={2}
             />
             <p className="text-2xs leading-relaxed text-fg-2">
-              نکته: باید از مرورگر{' '}
-              <span className="font-semibold text-fg-1">Safari</span> استفاده
-              کنی. Chrome iOS نصب PWA را پشتیبانی نمی‌کند.
+              {t('install.iosNote')}
             </p>
           </div>
         </div>
@@ -145,6 +135,8 @@ function IOSInstructionsCard() {
 }
 
 function AndroidInstructionsCard({ isChromeGo }) {
+  const { t } = useTranslation();
+
   return (
     <div className="glass-strong mt-3 rounded-2xl border-primary/25 p-4 lg:mt-4 lg:p-5">
       <div className="flex items-start gap-3">
@@ -152,9 +144,11 @@ function AndroidInstructionsCard({ isChromeGo }) {
           <Smartphone size={20} strokeWidth={1.9} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-md font-bold text-fg-1">نصب خزانه روی دستگاه</p>
+          <p className="text-md font-bold text-fg-1">
+            {t('install.androidTitle')}
+          </p>
           <p className="mt-1 text-xs leading-relaxed text-fg-2">
-            برای نصب، این مراحل را دنبال کن:
+            {t('install.androidText')}
           </p>
 
           <ol className="mt-3 space-y-2.5">
@@ -163,9 +157,7 @@ function AndroidInstructionsCard({ isChromeGo }) {
                 ۱
               </span>
               <p className="text-xs leading-relaxed text-fg-1">
-                این صفحه را در{' '}
-                <span className="font-semibold text-primary">Chrome</span> باز
-                کن
+                {t('install.androidStep1')}
               </p>
             </li>
             <li className="flex items-start gap-2.5">
@@ -173,11 +165,7 @@ function AndroidInstructionsCard({ isChromeGo }) {
                 ۲
               </span>
               <p className="text-xs leading-relaxed text-fg-1">
-                منوی{' '}
-                <span className="inline-flex items-center gap-1 rounded-md border border-border-1 bg-fill-2 px-1.5 py-0.5 text-xs font-semibold text-primary">
-                  <MoreVertical size={11} strokeWidth={2.2} />
-                </span>{' '}
-                بالا-راست را بزن
+                {t('install.androidStep2')}
               </p>
             </li>
             <li className="flex items-start gap-2.5">
@@ -185,45 +173,23 @@ function AndroidInstructionsCard({ isChromeGo }) {
                 ۳
               </span>
               <p className="text-xs leading-relaxed text-fg-1">
-                <span className="rounded-md border border-border-1 bg-fill-2 px-1.5 py-0.5 text-xs font-semibold text-primary">
-                  Add to Home screen
-                </span>{' '}
-                یا{' '}
-                <span className="rounded-md border border-border-1 bg-fill-2 px-1.5 py-0.5 text-xs font-semibold text-primary">
-                  Install app
-                </span>{' '}
-                را انتخاب کن
+                {t('install.androidStep3')}
               </p>
             </li>
           </ol>
 
-          {isChromeGo ? (
-            <div className="glass-inner mt-3 flex items-start gap-2 rounded-xl border-primary/25 p-2.5">
-              <AlertCircle
-                size={13}
-                className="mt-0.5 shrink-0 text-primary"
-                strokeWidth={2}
-              />
-              <p className="text-2xs leading-relaxed text-fg-2">
-                نکته: به‌نظر می‌رسد از{' '}
-                <span className="font-semibold text-fg-1">Chrome Go</span>{' '}
-                استفاده می‌کنی که از نصب خودکار پشتیبانی نمی‌کند. با دستور بالا
-                می‌توانی به‌صورت دستی نصب کنی.
-              </p>
-            </div>
-          ) : (
-            <div className="glass-inner mt-3 flex items-start gap-2 rounded-xl p-2.5">
-              <AlertCircle
-                size={13}
-                className="mt-0.5 shrink-0 text-primary"
-                strokeWidth={2}
-              />
-              <p className="text-2xs leading-relaxed text-fg-2">
-                اگر Chrome گزینه‌ای نشان نداد، از مرورگر پیش‌فرض دستگاه استفاده
-                نکن. در Chrome به‌روز امتحان کن.
-              </p>
-            </div>
-          )}
+          <div className="glass-inner mt-3 flex items-start gap-2 rounded-xl p-2.5">
+            <AlertCircle
+              size={13}
+              className="mt-0.5 shrink-0 text-primary"
+              strokeWidth={2}
+            />
+            <p className="text-2xs leading-relaxed text-fg-2">
+              {isChromeGo
+                ? t('install.androidChromeGo')
+                : t('install.androidChromeHint')}
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -231,6 +197,8 @@ function AndroidInstructionsCard({ isChromeGo }) {
 }
 
 function InstallButton({ onInstall }) {
+  const { t } = useTranslation();
+
   return (
     <button
       type="button"
@@ -243,10 +211,10 @@ function InstallButton({ onInstall }) {
 
       <div className="min-w-0 flex-1">
         <p className="text-md font-bold text-fg-1 lg:text-base">
-          نصب خزانه روی صفحه‌ی خانه
+          {t('install.installButton')}
         </p>
         <p className="mt-1 text-xs text-fg-2 lg:text-sm">
-          دسترسی سریع، بدون مرورگر، کاملاً آفلاین
+          {t('install.installButtonHint')}
         </p>
       </div>
 

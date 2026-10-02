@@ -1,5 +1,12 @@
+// ============================================================
+// Category Service — i18n-aware
+// ============================================================
+
 import db from '../db/database';
+import i18n from '../../i18n';
 import { MEMBER_ID } from '../utils/constants';
+
+const t = (key, opts = {}) => i18n.t(key, opts);
 
 export async function getCategories(type) {
   let categories = await db.categories.toArray();
@@ -28,10 +35,10 @@ export async function createCategory({
   const cleanName = name?.trim();
 
   if (!cleanName) {
-    throw new Error('نام دسته‌بندی الزامی است.');
+    throw new Error(t('errors.categoryNameEmpty'));
   }
   if (!['income', 'expense'].includes(type)) {
-    throw new Error('نوع دسته‌بندی نامعتبر است.');
+    throw new Error(t('errors.categoryTypeInvalid'));
   }
 
   const categories = await getCategories(type);
@@ -41,7 +48,7 @@ export async function createCategory({
       category.memberId === memberId &&
       category.name.trim().toLowerCase() === cleanName.toLowerCase(),
   );
-  if (existing) throw new Error('این دسته‌بندی از قبل وجود دارد.');
+  if (existing) throw new Error(t('errors.categoryNameExists'));
 
   const maxSortOrder = categories.reduce(
     (max, category) => Math.max(max, Number(category.sortOrder) || 0),
@@ -60,7 +67,9 @@ export async function createCategory({
     isDefault: false,
     sortOrder: maxSortOrder + 1,
     placeholder:
-      type === 'income' ? 'توضیح این درآمد...' : 'توضیح این مصرف...',
+      type === 'income'
+        ? 'توضیح این درآمد...'
+        : 'توضیح این مصرف...',
     createdAt: now,
     updatedAt: now,
   };
@@ -72,13 +81,13 @@ export async function createCategory({
 export async function deleteCategory(id) {
   const category = await db.categories.get(id);
 
-  if (!category) throw new Error('دسته پیدا نشد.');
-  if (category.isDefault) throw new Error('دسته‌های پیش‌فرض قابل حذف نیستند.');
+  if (!category) throw new Error(t('errors.categoryNotFound'));
+  if (category.isDefault) throw new Error(t('errors.categoryDefaultNotDeletable'));
 
   const count = await db.transactions.where('categoryId').equals(id).count();
 
   if (count > 0) {
-    throw new Error(`این دسته در ${count} تراکنش استفاده شده و قابل حذف نیست.`);
+    throw new Error(t('errors.categoryInUse', { count }));
   }
 
   await db.categories.delete(id);

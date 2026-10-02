@@ -1,17 +1,12 @@
 import { NavLink } from 'react-router-dom';
 import { Home, ArrowDownLeft, ArrowUpRight, Settings, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import AppLogo from '../common/AppLogo';
 import { useHaptic } from '../hooks/useHaptic';
 import { useRecordTransaction } from '../hooks/useRecordTransaction';
 import { APP_VERSION, ROUTES } from '../utils/constants';
-
-const ITEMS = [
-  { label: 'خانه', to: ROUTES.home, icon: Home, end: true },
-  { label: 'درآمد', to: ROUTES.income, icon: ArrowDownLeft },
-  { label: 'مصارف', to: ROUTES.expenses, icon: ArrowUpRight },
-  { label: 'تنظیمات', to: ROUTES.settings, icon: Settings },
-];
+import { getTodayShort } from '../utils/dates';
 
 function SidebarItem({ label, to, icon: Icon, end = false }) {
   const haptic = useHaptic();
@@ -31,24 +26,32 @@ function SidebarItem({ label, to, icon: Icon, end = false }) {
 }
 
 function Sidebar() {
+  const { t } = useTranslation();
   const { buttonLabel, isDisabled, trigger } = useRecordTransaction();
 
+  const items = [
+    { label: t('nav.home'), to: ROUTES.home, icon: Home, end: true },
+    { label: t('nav.income'), to: ROUTES.income, icon: ArrowDownLeft },
+    { label: t('nav.expenses'), to: ROUTES.expenses, icon: ArrowUpRight },
+    { label: t('nav.settings'), to: ROUTES.settings, icon: Settings },
+  ];
+
   return (
-    <aside className="glass-strong fixed right-0 top-0 z-40 hidden h-dvh w-[260px] flex-col border-l border-border-1 lg:flex">
+    <aside className="glass-strong fixed top-0 z-40 hidden h-dvh w-[260px] flex-col border-border-1 lg:flex rtl:right-0 rtl:border-l ltr:left-0 ltr:border-r">
       <div className="flex items-center gap-3 px-5 py-6">
         <div className="flex h-[44px] w-[44px] items-center justify-center overflow-hidden rounded-2xl">
           <AppLogo size={44} withShadow={false} />
         </div>
         <div>
-          <p className="text-xl font-extrabold text-fg-1">خزانه</p>
-          <p className="mt-0.5 text-xs text-fg-3">مدیریت مالی شخصی</p>
+          <p className="text-xl font-extrabold text-fg-1">{t('app.name')}</p>
+          <p className="mt-0.5 text-xs text-fg-3">{t('app.tagline')}</p>
         </div>
       </div>
 
       <div className="mx-4 h-px bg-border-1" />
 
       <nav className="mt-4 flex-1 space-y-1.5 px-3">
-        {ITEMS.map((item) => (
+        {items.map((item) => (
           <SidebarItem key={item.to} {...item} />
         ))}
       </nav>
@@ -80,7 +83,11 @@ function Sidebar() {
 
       <div className="px-5 pb-5 pt-1">
         <p className="text-center text-2xs leading-relaxed text-fg-3">
-          خزانه • نسخه {APP_VERSION} • کاملاً آفلاین
+          {t('settings.footer', {
+            appName: t('app.name'),
+            version: APP_VERSION,
+            date: getTodayShort(),
+          })}
         </p>
       </div>
     </aside>

@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowDownLeft, FileText, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import PeriodTabs from '../common/PeriodTabs';
 import PeriodNavigator from '../common/PeriodNavigator';
@@ -12,19 +13,20 @@ import TransactionList from '../transactions/TransactionList';
 
 import { useAppStore } from '../store/appStore';
 import { useAnalytics } from '../hooks/useAnalytics';
-import { getTransactions } from '../services/transactionService';
-import { getCategories } from '../services/categoryService';
+import { usePageData } from '../hooks/usePageData';
+import { useCurrencyLabel } from '../hooks/useCurrencyLabel';
 import { exportTransactionsToPDF } from '../services/exportService';
-import { getPeriodRange, getPeriodOffsetLabel } from '../utils/dates';
+import { getPeriodOffsetLabel } from '../utils/dates';
 import { formatNumber } from '../utils/formatting';
 import { ROUTES } from '../utils/constants';
 
 function IncomePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const currencyLabel = useCurrencyLabel();
 
   const period = useAppStore((s) => s.period);
   const periodOffset = useAppStore((s) => s.periodOffset);
-  const dataVersion = useAppStore((s) => s.dataVersion);
 
   const { summary, trend, comparison, loading } = useAnalytics({
     period,
@@ -32,39 +34,14 @@ function IncomePage() {
     periodOffset,
   });
 
-  const [transactions, setTransactions] = useState([]);
-  const [categoriesMap, setCategoriesMap] = useState({});
+  const { transactions, categoriesMap } = usePageData({
+    type: 'income',
+    period,
+    periodOffset,
+  });
+
   const [exporting, setExporting] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      const range = getPeriodRange(period, periodOffset);
-      const [txs, cats] = await Promise.all([
-        getTransactions({
-          type: 'income',
-          startDate: range.start,
-          endDate: range.end,
-        }),
-        getCategories('income'),
-      ]);
-      if (cancelled) return;
-
-      setTransactions(txs);
-      const map = {};
-      cats.forEach((c) => {
-        map[c.id] = c;
-      });
-      setCategoriesMap(map);
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [dataVersion, period, periodOffset]);
 
   async function handleExportPDF() {
     if (transactions.length === 0) return;
@@ -73,17 +50,17 @@ function IncomePage() {
       await exportTransactionsToPDF({
         transactions,
         categoriesMap,
-        title: 'گزارش درآمدها',
+        title: t('pdf.incomeReport'),
         periodLabel: getPeriodOffsetLabel(period, periodOffset),
         totalIncome: summary.income,
         totalExpense: 0,
-        currency: 'افغانی',
+        currencyLabel,
         showSummary: true,
         fileName: `khazane-income-${period}.pdf`,
       });
     } catch (err) {
       console.error(err);
-      alert(err?.message || 'خروجی PDF ناموفق بود.');
+      alert(err?.message || t('errors.exportPdfFailed'));
     } finally {
       setExporting(false);
     }
@@ -100,15 +77,15 @@ function IncomePage() {
     <div className="px-4 pb-6 pt-6 lg:px-0 lg:pt-8">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <p className="kh-page-subtitle">مدیریت درآمد</p>
-          <h1 className="kh-page-title">درآمد</h1>
+          <p className="kh-page-subtitle">{t('nav.income')}</p>
+          <h1 className="kh-page-title">{t('nav.income')}</h1>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => navigate(ROUTES.search)}
-            aria-label="جستجو"
+            aria-label={t('common.search')}
             className="glass kh-header-icon-btn"
           >
             <Search size={18} strokeWidth={1.9} />
@@ -121,7 +98,7 @@ function IncomePage() {
             className="glass flex h-11 shrink-0 items-center gap-2 rounded-2xl px-3.5 text-xs font-semibold text-primary transition-all hover:border-primary/30 active:scale-95 disabled:opacity-40 lg:h-10 lg:text-sm"
           >
             <FileText size={17} strokeWidth={1.9} />
-            {exporting ? 'صبر...' : 'PDF'}
+            {exporting ? '...' : 'PDF'}
           </button>
         </div>
       </header>
@@ -136,20 +113,24 @@ function IncomePage() {
 
         <section className="mt-4">
           <StatCard
-            title={`کل درآمد ${getPeriodOffsetLabel(period, periodOffset)}`}
+            title={t('balance.balanceOf', {
+              period: getPeriodOffsetLabel(period, periodOffset),
+            })}
             value={formatNumber(summary.income)}
             icon={ArrowDownLeft}
             tone="income"
             featured
             change={incomeChange}
             onClick={() => setSummaryOpen(true)}
-            clickHint="برای خلاصه‌ی همه‌ی دوره‌ها کلیک کن"
+            clickHint={t('balance.clickForSummary')}
           />
         </section>
 
         <section className="mt-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-fg-1">روند درآمد</h2>
+            <h2 className="text-lg font-bold text-fg-1">
+              {t('charts.incomeTrend')}
+            </h2>
             <span className="text-xs text-fg-3">
               {getPeriodOffsetLabel(period, periodOffset)}
             </span>
@@ -157,7 +138,7 @@ function IncomePage() {
           <div className="glass mt-3 overflow-hidden rounded-3xl py-3">
             {loading ? (
               <div className="flex h-[230px] items-center justify-center text-sm text-fg-3">
-                در حال بارگذاری...
+                {t('common.loading')}
               </div>
             ) : (
               <IncomeTrendChart
@@ -170,13 +151,15 @@ function IncomePage() {
         </section>
 
         <section className="mt-6">
-          <h2 className="text-lg font-bold text-fg-1">آخرین درآمدها</h2>
+          <h2 className="text-lg font-bold text-fg-1">
+            {t('transaction.recent')}
+          </h2>
           <div className="mt-3">
             <TransactionList
               transactions={transactions.slice(0, 8)}
               categoriesMap={categoriesMap}
-              emptyTitle="در این دوره درآمدی ثبت نشده است"
-              emptyHint="از دکمه + برای ثبت درآمد استفاده کن."
+              emptyTitle={t('transaction.noIncomeInPeriod')}
+              emptyHint={t('transaction.noIncomeHint')}
             />
           </div>
         </section>
@@ -192,7 +175,9 @@ function IncomePage() {
 
           <div className="flex-1">
             <StatCard
-              title={`کل درآمد ${getPeriodOffsetLabel(period, periodOffset)}`}
+              title={t('balance.balanceOf', {
+                period: getPeriodOffsetLabel(period, periodOffset),
+              })}
               value={formatNumber(summary.income)}
               icon={ArrowDownLeft}
               tone="income"
@@ -200,7 +185,7 @@ function IncomePage() {
               fillHeight
               change={incomeChange}
               onClick={() => setSummaryOpen(true)}
-              clickHint="برای خلاصه‌ی همه‌ی دوره‌ها کلیک کن"
+              clickHint={t('balance.clickForSummary')}
             />
           </div>
         </div>
@@ -209,7 +194,9 @@ function IncomePage() {
           <div className="col-span-8">
             <div className="glass flex h-[480px] flex-col overflow-hidden rounded-3xl">
               <div className="flex shrink-0 items-center justify-between px-5 pt-4 pb-2">
-                <h2 className="text-xl font-bold text-fg-1">روند درآمد</h2>
+                <h2 className="text-xl font-bold text-fg-1">
+                  {t('charts.incomeTrend')}
+                </h2>
                 <span className="text-sm text-fg-3">
                   {getPeriodOffsetLabel(period, periodOffset)}
                 </span>
@@ -218,7 +205,7 @@ function IncomePage() {
               <div className="min-h-0 flex-1 px-2 pb-2">
                 {loading ? (
                   <div className="flex h-full items-center justify-center text-base text-fg-3">
-                    در حال بارگذاری...
+                    {t('common.loading')}
                   </div>
                 ) : (
                   <IncomeTrendChart
@@ -236,10 +223,12 @@ function IncomePage() {
             <div className="glass flex h-[480px] flex-col overflow-hidden rounded-3xl">
               <div className="flex shrink-0 items-center justify-between px-5 pt-4 pb-3">
                 <h2 className="text-lg font-bold text-fg-1">
-                  آخرین درآمدها
+                  {t('transaction.recent')}
                 </h2>
                 <span className="text-xs text-fg-3">
-                  {formatNumber(transactions.length)} مورد
+                  {t('transaction.itemCount', {
+                    count: formatNumber(transactions.length),
+                  })}
                 </span>
               </div>
 
@@ -250,26 +239,26 @@ function IncomePage() {
                   <div className="flex h-full items-center justify-center px-4 text-center">
                     <div>
                       <p className="text-base font-semibold text-fg-2">
-                        در این دوره درآمدی ثبت نشده است
+                        {t('transaction.noIncomeInPeriod')}
                       </p>
                       <p className="mt-1 text-xs text-fg-3">
-                        از دکمه‌ی + در سایدبار استفاده کن.
+                        {t('transaction.sidebarHint')}
                       </p>
                     </div>
                   </div>
                 ) : (
                   <div>
-                    {transactions.map((t, index) => (
+                    {transactions.map((tx, index) => (
                       <div
-                        key={t.id}
+                        key={tx.id}
                         className="tx-list-item"
                         style={{
                           contentVisibility: index >= 10 ? 'auto' : 'visible',
                         }}
                       >
                         <TransactionItem
-                          transaction={t}
-                          category={categoriesMap[t.categoryId]}
+                          transaction={tx}
+                          category={categoriesMap[tx.categoryId]}
                         />
                       </div>
                     ))}

@@ -11,9 +11,11 @@ import {
   Sun,
   X,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import AnimatedNumber from '../common/AnimatedNumber';
 import { useAppStore } from '../store/appStore';
+import { useCurrencyLabel } from '../hooks/useCurrencyLabel';
 import {
   getPeriodSummary,
   getAllTimeSummary,
@@ -27,57 +29,68 @@ import {
 import { formatNumber } from '../utils/formatting';
 import { lockBody } from '../utils/scrollLock';
 
-const SECTIONS = [
-  {
-    key: 'daily',
-    period: 'daily',
-    icon: Sun,
-    accent: 'text-primary',
-    resetLabel: 'امروز',
-  },
-  {
-    key: 'weekly',
-    period: 'weekly',
-    icon: CalendarDays,
-    accent: 'text-blue',
-    resetLabel: 'این هفته',
-  },
-  {
-    key: 'monthly',
-    period: 'monthly',
-    icon: CalendarRange,
-    accent: 'text-purple',
-    resetLabel: 'این ماه',
-  },
-  {
-    key: 'yearly',
-    period: 'yearly',
-    icon: Calendar,
-    accent: 'text-orange',
-    resetLabel: 'امسال',
-  },
-  {
-    key: 'allTime',
-    period: 'allTime',
-    icon: History,
-    accent: 'text-fg-2',
-    resetLabel: null,
-  },
-];
-
-const MODE_TITLES = {
-  both: { subtitle: 'نگاهی به همه‌ی دوره‌ها', title: 'خلاصه‌ی مالی' },
-  income: { subtitle: 'درآمد در همه‌ی دوره‌ها', title: 'خلاصه‌ی درآمد' },
-  expense: { subtitle: 'مصرف در همه‌ی دوره‌ها', title: 'خلاصه‌ی مصارف' },
-};
-
 export default function SummaryModal({ open, onClose, mode = 'both' }) {
+  const { t } = useTranslation();
+
   useEffect(() => {
     if (!open) return;
     return lockBody();
   }, [open]);
 
-  const titles = MODE_TITLES[mode] || MODE_TITLES.both;
+  const sections = [
+    {
+      key: 'daily',
+      period: 'daily',
+      icon: Sun,
+      accent: 'text-primary',
+      resetLabel: t('periods.today'),
+    },
+    {
+      key: 'weekly',
+      period: 'weekly',
+      icon: CalendarDays,
+      accent: 'text-blue',
+      resetLabel: t('periods.weekly'),
+    },
+    {
+      key: 'monthly',
+      period: 'monthly',
+      icon: CalendarRange,
+      accent: 'text-purple',
+      resetLabel: t('periods.monthly'),
+    },
+    {
+      key: 'yearly',
+      period: 'yearly',
+      icon: Calendar,
+      accent: 'text-orange',
+      resetLabel: t('periods.yearly'),
+    },
+    {
+      key: 'allTime',
+      period: 'allTime',
+      icon: History,
+      accent: 'text-fg-2',
+      resetLabel: null,
+    },
+  ];
+
+  const modeTitles = {
+    both: {
+      subtitle: t('summary.financialSubtitle'),
+      title: t('summary.financial'),
+    },
+    income: {
+      subtitle: t('summary.incomeSubtitle'),
+      title: t('summary.incomeTitle'),
+    },
+    expense: {
+      subtitle: t('summary.expenseSubtitle'),
+      title: t('summary.expenseTitle'),
+    },
+  };
+
+  const titles = modeTitles[mode] || modeTitles.both;
 
   return (
     <AnimatePresence>
@@ -97,7 +110,6 @@ export default function SummaryModal({ open, onClose, mode = 'both' }) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ duration: 0.34, ease: [0.32, 0.72, 0, 1] }}
-            dir="rtl"
             className="glass-strong relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-3xl shadow-2xl lg:max-h-[88vh] lg:max-w-[480px] lg:rounded-3xl"
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
@@ -117,7 +129,7 @@ export default function SummaryModal({ open, onClose, mode = 'both' }) {
                 <button
                   type="button"
                   onClick={onClose}
-                  aria-label="بستن"
+                  aria-label={t('common.close')}
                   className="kh-close-btn"
                 >
                   <X size={18} />
@@ -127,8 +139,12 @@ export default function SummaryModal({ open, onClose, mode = 'both' }) {
 
             <div className="relative min-h-0 flex-1 overflow-y-auto px-5 pb-6 lg:px-6">
               <div className="space-y-3">
-                {SECTIONS.map((section) => (
-                  <SummarySection key={section.key} section={section} mode={mode} />
+                {sections.map((section) => (
+                  <SummarySection
+                    key={section.key}
+                    section={section}
+                    mode={mode}
+                  />
                 ))}
               </div>
             </div>
@@ -140,6 +156,8 @@ export default function SummaryModal({ open, onClose, mode = 'both' }) {
 }
 
 function SummarySection({ section, mode }) {
+  const { t } = useTranslation();
+  const currencyLabel = useCurrencyLabel();
   const { period, icon: Icon, accent, resetLabel } = section;
 
   const dataVersion = useAppStore((s) => s.dataVersion);
@@ -184,7 +202,7 @@ function SummarySection({ section, mode }) {
   }, [period, offset, isAllTime, dataVersion]);
 
   const currentLabel = isAllTime
-    ? 'از ابتدا تا کنون'
+    ? t('periods.allTime')
     : getPeriodOffsetLabel(period, offset);
 
   const subLabel = isAllTime ? null : getPeriodSubLabel(period, offset);
@@ -197,14 +215,19 @@ function SummarySection({ section, mode }) {
   return (
     <div className="rounded-2xl border border-border-1 bg-fill-1 p-4 backdrop-blur-md">
       <div className="mb-3 flex items-center justify-between gap-2">
+        {/* دکمه‌ی دوره‌ی قبل */}
         <button
           type="button"
-          disabled={!canGoForward}
-          onClick={() => setOffset((o) => Math.min(0, o + 1))}
-          aria-label="بعدی"
+          disabled={!canGoBack}
+          onClick={() => setOffset((o) => o - 1)}
+          aria-label={t('common.previous')}
           className="kh-nav-btn !h-7 !w-7"
         >
-          <ChevronRight size={16} strokeWidth={2.2} />
+          <ChevronRight
+            size={16}
+            strokeWidth={2.2}
+            className="ltr:rotate-180"
+          />
         </button>
 
         <div className="flex min-w-0 flex-1 items-center justify-center gap-2">
@@ -224,14 +247,19 @@ function SummarySection({ section, mode }) {
           </div>
         </div>
 
+        {/* دکمه‌ی دوره‌ی بعد */}
         <button
           type="button"
-          disabled={!canGoBack}
-          onClick={() => setOffset((o) => o - 1)}
-          aria-label="قبلی"
+          disabled={!canGoForward}
+          onClick={() => setOffset((o) => Math.min(0, o + 1))}
+          aria-label={t('common.next')}
           className="kh-nav-btn !h-7 !w-7"
         >
-          <ChevronLeft size={16} strokeWidth={2.2} />
+          <ChevronLeft
+            size={16}
+            strokeWidth={2.2}
+            className="ltr:rotate-180"
+          />
         </button>
       </div>
 
@@ -250,7 +278,9 @@ function SummarySection({ section, mode }) {
           >
             {showIncome && (
               <div className="rounded-xl border border-primary/20 bg-primary/[0.08] px-3 py-2.5 backdrop-blur-md">
-                <p className="text-2xs font-medium text-fg-2">درآمد</p>
+                <p className="text-2xs font-medium text-fg-2">
+                  {t('balance.income')}
+                </p>
                 <p className="mt-1 text-lg font-extrabold tabular-nums text-primary">
                   <AnimatedNumber value={summary.income} duration={550} />
                 </p>
@@ -259,7 +289,9 @@ function SummarySection({ section, mode }) {
 
             {showExpense && (
               <div className="rounded-xl border border-expense/20 bg-expense/[0.08] px-3 py-2.5 backdrop-blur-md">
-                <p className="text-2xs font-medium text-fg-2">مصرف</p>
+                <p className="text-2xs font-medium text-fg-2">
+                  {t('balance.expense')}
+                </p>
                 <p className="mt-1 text-lg font-extrabold tabular-nums text-expense">
                   <AnimatedNumber value={summary.expense} duration={550} />
                 </p>
@@ -269,14 +301,16 @@ function SummarySection({ section, mode }) {
 
           {hasData && mode === 'both' && (
             <div className="mt-2.5 flex items-center justify-between border-t border-border-1 pt-2.5">
-              <span className="text-2xs text-fg-3">موجودی</span>
+              <span className="text-2xs text-fg-3">
+                {t('summary.balance')}
+              </span>
               <span
                 className={[
                   'text-sm font-bold tabular-nums',
                   summary.balance >= 0 ? 'text-fg-1' : 'text-expense',
                 ].join(' ')}
               >
-                {formatNumber(summary.balance)} افغانی
+                {formatNumber(summary.balance)} {currencyLabel}
               </span>
             </div>
           )}
@@ -288,7 +322,7 @@ function SummarySection({ section, mode }) {
               className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-xl border border-primary/25 bg-primary/[0.08] py-1.5 text-2xs font-semibold text-primary backdrop-blur-md transition-all hover:bg-primary/[0.14] active:scale-[0.98]"
             >
               <RotateCcw size={11} strokeWidth={2.2} />
-              بازگشت به {resetLabel}
+              {t('summary.resetTo', { label: resetLabel })}
             </button>
           )}
         </>

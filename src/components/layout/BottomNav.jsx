@@ -1,18 +1,9 @@
 import { NavLink } from 'react-router-dom';
 import { Home, ArrowDownLeft, ArrowUpRight, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useHaptic } from '../hooks/useHaptic';
 import { ROUTES } from '../utils/constants';
-
-const LEFT_ITEMS = [
-  { label: 'خانه', to: ROUTES.home, icon: Home, end: true },
-  { label: 'درآمد', to: ROUTES.income, icon: ArrowDownLeft },
-];
-
-const RIGHT_ITEMS = [
-  { label: 'مصارف', to: ROUTES.expenses, icon: ArrowUpRight },
-  { label: 'تنظیمات', to: ROUTES.settings, icon: Settings },
-];
 
 function NavItem({ label, to, icon: Icon, end = false }) {
   const haptic = useHaptic();
@@ -35,17 +26,29 @@ function NavItem({ label, to, icon: Icon, end = false }) {
 }
 
 function BottomNav() {
+  const { t } = useTranslation();
+
+  const leftItems = [
+    { label: t('nav.home'), to: ROUTES.home, icon: Home, end: true },
+    { label: t('nav.income'), to: ROUTES.income, icon: ArrowDownLeft },
+  ];
+
+  const rightItems = [
+    { label: t('nav.expenses'), to: ROUTES.expenses, icon: ArrowUpRight },
+    { label: t('nav.settings'), to: ROUTES.settings, icon: Settings },
+  ];
+
   return (
     <nav className="fixed bottom-0 left-1/2 z-40 w-full max-w-[420px] -translate-x-1/2 px-3 pb-[env(safe-area-inset-bottom)] lg:hidden">
       <div className="kh-nav-bar mb-2">
         <div className="flex h-full flex-1 items-center justify-between pl-3">
-          {LEFT_ITEMS.map((item) => (
+          {leftItems.map((item) => (
             <NavItem key={item.to} {...item} />
           ))}
         </div>
         <div className="w-[60px] shrink-0" />
         <div className="flex h-full flex-1 items-center justify-between pr-4">
-          {RIGHT_ITEMS.map((item) => (
+          {rightItems.map((item) => (
             <NavItem key={item.to} {...item} />
           ))}
         </div>
