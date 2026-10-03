@@ -660,8 +660,28 @@
 
   "changelog": [
     {
+      "version": "2.0.0",
+      "date": "2026/10/03",
+      "items": [
+        "Persian and English language support",
+        "Change language without reloading the app",
+        "Region selection during onboarding (Afghanistan, Iran, International)",
+        "Support for three calendars: Afghan solar, Iranian solar, Gregorian",
+        "Support for four currencies: Afghani, Toman, Dollar, Rupee",
+        "Currency change with automatic backup",
+        "Smart PDF export with selected language and calendar",
+        "Performance improvements on mobile",
+        "Independent language, calendar, and currency settings",
+        "Improved number and date formatting per region",
+        "Fixed layout direction in English mode",
+        "Complete rewrite of components for multi-language support",
+        "New region selection step in onboarding",
+        "Improved translations and copy"
+      ]
+    },
+    {
       "version": "1.1.0",
-      "date": "2026/09/16",
+      "date": "2026/08/23",
       "items": [
         "Complete glass design with green theme",
         "Fresh color palette with green",
@@ -682,7 +702,7 @@
     },
     {
       "version": "1.0.0",
-      "date": "2026/08/23",
+      "date": "2026/06/22",
       "items": [
         "Initial release",
         "Income and expense recording",

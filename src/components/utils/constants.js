@@ -4,8 +4,8 @@
 // ============================================================
 
 export const APP_NAME = 'Khazane';
-export const APP_VERSION = '1.1.0';
-export const APP_BUILD_DATE = '1405/06';
+export const APP_VERSION = '2.0.0';
+export const APP_BUILD_DATE = '1405/07';
 
 export const MEMBER_ID = 'self';
 
