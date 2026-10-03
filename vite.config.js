@@ -1,3 +1,7 @@
+// ============================================================
+// vite.config.js — WORKBOX improvements
+// ============================================================
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
@@ -11,12 +15,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
 
-      // ⭐ در حالت dev کاملاً غیرفعال است — هیچ SW register نمی‌شود
       devOptions: {
         enabled: false,
       },
 
-      // ⭐ لینک manifest به صورت خودکار در build تزریق می‌شود
       injectRegister: 'auto',
 
       includeAssets: ['192.png', '512.png', 'fonts/*.ttf'],
@@ -27,24 +29,17 @@ export default defineConfig({
         short_name: 'خزانه',
         description:
           'اپلیکیشن مدیریت درآمد و مصارف شخصی، ساده، دقیق و کاملاً آفلاین',
-
         lang: 'fa',
         dir: 'rtl',
-
         start_url: '/',
         scope: '/',
-
         display: 'standalone',
         display_override: ['standalone', 'minimal-ui'],
         orientation: 'portrait',
-
         theme_color: '#0A1614',
         background_color: '#0A1614',
-
         categories: ['finance', 'productivity'],
-
         prefer_related_applications: false,
-
         icons: [
           {
             src: '/192.png',
@@ -75,11 +70,16 @@ export default defineConfig({
         ],
 
         navigateFallbackDenylist: [/^\/api/, /\.pdf$/],
-
         navigateFallback: '/index.html',
 
-        // ⭐ در حالت dev این logها را خاموش می‌کند
+        // ⭐ پاک کردن کش‌های قدیمی
         cleanupOutdatedCaches: true,
+
+        // ⭐ SW جدید بدون انتظار فعال می‌شود
+        skipWaiting: true,
+
+        // ⭐ SW جدید بلافاصله کنترل همه تب‌ها را می‌گیرد
+        clientsClaim: true,
       },
     }),
   ],
